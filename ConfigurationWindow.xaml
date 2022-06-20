@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:overlay_popup"
+        xmlns:local="clr-namespace:overlay_popup" d:DataContext="{d:DesignInstance Type=local:ConfigurationViewModel}"
         mc:Ignorable="d"
         Title="Configure" Height="450" Width="800">
     <DockPanel Margin="5">
@@ -13,31 +13,13 @@
                 <Button Margin="0,2" Width="20" Height="20"><Bold>+</Bold></Button>
                 <Button Margin="2,2" Width="20" Height="20"><Bold>-</Bold></Button>
             </StackPanel>
-            <ListView>
-                <ListViewItem>Abc</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                <ListViewItem>Def</ListViewItem>
-                
+            <ListView ItemsSource="{Binding Path=Menus}">
+
             </ListView>
         </DockPanel>
 
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" FlowDirection="RightToLeft">
-            <Button Margin="2,0" Content="OK" IsDefault="True" />
+            <Button Margin="2,0" Content="OK" IsDefault="True" Click="OK_Click" />
             <Button Margin="2,0" Content="Cancel" IsCancel="True" />
         </StackPanel>
 

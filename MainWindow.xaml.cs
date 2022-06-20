@@ -52,6 +52,7 @@ namespace overlay_popup
             this.Topmost = false;
 
             var configure = new ConfigurationWindow();
+            configure.DataContext = new ConfigurationViewModel((this.DataContext as AppViewModel)!);
             configure.ShowDialog();
 
             this.Topmost = true;

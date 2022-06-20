@@ -20,6 +20,13 @@
                     </LinearGradientBrush>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseDirectlyOver" Value="true">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontSize" Value="18"/>
+
+                </Trigger>
+            </Style.Triggers>
          </Style>
 
          <Style TargetType="Button" x:Key="CloseButton">

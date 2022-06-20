@@ -13,15 +13,66 @@ namespace overlay_popup;
 public class ConfigurationViewModel : INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public ObservableCollection<ButtonMenuViewModel> Menus { get; private set; }
+    public ObservableCollection<ConfigurationButtonMenuViewModel> Menus { get; private set; }
 
     public ConfigurationViewModel(AppViewModel source)
     {
-        Menus = new ObservableCollection<ButtonMenuViewModel>();
-        source.AllMenus.ForEach(x =>
+        Menus = new ObservableCollection<ConfigurationButtonMenuViewModel>(
+            source.AllMenus.Select(m => new ConfigurationButtonMenuViewModel(m)));
+    }
+}
+
+public class ConfigurationButtonMenuViewModel : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public ObservableCollection<ButtonViewModel> Buttons { get; private set; }
+
+    private string name = String.Empty;
+    public string Name
+    {
+        get { return this.name; }
+        set
         {
-            Menus.Add(x.Clone());
-        });
+            this.name = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+        }
+    }
+
+    private bool canChangeName = true;
+    public bool CanChangeName
+    {
+        get
+        {
+            return canChangeName;
+        }
+        set
+        {
+            canChangeName = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanChangeName)));
+        }
+    }
+    public bool IsReadOnly { get { return !canChangeName; } }
+
+    public ConfigurationButtonMenuViewModel(ButtonMenuViewModel source)
+    {
+        name = source.Name;
+        canChangeName = source.CanChangeName;
+        Buttons = new ObservableCollection<ButtonViewModel>();
+        for (int i = 0; i < 5; ++i)
+        {
+            for (int j = 0; j < 5; ++j)
+            {
+                if (i == 2 && j == 2)
+                {
+                    Buttons.Add(new ButtonViewModel()
+                    {
+                        Visibility = Visibility.Hidden,
+                    });
+                    continue;
+                }
+                Buttons.Add(source[j, i].Clone());
+            }
+        }
     }
 }
 
@@ -83,6 +134,11 @@ public class AppViewModel : INotifyPropertyChanged {
             {
                 Name = "Default",
                 CanChangeName = false,
+            },
+            new ButtonMenuViewModel()
+            {
+                Name = "Alternate",
+                CanChangeName = true,
             }
         };
 
@@ -128,9 +184,12 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
             if (this.PropertyChanged != null)
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs("CanChangeName"));
+                this.PropertyChanged(this, new PropertyChangedEventArgs("IsReadOnly"));
             }
         }
     }
+
+    public bool IsReadOnly { get { return !canChangeName; } }
 
     public ButtonViewModel this[int x, int y]
     {

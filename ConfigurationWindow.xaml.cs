@@ -12,26 +12,71 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace overlay_popup
+namespace overlay_popup;
+
+/// <summary>
+/// Interaction logic for ConfigurationWindow.xaml
+/// </summary>
+public partial class ConfigurationWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for ConfigurationWindow.xaml
-    /// </summary>
-    public partial class ConfigurationWindow : Window
+
+    public ConfigurationWindow()
     {
-        public ConfigurationWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
 
-        private void OK_Click(object sender, RoutedEventArgs e)
+        for (int i = 0; i < 5; ++i)
         {
-            DialogResult = true;
-        }
+            for (int j = 0; j < 5; ++j)
+            {
+                var btn = new Button();
+                btn.Margin = new Thickness(5);
+                if (i == 2 && j == 2) btn.Visibility = Visibility.Hidden;
+                ButtonGrid.Children.Add(btn);
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        { 
-                DialogResult = false;
+                btn.Tag = i * 5 + j;
+                var binding = new Binding($".[{(int)btn.Tag}].BackgroundColourBrush");
+                btn.SetBinding(Control.BackgroundProperty, binding);
+
+                btn.BorderBrush = new SolidColorBrush(Colors.OrangeRed);
+                btn.BorderThickness = new Thickness(0);
+
+                if (i == 0 && j == 0) { btn.BorderThickness = new Thickness(3); }
+
+                btn.Click += (s, e) => {
+                    var index = (int)((Button)s).Tag;
+                    var collectionView = CollectionViewSource.GetDefaultView(ButtonGrid.DataContext);
+                    var currentIndex = collectionView.CurrentPosition;
+                    ((Button)ButtonGrid.Children[currentIndex]).BorderThickness = new Thickness(0);
+                    ((Button)ButtonGrid.Children[index]).BorderThickness = new Thickness(3);
+                    collectionView.MoveCurrentToPosition(index);
+                };
+            }
+        }
+    }
+
+    private void OK_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = true;
+    }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = false;
+    }
+
+    private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        for (int i = 0; i < 5; ++i)
+        {
+            for (int j = 0; j < 5; ++j)
+            {
+                var b = (Button)ButtonGrid.Children[i * 5 + j];
+                b.BorderThickness = new Thickness((i == 0 && j == 0) ? 3 : 0);
+            }
+        }
+        if (ButtonGrid.DataContext != null)
+        {
+            CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).MoveCurrentToPosition(0);
         }
     }
 }

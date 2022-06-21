@@ -4,7 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:clr="clr-namespace:System.Windows.Media.Converters;assembly=WindowsBase"
-        xmlns:local="clr-namespace:overlay_popup">
+        xmlns:local="clr-namespace:overlay_popup"
+        
+             >
     <UserControl.Resources>
         <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD"/>
         <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
@@ -35,15 +37,16 @@
                     <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Pressed.Border}"/>
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="false">
-                    <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>
+                    <!--<Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>-->
                     <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Disabled.Border}"/>
-                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                    <!--<Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>-->
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
     </UserControl.Resources>
     <Border Padding="7" Visibility="{Binding Path=Visibility}">
-        <Button Template="{DynamicResource ColouredButton}" Click="bubbleClick" Content="{Binding Path=Content}"
+        <Button Template="{DynamicResource ColouredButton}" Content="{Binding Path=Content}"
+                Command="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}"
                 BorderThickness="0" Padding="3">
             <Button.Style>
                 <Style TargetType="Button">
@@ -60,6 +63,12 @@
                             <Setter Property="Background" Value="{Binding BackgroundPressedColourBrush}"/>
                             <Setter Property="Foreground" Value="{Binding ForegroundPressedColourBrush}"/>
                             <Setter Property="FontSize" Value="{Binding PressedFontSize}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Background" Value="{Binding BackgroundColourBrush}"/>
+                            <Setter Property="Foreground" Value="{Binding ForegroundColourBrush}"/>
+                            <Setter Property="FontSize" Value="{Binding FontSize}"/>
+                            <Setter Property="FontWeight" Value="Thin" />
                         </Trigger>
                     </Style.Triggers>
                 </Style>

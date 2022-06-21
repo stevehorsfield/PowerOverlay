@@ -99,4 +99,17 @@ public partial class ConfigurationWindow : Window
 
         model.PasteStyleFrom(source);
     }
+
+    private void ActionModeNoOp_Click(object sender, RoutedEventArgs e) {
+        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
+        model.SetActionMode(ButtonViewModel.ActionMode.NoAction);
+    }
+    private void ActionModeMenu_Click(object sender, RoutedEventArgs e) {
+        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
+        model.SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+    }
+    private void ActionModeActivity_Click(object sender, RoutedEventArgs e) {
+        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
+        model.SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+    }
 }

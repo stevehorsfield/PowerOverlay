@@ -125,6 +125,30 @@
                                     </ContentPresenter.Style>
                                 </ContentPresenter>
                             </Border>
+
+                            <Label Grid.Row="4" Grid.Column="0">Action</Label>
+                            <StackPanel Grid.Row="4" Grid.Column="1">
+                                <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsNoAction, Mode=OneWay}" Checked="ActionModeNoOp_Click" >No action</RadioButton>
+                                <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsSelectMenu, Mode=OneWay}" Checked="ActionModeMenu_Click">Switch to menu</RadioButton>
+                                <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsPerformTask, Mode=OneWay}" Checked="ActionModeActivity_Click">Perform action</RadioButton>
+
+                                <ListBox Name="TargetMenuList" Visibility="{Binding MenuListVisibility}"
+                                         ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Menus}">
+                                    
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Path=Name}" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <Border Name="ActionPanel" BorderThickness="0">
+                                    <ContentPresenter Visibility="{Binding Path=ActionVisibility}"
+                                                      Content="{Binding Path=Action.ConfigElement}"
+                                                      DataContext="{Binding Path=Action}" />
+                                </Border>
+                                
+                            </StackPanel>
                         </Grid>
                     </ScrollViewer>
                 </TabItem>

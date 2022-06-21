@@ -13,5 +13,9 @@ namespace overlay_popup
     /// </summary>
     public partial class App : Application
     {
+        static App()
+        {
+            Commands.CommandFactory.Init();
+        }
     }
 }

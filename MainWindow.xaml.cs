@@ -37,11 +37,14 @@ namespace overlay_popup
                     if (i == 2 && j == 2) continue; // skip middle location
 
                     var ctrl = new CommandButton();
-                    Grid.SetColumn(ctrl, i);
-                    Grid.SetRow(ctrl, j);
+
+                    Grid.SetRow(ctrl, i);
+                    Grid.SetColumn(ctrl, j);
 
                     var binding = new Binding($".[{i},{j}]");
                     ctrl.SetBinding(FrameworkElement.DataContextProperty, binding);
+                    binding = new Binding($".[{i},{j}]");
+                    ctrl.SetBinding(Button.CommandProperty, binding);
 
                     ButtonGrid.Children.Add(ctrl);
                 }

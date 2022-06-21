@@ -85,4 +85,18 @@ public partial class ConfigurationWindow : Window
         var contentSourceType = Enum.Parse<ButtonViewModel.ContentSourceType>((string) ((RadioButton)sender).Tag);
         (((RadioButton)sender).DataContext as ButtonViewModel)!.ContentFormat = contentSourceType;
     }
+
+    private void CopyButtonStyle_Click(object sender, RoutedEventArgs e)
+    {
+        ((ConfigurationViewModel)DataContext).ClipboardButton = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
+    }
+
+    private void PasteButtonStyle_Click(object sender, RoutedEventArgs e)
+    {
+        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
+        var source = ((ConfigurationViewModel)DataContext).ClipboardButton;
+        if (source == null) return;
+
+        model.PasteStyleFrom(source);
+    }
 }

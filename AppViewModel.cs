@@ -14,6 +14,18 @@ namespace overlay_popup;
 public class ConfigurationViewModel : INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    ButtonViewModel? clipboardButton;
+    public ButtonViewModel? ClipboardButton { 
+        get { return clipboardButton; } 
+        set
+        {
+            this.clipboardButton = value?.Clone();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ClipboardButton)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasClipboardButton)));
+        }
+    }
+    public bool HasClipboardButton { get { return clipboardButton != null; } }
+
     public ObservableCollection<ConfigurationButtonMenuViewModel> Menus { get; private set; }
 
     public ConfigurationViewModel(AppViewModel source)
@@ -627,6 +639,18 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
         return model;
     }
 
+    public void PasteStyleFrom(ButtonViewModel source)
+    {
+        this.BackgroundColour = source.BackgroundColour;
+        this.BackgroundHoverColour = source.BackgroundHoverColour;
+        this.BackgroundPressedColour = source.BackgroundPressedColour;
+        this.ForegroundColour = source.ForegroundColour;
+        this.ForegroundHoverColour = source.ForegroundHoverColour;
+        this.ForegroundPressedColour = source.ForegroundPressedColour;
+        this.FontSize = source.FontSize;
+        this.HoverFontSize = source.HoverFontSize;
+        this.PressedFontSize = source.PressedFontSize;
+    }
 
     public event EventHandler? CanExecuteChanged;
     public event PropertyChangedEventHandler? PropertyChanged;

@@ -130,69 +130,96 @@
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>Appearance</TabItem.Header>
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                            <Button Margin="2,5" Padding="2" Content="Copy button style" Width="auto" Click="CopyButtonStyle_Click"/>
+                            <Button Margin="2,5" Padding="2" Content="Paste button style" Width="auto" Click="PasteButtonStyle_Click"
+                                    IsEnabled="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HasClipboardButton}"/>
+                        </StackPanel>
+                        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220"/>
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
 
-                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="220"/>
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0">Background colour:</Label>
+                                <DockPanel Grid.Row="0" Grid.Column="1">
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=BackgroundColour}"></TextBox>
+                                </DockPanel>
 
-                            <Label Grid.Row="0" Grid.Column="0">Background colour:</Label>
-                            <DockPanel Grid.Row="0" Grid.Column="1">
-                                <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundColourBrush}" />
-                                <TextBox Text="{Binding Path=BackgroundColour}"></TextBox>
-                            </DockPanel>
+                                <Label Grid.Row="1" Grid.Column="0">Hover background colour:</Label>
+                                <DockPanel Grid.Row="1" Grid.Column="1">
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundHoverColourBrush}" />
+                                    <TextBox Text="{Binding Path=BackgroundHoverColour}"></TextBox>
+                                </DockPanel>
 
-                            <Label Grid.Row="1" Grid.Column="0">Hover background colour:</Label>
-                            <DockPanel Grid.Row="1" Grid.Column="1">
-                                <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundHoverColourBrush}" />
-                                <TextBox Text="{Binding Path=BackgroundHoverColour}"></TextBox>
-                            </DockPanel>
-
-                            <Label Grid.Row="2" Grid.Column="0">Pressed background colour:</Label>
-                            <DockPanel Grid.Row="2" Grid.Column="1">
-                                <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundPressedColourBrush}" />
-                                <TextBox Text="{Binding Path=BackgroundPressedColour}"></TextBox>
-                            </DockPanel>
+                                <Label Grid.Row="2" Grid.Column="0">Pressed background colour:</Label>
+                                <DockPanel Grid.Row="2" Grid.Column="1">
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundPressedColourBrush}" />
+                                    <TextBox Text="{Binding Path=BackgroundPressedColour}"></TextBox>
+                                </DockPanel>
 
 
-                            <Label Grid.Row="3" Grid.Column="0">Foreground colour:</Label>
-                            <DockPanel Grid.Row="3" Grid.Column="1">
-                                <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundColourBrush}" />
-                                <TextBox Text="{Binding Path=ForegroundColour}"></TextBox>
-                            </DockPanel>
+                                <Label Grid.Row="3" Grid.Column="0">Foreground colour:</Label>
+                                <DockPanel Grid.Row="3" Grid.Column="1">
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=ForegroundColour}"></TextBox>
+                                </DockPanel>
 
-                            <Label Grid.Row="4" Grid.Column="0">Hover foreground colour:</Label>
-                            <DockPanel Grid.Row="4" Grid.Column="1">
-                                <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundHoverColourBrush}" />
-                                <TextBox Text="{Binding Path=ForegroundHoverColour}"></TextBox>
-                            </DockPanel>
+                                <Label Grid.Row="4" Grid.Column="0">Hover foreground colour:</Label>
+                                <DockPanel Grid.Row="4" Grid.Column="1">
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundHoverColourBrush}" />
+                                    <TextBox Text="{Binding Path=ForegroundHoverColour}"></TextBox>
+                                </DockPanel>
 
-                            <Label Grid.Row="5" Grid.Column="0">Pressed foreground colour:</Label>
-                            <DockPanel Grid.Row="5" Grid.Column="1">
-                                <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundPressedColourBrush}" />
-                                <TextBox Text="{Binding Path=ForegroundPressedColour}"></TextBox>
-                            </DockPanel>
+                                <Label Grid.Row="5" Grid.Column="0">Pressed foreground colour:</Label>
+                                <DockPanel Grid.Row="5" Grid.Column="1">
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundPressedColourBrush}" />
+                                    <TextBox Text="{Binding Path=ForegroundPressedColour}"></TextBox>
+                                </DockPanel>
 
-                        </Grid>
-                    </ScrollViewer>
+                                <Label Grid.Row="6" Grid.Column="0">Font size:</Label>
+                                <DockPanel Grid.Row="6" Grid.Column="1">
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=FontSize}" Margin="0,0,10,0" Width="20"/>
+                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=FontSize}" />
+                                </DockPanel>
+                                
+                                <Label Grid.Row="7" Grid.Column="0">Hover font size:</Label>
+                                <DockPanel Grid.Row="7" Grid.Column="1">
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=HoverFontSize}" Margin="0,0,10,0" Width="20"/>
+                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=HoverFontSize}" />
+                                </DockPanel>
+                                
+                                <Label Grid.Row="8" Grid.Column="0">Pressed font size:</Label>
+                                <DockPanel Grid.Row="8" Grid.Column="1">
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=PressedFontSize}" Margin="0,0,10,0" Width="20"/>
+                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=PressedFontSize}" />
+                                </DockPanel>
+
+                            </Grid>
+                        </ScrollViewer>
+                    </DockPanel>
+                    
+
+                    
                 </TabItem>
             </TabControl>
             

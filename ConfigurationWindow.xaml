@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:overlay_popup" d:DataContext="{d:DesignInstance Type=local:ConfigurationViewModel}"
         mc:Ignorable="d"
-        Title="Configure" Height="450" Width="800">
+        Title="Configure" Height="600" Width="1000">
     <DockPanel Margin="5">
 
         <DockPanel DockPanel.Dock="Left" Width="100">
@@ -35,7 +35,7 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="350"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
@@ -54,56 +54,113 @@
             <UniformGrid DataContext="{Binding Path=Buttons}" Name="ButtonGrid" Columns="5" Rows="5" Grid.Row="1" Grid.Column="0" Width="250" Height="250">
 
             </UniformGrid>
-            <Grid Grid.Row="1" Grid.Column="1" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0">Visible</Label>
-                <CheckBox Grid.Row="0" Grid.Column="1"></CheckBox>
+                    <Label Grid.Row="0" Grid.Column="0">Visible</Label>
+                    <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Path=IsVisible}"/>
 
-                <Label Grid.Row="1" Grid.Column="0">Background colour:</Label>
-                <DockPanel Grid.Row="1" Grid.Column="1">
-                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundColourBrush}" />
-                    <TextBox Text="{Binding Path=BackgroundColour}"></TextBox>
-                </DockPanel>
+                    <Label Grid.Row="1" Grid.Column="0">Content type</Label>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
+                        <RadioButton Click="ContentFormatRadio_Click" Content="Text" Tag="PlainText" IsChecked="{Binding Path=IsPlainText, Mode=OneWay}"/>
+                        <RadioButton Click="ContentFormatRadio_Click" Content="XAML (Fragment)" Tag="XamlFragment"  IsChecked="{Binding Path=IsXamlFragment, Mode=OneWay}"/>
+                        <RadioButton Click="ContentFormatRadio_Click" Content="XAML (Full)" Tag="Xaml" IsChecked="{Binding Path=IsXaml, Mode=OneWay}"/>
+                    </StackPanel>
 
-                <Label Grid.Row="2" Grid.Column="0">Hover background colour:</Label>
-                <DockPanel Grid.Row="2" Grid.Column="1">
-                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundHoverColourBrush}" />
-                    <TextBox Text="{Binding Path=BackgroundHoverColour}"></TextBox>
-                </DockPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="0">
+                        <Label>Button content</Label>
+                        <TextBlock Foreground="Red" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="100"
+                                   MaxWidth="200">
+                            <TextBlock.Style>
+                                <Style>
+                                    <Setter Property="UIElement.Visibility" Value="Hidden"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=HasXamlError, Mode=OneWay}" Value="true">
+                                            <Setter Property="UIElement.Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Bold>Error:</Bold> <Run Text="{Binding XamlErrorMessage, Mode=OneWay}"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="150" Width="300" HorizontalAlignment="Left"
+                             AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                             Text="{Binding Path=RawText}"/>
 
-                <Label Grid.Row="3" Grid.Column="0">Pressed background colour:</Label>
-                <DockPanel Grid.Row="3" Grid.Column="1">
-                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundPressedColourBrush}" />
-                    <TextBox Text="{Binding Path=BackgroundPressedColour}"></TextBox>
-                </DockPanel>
+                    <Label Grid.Row="3" Grid.Column="0">Preview</Label>
+                    <Border Grid.Row="3" Grid.Column="1" Width="150" Height="80" BorderThickness="2" BorderBrush="Silver"
+                            Margin="10"
+                            Background="{Binding BackgroundColourBrush}">
+                        <ContentPresenter Content="{Binding Content}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <ContentPresenter.Style>
+                                <Style>
+                                    <Setter Property="TextBlock.Foreground" Value="{Binding ForegroundColourBrush}"/>
+                                </Style>
+                            </ContentPresenter.Style>
+                        </ContentPresenter>
+                    </Border>
 
-                <Label Grid.Row="4" Grid.Column="0">Content type</Label>
-                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Vertical">
-                    <RadioButton Content="Text" />
-                    <RadioButton Content="XAML (Fragment)"/>
-                    <RadioButton Content="XAML (Full)"/>
-                </StackPanel>
-                
-                <Label Grid.Row="5" Grid.Column="0">Button content</Label>
-                <TextBox Grid.Row="5" Grid.Column="1" AcceptsReturn="True" TextWrapping="NoWrap" Height="150">untitled</TextBox>
+                    <Label Grid.Row="4" Grid.Column="0">Background colour:</Label>
+                    <DockPanel Grid.Row="4" Grid.Column="1">
+                        <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundColourBrush}" />
+                        <TextBox Text="{Binding Path=BackgroundColour}"></TextBox>
+                    </DockPanel>
 
-            </Grid>
+                    <Label Grid.Row="5" Grid.Column="0">Hover background colour:</Label>
+                    <DockPanel Grid.Row="5" Grid.Column="1">
+                        <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundHoverColourBrush}" />
+                        <TextBox Text="{Binding Path=BackgroundHoverColour}"></TextBox>
+                    </DockPanel>
+
+                    <Label Grid.Row="6" Grid.Column="0">Pressed background colour:</Label>
+                    <DockPanel Grid.Row="6" Grid.Column="1">
+                        <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundPressedColourBrush}" />
+                        <TextBox Text="{Binding Path=BackgroundPressedColour}"></TextBox>
+                    </DockPanel>
+
+                    
+                    <Label Grid.Row="7" Grid.Column="0">Foreground colour:</Label>
+                    <DockPanel Grid.Row="7" Grid.Column="1">
+                        <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundColourBrush}" />
+                        <TextBox Text="{Binding Path=ForegroundColour}"></TextBox>
+                    </DockPanel>
+
+                    <Label Grid.Row="8" Grid.Column="0">Hover foreground colour:</Label>
+                    <DockPanel Grid.Row="8" Grid.Column="1">
+                        <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundHoverColourBrush}" />
+                        <TextBox Text="{Binding Path=ForegroundHoverColour}"></TextBox>
+                    </DockPanel>
+
+                    <Label Grid.Row="9" Grid.Column="0">Pressed foreground colour:</Label>
+                    <DockPanel Grid.Row="9" Grid.Column="1">
+                        <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundPressedColourBrush}" />
+                        <TextBox Text="{Binding Path=ForegroundPressedColour}"></TextBox>
+                    </DockPanel>
+
+                </Grid>
+            </ScrollViewer>
         </Grid>
 
     </DockPanel>

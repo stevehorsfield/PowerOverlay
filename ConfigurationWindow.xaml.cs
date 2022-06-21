@@ -79,4 +79,10 @@ public partial class ConfigurationWindow : Window
             CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).MoveCurrentToPosition(0);
         }
     }
+
+    private void ContentFormatRadio_Click(object sender, RoutedEventArgs e)
+    {
+        var contentSourceType = Enum.Parse<ButtonViewModel.ContentSourceType>((string) ((RadioButton)sender).Tag);
+        (((RadioButton)sender).DataContext as ButtonViewModel)!.ContentFormat = contentSourceType;
+    }
 }

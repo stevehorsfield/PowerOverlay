@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Windows.Media;
 using System.Linq;
+using System.Collections.Specialized;
 
 namespace overlay_popup;
 
@@ -82,7 +83,7 @@ public class AppViewModel : INotifyPropertyChanged {
     private string appProcessName = String.Empty;
     private ButtonMenuViewModel? currentMenu;
 
-    public readonly List<ButtonMenuViewModel> AllMenus;
+    public ObservableCollection<ButtonMenuViewModel> AllMenus { get; private set; }
 
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -119,10 +120,7 @@ public class AppViewModel : INotifyPropertyChanged {
         set
         {
             this.currentMenu = value;
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs("CurrentMenu"));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurrentMenu"));
         }
     }
 
@@ -141,6 +139,8 @@ public class AppViewModel : INotifyPropertyChanged {
                 CanChangeName = true,
             }
         };
+        AllMenus[0][0, 0].BackgroundColour = "#FF000000";
+        AllMenus[1][0, 0].BackgroundColour = "#FF0000FF";
 
         CurrentMenu = this.AllMenus[0];
     }
@@ -153,9 +153,34 @@ public class AppViewModel : INotifyPropertyChanged {
         this.ApplicationProcessName = NativeUtils.GetWindowProcessName(hwndApp);
 
     }
+
+    public void ApplyFrom(ConfigurationViewModel config)
+    {
+        string currentMenu = this.CurrentMenu?.Name ?? String.Empty;
+        this.AllMenus.Clear();
+        foreach (var x in config.Menus.Select(m => ButtonViewModel.CreateFrom(m)))
+        {
+            this.AllMenus.Add(x);
+        }
+
+        var finder = (string v) => {
+            for (var i = 0; i < AllMenus.Count; ++i)
+            {
+                if (String.Equals(AllMenus[i].Name, v, StringComparison.InvariantCultureIgnoreCase)) return i;
+            }
+            return -1;
+        };
+
+        var indexCurrent = finder(currentMenu);
+        if (indexCurrent == -1) indexCurrent = finder("Default");
+        if (indexCurrent == -1 && this.AllMenus.Count > 0) indexCurrent = 0;
+
+        this.CurrentMenu = (indexCurrent >= 0) ? this.AllMenus[indexCurrent] : null;
+    }
 }
 
 public class ButtonMenuViewModel : INotifyPropertyChanged {
+
     private readonly ButtonViewModel[] Buttons = new ButtonViewModel[25];
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -233,12 +258,14 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
 
         return other;
     }
+
 }
 
 public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     private FrameworkElement? content;
     private string contentSource = String.Empty;
-    private enum ContentSourceType
+    private string? xamlErrorMessage = String.Empty;
+    public enum ContentSourceType
     {
         PlainText,
         XamlFragment,
@@ -292,6 +319,33 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     public string Xaml { set { SetContent(value, true, false); } }
     public string XamlFragment { set { SetContent(value, true, true); } }
 
+    public string XamlErrorMessage { get { return xamlErrorMessage ?? String.Empty; } }
+    public bool HasXamlError { get { return !String.IsNullOrEmpty(xamlErrorMessage); } }
+
+    public string RawText
+    {
+        get { return contentSource; }
+        set
+        {
+            bool isXaml = contentSourceType != ContentSourceType.PlainText;
+            bool isFragment = isXaml && contentSourceType == ContentSourceType.XamlFragment;
+            SetContent(value, isXaml, isFragment);
+        }
+    }
+    public ContentSourceType ContentFormat
+    {
+        get { return contentSourceType; }
+        set
+        {
+            bool isXaml = value != ContentSourceType.PlainText;
+            bool isFragment = isXaml && value == ContentSourceType.XamlFragment;
+            SetContent(contentSource, isXaml, isFragment);
+        }
+    }
+    public bool IsPlainText { get { return contentSourceType == ContentSourceType.PlainText;  } }
+    public bool IsXaml { get { return contentSourceType == ContentSourceType.Xaml; } }
+    public bool IsXamlFragment { get { return contentSourceType == ContentSourceType.XamlFragment; } }
+
     private void Notify(params string[] names)
     {
         Array.ForEach(names, n => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n)));
@@ -311,7 +365,16 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     public Visibility Visibility {
         get { return visibility; }
         set {
-            SetAndNotify(ref visibility, value, nameof(Visibility));
+            SetAndNotify(ref visibility, value, nameof(Visibility), nameof(IsVisible));
+        }
+    }
+
+    public bool IsVisible
+    {
+        get { return visibility == Visibility.Visible; }
+        set
+        {
+            SetAndNotify(ref visibility, value ? Visibility.Visible : Visibility.Collapsed, nameof(IsVisible), nameof(Visibility));
         }
     }
 
@@ -426,8 +489,8 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
         set
         {
             Set2AndNotify(
-                ref foregroundColour, value,
-                ref foregroundBrush, null,
+                ref foregroundPressedColour, value,
+                ref foregroundPressedBrush, null,
                 nameof(ForegroundPressedColour), nameof(ForegroundPressedColourBrush));
         }
     }
@@ -465,35 +528,71 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     }
 
     public void SetContent(string text, bool asXaml = false, bool includeBoilerplate = true) {
-        this.contentSource = text;
-        if (! asXaml) {
-            this.contentSourceType = ContentSourceType.PlainText;
-            this.Content = new TextBlock { Text = text };
-            return;
-        }
-        var boilerplatePrefix = @"<ContentControl
+        try
+        {
+            this.contentSource = text;
+            this.xamlErrorMessage = String.Empty;
+
+            if (!asXaml)
+            {
+                this.contentSourceType = ContentSourceType.PlainText;
+                this.Content = new TextBlock { Text = text };
+                return;
+            }
+            var boilerplatePrefix = @"<ContentControl
         xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
         xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" >
         ";
 
-        var boilerplateSuffix = @"
+            var boilerplateSuffix = @"
 </ContentControl>
         ";
 
-        if (includeBoilerplate) {
-            this.contentSourceType = ContentSourceType.XamlFragment;
-            text = boilerplatePrefix + text + boilerplateSuffix;
-        } else
-        {
-            this.contentSourceType = ContentSourceType.Xaml;
+            if (includeBoilerplate)
+            {
+                this.contentSourceType = ContentSourceType.XamlFragment;
+                text = boilerplatePrefix + text + boilerplateSuffix;
+            }
+            else
+            {
+                this.contentSourceType = ContentSourceType.Xaml;
+            }
+            try
+            {
+                this.Content = System.Windows.Markup.XamlReader.Parse(text, true) as FrameworkElement;
+
+            }
+            catch (System.Windows.Markup.XamlParseException e)
+            {
+                xamlErrorMessage = e.Message ?? "Unspecified XAML error";
+                this.Content = new TextBlock { Text = "Unable to render" };
+            }
         }
-        this.Content = System.Windows.Markup.XamlReader.Parse(text, true) as FrameworkElement;
+        finally
+        {
+            Notify(nameof(Content), nameof(ContentFormat), nameof(RawText), 
+                nameof(IsXaml), nameof(IsPlainText), nameof(IsXamlFragment),
+                nameof(XamlErrorMessage), nameof(HasXamlError));
+        }
     }
 
     internal ButtonViewModel Clone()
     {
-        var result = new ButtonViewModel();
-        result.visibility = this.visibility;
+        var result = new ButtonViewModel()
+        {
+            Visibility = Visibility,
+            FontSize = FontSize,
+            HoverFontSize = HoverFontSize,
+            PressedFontSize = PressedFontSize,
+            // Brushes created automatically, only colours need to be set
+            BackgroundColour = BackgroundColour,
+            BackgroundHoverColour = BackgroundHoverColour,
+            BackgroundPressedColour = BackgroundPressedColour,
+            ForegroundColour = ForegroundColour,
+            ForegroundHoverColour = ForegroundHoverColour,
+            ForegroundPressedColour = ForegroundPressedColour,
+        };
+
         switch (this.contentSourceType)
         {
             case ContentSourceType.PlainText:
@@ -509,6 +608,25 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
 
         return result;
     }
+
+    public static ButtonMenuViewModel CreateFrom(ConfigurationButtonMenuViewModel config)
+    {
+        var model = new ButtonMenuViewModel()
+        {
+            Name = config.Name,
+            CanChangeName = config.CanChangeName
+        };
+        for (int i = 0; i < 5; ++i)
+        {
+            for (int j = 0; j < 5; ++j)
+            {
+                if (i == 2 && j == 2) continue;
+                model[i, j] = config.Buttons[j * 5 + i].Clone();
+            }
+        }
+        return model;
+    }
+
 
     public event EventHandler? CanExecuteChanged;
     public event PropertyChangedEventHandler? PropertyChanged;

@@ -27,7 +27,6 @@
             <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="40" Background="Transparent">
                 <Border Grid.Row="0" Grid.Column="5" Padding="7" BorderThickness="0" HorizontalAlignment="Right">
                     <Button BorderThickness="0" Click="onMenuClick" Content="⚙" FontSize="16" Padding="5" FontWeight="Bold" Foreground="Gold" Background="Transparent" />
-                    <!-- Style="{StaticResource MenuButton}" -->
                 </Border>
             </StackPanel>
 
@@ -35,7 +34,7 @@
             <StackPanel DockPanel.Dock="Left" Width="40" Background="Transparent" />
             <StackPanel DockPanel.Dock="Right" Width="40" Background="Transparent" />
 
-            <Grid Name="ButtonGrid">
+            <Grid Name="ButtonGrid" DataContext="{Binding Path=CurrentMenu}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
@@ -61,7 +60,32 @@
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Current menu:</Bold> <Run Text="{Binding Path=CurrentMenu.Name}"></Run></TextBlock>
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>App:</Bold> <Run Text="{Binding Path=ApplicationProcessName}"></Run></TextBlock>
                 <TextBlock Margin="0,5" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40"><Bold>Window:</Bold> <Run Text="{Binding Path=ApplicationWindowTitle}"></Run></TextBlock>
+
+                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      X1="0" X2="300" ClipToBounds="True" />
+
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <ListView Name="MenuList" ItemsSource="{Binding Path=AllMenus}" Background="Transparent" BorderThickness="0"
+                              SelectionChanged="MenuList_SelectionChanged">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" Margin="0,5"  />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </ScrollViewer>
+
+                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      X1="0" X2="300" ClipToBounds="True" />
+
                 <Button Margin="0,5" Click="onConfigure">Configure</Button>
+
+                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      X1="0" X2="300" ClipToBounds="True" />
+
                 <Button Margin="0,5" Click="onQuitClick">Quit</Button>
             </StackPanel>
         </Border>

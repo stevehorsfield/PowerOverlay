@@ -40,7 +40,8 @@ namespace overlay_popup
                     Grid.SetColumn(ctrl, i);
                     Grid.SetRow(ctrl, j);
 
-                    ctrl.DataContext = (this.DataContext as AppViewModel)!.CurrentMenu![i,j];
+                    var binding = new Binding($".[{i},{j}]");
+                    ctrl.SetBinding(FrameworkElement.DataContextProperty, binding);
 
                     ButtonGrid.Children.Add(ctrl);
                 }
@@ -53,7 +54,10 @@ namespace overlay_popup
 
             var configure = new ConfigurationWindow();
             configure.DataContext = new ConfigurationViewModel((this.DataContext as AppViewModel)!);
-            configure.ShowDialog();
+            if (configure.ShowDialog() ?? false)
+            {
+                ((AppViewModel)this.DataContext).ApplyFrom((ConfigurationViewModel)configure.DataContext);
+            }
 
             this.Topmost = true;
             lockActive = false;
@@ -104,6 +108,7 @@ namespace overlay_popup
 
         public void onMenuClick(object o, RoutedEventArgs e)
         {
+            MenuList.SelectedIndex = -1;
             this.MenuPopup.Visibility =
                 this.MenuPopup.Visibility == Visibility.Hidden ?
                 Visibility.Visible : Visibility.Hidden;
@@ -118,5 +123,13 @@ namespace overlay_popup
         
         [DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        private void MenuList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MenuList.SelectedIndex == -1) return;
+            var menu = MenuList.SelectedItem as ButtonMenuViewModel;
+            ((AppViewModel)DataContext).CurrentMenu = menu;
+            this.MenuPopup.Visibility = Visibility.Hidden;
+        }
     }
 }

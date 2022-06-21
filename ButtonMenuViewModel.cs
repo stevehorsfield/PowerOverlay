@@ -96,7 +96,7 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
             for (int j = 0; j < 5; ++j)
             {
                 if (i == 2 && j == 2) continue;
-                model[i, j] = config.Buttons[j * 5 + i].Clone();
+                model[i, j] = config.Buttons[i * 5 + j].Clone();
             }
         }
         return model;

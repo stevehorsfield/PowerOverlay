@@ -53,7 +53,7 @@ public class ConfigurationButtonMenuViewModel : INotifyPropertyChanged
                     });
                     continue;
                 }
-                Buttons.Add(source[j, i].Clone());
+                Buttons.Add(source[i, j].Clone());
             }
         }
     }

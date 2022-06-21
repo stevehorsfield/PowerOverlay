@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.ComponentModel;
 using System.Windows.Media;
 using overlay_popup.Commands;
+using System.Windows.Documents;
 
 namespace overlay_popup;
 
@@ -312,6 +313,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
 
     public void Execute(object? o) {
         MessageBox.Show(Application.Current.MainWindow, "Button pressed");
+        Action?.Execute(null);
     }
 
     public void SetContent(string text, bool asXaml = false, bool includeBoilerplate = true) {
@@ -323,7 +325,21 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
             if (!asXaml)
             {
                 this.contentSourceType = ContentSourceType.PlainText;
-                this.Content = new TextBlock { Text = text };
+
+                var tb = new TextBlock()
+                {
+                    TextWrapping = TextWrapping.Wrap,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                };
+                var lines = text.Split('\n');
+                var isFirstLine = true;
+                foreach (var l in lines)
+                {
+                    if (!isFirstLine) tb.Inlines.Add(new LineBreak());
+                    tb.Inlines.Add(new Run(l));
+                    isFirstLine = false;
+                }
+                this.Content = tb;
                 return;
             }
             var boilerplatePrefix = @"<ContentControl

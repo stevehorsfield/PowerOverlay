@@ -69,12 +69,31 @@ public class AppViewModel : INotifyPropertyChanged {
                 CanChangeName = true,
             }
         };
+        
         AllMenus[0][0, 0].BackgroundColour = "#FF000000";
-        AllMenus[1][0, 0].BackgroundColour = "#FF0000FF";
+        AllMenus[0][0, 0].BackgroundHoverColour = "#FF400000";
         AllMenus[0][0, 0].Action = ExecuteCommandDefinition.Instance.Create();
         AllMenus[0][0, 0].SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+        AllMenus[0][0, 0].Text = "Notepad";
+
+        AllMenus[0][1, 0].BackgroundColour = "#FF500000";
         AllMenus[0][1, 0].TargetMenu = "Alternate";
         AllMenus[0][1, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[0][1, 0].SetContent(@"<TextBlock>Menu -&gt;<LineBreak/>Alternate</TextBlock>",true,true);
+
+        AllMenus[0][2, 0].BackgroundColour = "#FF500000";
+        AllMenus[0][2, 0].TargetMenu = "Alternate";
+        AllMenus[0][2, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[0][2, 0].Text = "Menu:\nAlternate";
+
+        AllMenus[0][3, 0].BackgroundColour = "#FF404040";
+        AllMenus[0][3, 0].BackgroundHoverColour = "#FFE0E0A0";
+        AllMenus[0][3, 0].ForegroundHoverColour = "#FF404080";
+        AllMenus[0][3, 0].SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+        AllMenus[0][3, 0].Action = SendCharactersDefinition.Instance.Create();
+        AllMenus[0][3, 0].Text = "🎁";
+
+        AllMenus[1][0, 0].BackgroundColour = "#FF0000FF";
 
         CurrentMenu = this.AllMenus[0];
     }

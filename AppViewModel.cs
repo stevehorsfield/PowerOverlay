@@ -67,6 +67,11 @@ public class AppViewModel : INotifyPropertyChanged {
             {
                 Name = "Alternate",
                 CanChangeName = true,
+            },
+            new ButtonMenuViewModel()
+            {
+                Name = "Menu 3",
+                CanChangeName = true,
             }
         };
         
@@ -82,9 +87,9 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[0][1, 0].SetContent(@"<TextBlock>Menu -&gt;<LineBreak/>Alternate</TextBlock>",true,true);
 
         AllMenus[0][2, 0].BackgroundColour = "#FF500000";
-        AllMenus[0][2, 0].TargetMenu = "Alternate";
+        AllMenus[0][2, 0].TargetMenu = "Menu 3";
         AllMenus[0][2, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
-        AllMenus[0][2, 0].Text = "Menu:\nAlternate";
+        AllMenus[0][2, 0].Text = "Menu:\nMenu 3";
 
         AllMenus[0][3, 0].BackgroundColour = "#FF404040";
         AllMenus[0][3, 0].BackgroundHoverColour = "#FFE0E0A0";
@@ -94,6 +99,16 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[0][3, 0].Text = "🎁";
 
         AllMenus[1][0, 0].BackgroundColour = "#FF0000FF";
+        AllMenus[1][0, 1].Text = "Go to Default";
+        AllMenus[1][0, 1].TargetMenu = "Default";
+        AllMenus[1][0, 1].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+
+        AllMenus[2][0, 0].Text = "Go to Alternate";
+        AllMenus[2][0, 0].TargetMenu = "Alternate";
+        AllMenus[2][0, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[2][0, 1].Text = "Go to Default";
+        AllMenus[2][0, 1].TargetMenu = "Default";
+        AllMenus[2][0, 1].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
 
         CurrentMenu = this.AllMenus[0];
     }

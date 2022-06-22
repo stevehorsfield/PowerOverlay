@@ -312,6 +312,30 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     }
 
     public void Execute(object? o) {
+        AppViewModel appdata = ((AppViewModel)App.Current.MainWindow.DataContext);
+
+        switch (actionMode)
+        {
+            case ActionMode.NoAction:
+                return;
+            case ActionMode.SelectMenu:
+                if (targetMenu == String.Empty) return;
+                foreach (var m in appdata.AllMenus)
+                {
+                    if (m.Name.Equals(targetMenu, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        appdata.CurrentMenu = m;
+                        return;
+                    }
+                }
+                MessageBox.Show(Application.Current.MainWindow, $"Menu '{targetMenu}' is not found");
+                return;
+            case ActionMode.PerformTask:
+                break;
+            default:
+                throw new NotImplementedException($"Action type {actionMode} is not implemented");
+        }
+        
         MessageBox.Show(Application.Current.MainWindow, "Button pressed");
         Action?.Execute(null);
     }

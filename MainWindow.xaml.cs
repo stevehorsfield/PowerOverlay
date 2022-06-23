@@ -43,8 +43,6 @@ namespace overlay_popup
 
                     var binding = new Binding($".[{i},{j}]");
                     ctrl.SetBinding(FrameworkElement.DataContextProperty, binding);
-                    binding = new Binding($".[{i},{j}]");
-                    ctrl.SetBinding(Button.CommandProperty, binding);
 
                     ButtonGrid.Children.Add(ctrl);
                 }

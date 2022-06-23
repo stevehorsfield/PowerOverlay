@@ -22,7 +22,7 @@ public class ConfigurationViewModel : INotifyPropertyChanged {
     public bool HasClipboardButton { get { return clipboardButton != null; } }
 
     class CommandType { public string Name { get; set; } public string DisplayName { get; set; } }
-    public List<IActionCommandDefinition> CommandTypes { get; private set; }
+    public List<ActionCommandDefinition> CommandTypes { get; private set; }
 
     public ObservableCollection<ConfigurationButtonMenuViewModel> Menus { get; private set; }
 

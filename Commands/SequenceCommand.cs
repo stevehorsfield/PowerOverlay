@@ -4,45 +4,43 @@ using System.Windows.Controls;
 
 namespace overlay_popup.Commands;
 
-public class SequenceCommand : IActionCommand
+public class SequenceCommand : ActionCommand
 {
+    public override ActionCommandDefinition Definition { get { return SequenceCommandDefinition.Instance; } }
 
-    public IActionCommandDefinition Definition { get { return SequenceCommandDefinition.Instance; } }
-
-    public event EventHandler? CanExecuteChanged;
     private readonly FrameworkElement configElement = SequenceCommandDefinition.Instance.CreateConfigElement();
-    public FrameworkElement ConfigElement => configElement;
+    public override FrameworkElement ConfigElement => configElement;
 
-    public bool CanExecute(object? parameter)
+    public override bool CanExecute(object? parameter)
     {
         return true;
     }
 
-    public IActionCommand Clone()
+    public override ActionCommand Clone()
     {
         return new SequenceCommand();
     }
 
-    public void Execute(object? parameter)
+    public override void Execute(object? parameter)
     {
         // TODO
         return;
     }
 }
 
-public class SequenceCommandDefinition : IActionCommandDefinition
+public class SequenceCommandDefinition : ActionCommandDefinition
 {
     public static SequenceCommandDefinition Instance = new();
 
-    public string ActionName => "SequenceCommand";
-    public string ActionDisplayName => "Execute a sequence of commands";
+    public override string ActionName => "SequenceCommand";
+    public override string ActionDisplayName => "Execute a sequence of commands";
 
-    public IActionCommand Create()
+    public override ActionCommand Create()
     {
         return new SequenceCommand();
     }
 
-    public FrameworkElement CreateConfigElement()
+    public override FrameworkElement CreateConfigElement()
     {
         return new TextBox() { Text = "Not implemented" };
     }

@@ -77,7 +77,12 @@ public class AppViewModel : INotifyPropertyChanged {
         
         AllMenus[0][0, 0].BackgroundColour = "#FF000000";
         AllMenus[0][0, 0].BackgroundHoverColour = "#FF400000";
-        AllMenus[0][0, 0].Action = ExecuteCommandDefinition.Instance.Create();
+        var action = (ExecuteCommand) ExecuteCommandDefinition.Instance.Create();
+        action.ExecutablePath = @"C:\windows\notepad.exe";
+        action.WaitForInputIdle = true;
+        action.WaitTimeoutMilliseconds = 300;
+        action.Arguments.Add(@"C:\temp.txt");
+        AllMenus[0][0, 0].Action = action;
         AllMenus[0][0, 0].SetActionMode(ButtonViewModel.ActionMode.PerformTask);
         AllMenus[0][0, 0].Text = "Notepad";
 

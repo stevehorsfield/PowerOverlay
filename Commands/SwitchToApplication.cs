@@ -5,44 +5,43 @@ using System.Windows.Input;
 
 namespace overlay_popup.Commands;
 
-public class SwitchToApplication : IActionCommand
+public class SwitchToApplication : ActionCommand
 {
 
-    public IActionCommandDefinition Definition { get { return SwitchToApplicationDefinition.Instance; } }
+    public override ActionCommandDefinition Definition { get { return SwitchToApplicationDefinition.Instance; } }
 
-    public event EventHandler? CanExecuteChanged;
     private readonly FrameworkElement configElement = SwitchToApplicationDefinition.Instance.CreateConfigElement();
-    public FrameworkElement ConfigElement => configElement;
+    public override FrameworkElement ConfigElement => configElement;
 
-    public bool CanExecute(object? parameter)
+    public override bool CanExecute(object? parameter)
     {
         return true;
     }
 
-    public IActionCommand Clone()
+    public override ActionCommand Clone()
     {
         return new SwitchToApplication();
     }
 
-    public void Execute(object? parameter)
+    public override void Execute(object? parameter)
     {
         // todo: No-Op
     }
 }
 
-public class SwitchToApplicationDefinition : IActionCommandDefinition
+public class SwitchToApplicationDefinition : ActionCommandDefinition
 {
     public static SwitchToApplicationDefinition Instance = new();
 
-    public string ActionName => "SwitchApp";
-    public string ActionDisplayName => "Switch to app";
+    public override string ActionName => "SwitchApp";
+    public override string ActionDisplayName => "Switch to app";
 
-    public IActionCommand Create()
+    public override ActionCommand Create()
     {
         return new SwitchToApplication();
     }
 
-    public FrameworkElement CreateConfigElement()
+    public override FrameworkElement CreateConfigElement()
     {
         return new TextBox() { Text = "Not implemented" };
     }

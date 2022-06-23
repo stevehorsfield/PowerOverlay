@@ -281,10 +281,10 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     public bool IsSelectMenu => actionMode == ActionMode.SelectMenu;
     public bool IsPerformTask => actionMode == ActionMode.PerformTask;
 
-    private IActionCommand? action;
+    private ActionCommand? action;
     public string targetMenu = String.Empty;
 
-    public IActionCommand? Action
+    public ActionCommand? Action
     {
         get { return action; }
         set
@@ -308,7 +308,12 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     }
 
     public bool CanExecute(object? o) {
-        return actionMode != ActionMode.NoAction;
+        switch (actionMode)
+        {
+            case ActionMode.NoAction: return false;
+            case ActionMode.SelectMenu: return ! String.IsNullOrEmpty(targetMenu);
+        }
+        return action?.CanExecute(null) ?? false;
     }
 
     public void Execute(object? o) {
@@ -335,9 +340,10 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
             default:
                 throw new NotImplementedException($"Action type {actionMode} is not implemented");
         }
-        
-        MessageBox.Show(Application.Current.MainWindow, "Button pressed");
-        Action?.Execute(null);
+        if (Action == null) return;
+
+        Application.Current.MainWindow.Hide();
+        Action.Execute(null);
     }
 
     public void SetContent(string text, bool asXaml = false, bool includeBoilerplate = true) {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -8,16 +9,16 @@ namespace overlay_popup.Commands;
 
 public class CommandFactory
 {
-    private static readonly List<IActionCommandDefinition> builders = new();
+    private static readonly List<ActionCommandDefinition> builders = new();
 
-    public static void RegisterCommandType<T>(T builder) where T: IActionCommandDefinition
+    public static void RegisterCommandType<T>(T builder) where T: ActionCommandDefinition
     {
         builders.Add(builder);
     }
 
-    public static IEnumerable<IActionCommandDefinition> GetCommandTypes()
+    public static IEnumerable<ActionCommandDefinition> GetCommandTypes()
     {
-        return builders.Cast<IActionCommandDefinition>();
+        return builders.Cast<ActionCommandDefinition>();
     }
 
     public static void Init()
@@ -30,21 +31,34 @@ public class CommandFactory
 
 }
 
-public interface IActionCommandDefinition
+public abstract class ActionCommandDefinition
 {
-    public string ActionName { get; }
-    public string ActionDisplayName { get; }
-    public IActionCommand Create();
-    public FrameworkElement CreateConfigElement();
+    public abstract string ActionName { get; }
+    public abstract string ActionDisplayName { get; }
+    public abstract ActionCommand Create();
+    public abstract FrameworkElement CreateConfigElement();
 
 }
 
-public interface IActionCommand : ICommand
+public abstract class ActionCommand : ICommand, INotifyPropertyChanged
 {
-    public IActionCommandDefinition Definition { get; }
+    public abstract ActionCommand Clone();
+    public abstract ActionCommandDefinition Definition { get; }
+    public abstract FrameworkElement ConfigElement { get; }
 
-    public FrameworkElement ConfigElement { get; }
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void RaisePropertyChanged(string propertyName)
+    { 
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
-    IActionCommand Clone();
+    public event EventHandler? CanExecuteChanged;
+    protected void RaiseCanExecuteChanged(EventArgs e)
+    {
+        CanExecuteChanged?.Invoke(this, e);
+    }
+
+    public abstract bool CanExecute(object? parameter);
+    public abstract void Execute(object? parameter);
 }
 

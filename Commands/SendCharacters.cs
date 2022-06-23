@@ -4,46 +4,44 @@ using System.Windows.Controls;
 
 namespace overlay_popup.Commands;
 
-public class SendCharacters : IActionCommand
+public class SendCharacters : ActionCommand
 {
 
-    public IActionCommandDefinition Definition { get { return SendCharactersDefinition.Instance; } }
-
-    public event EventHandler? CanExecuteChanged;
+    public override ActionCommandDefinition Definition { get { return SendCharactersDefinition.Instance; } }
 
     private readonly FrameworkElement configElement = SendCharactersDefinition.Instance.CreateConfigElement();
-    public FrameworkElement ConfigElement => configElement;
+    public override FrameworkElement ConfigElement => configElement;
 
-    public bool CanExecute(object? parameter)
+    public override bool CanExecute(object? parameter)
     {
         return true;
     }
 
-    public IActionCommand Clone()
+    public override ActionCommand Clone()
     {
         return new SendCharacters();
     }
 
-    public void Execute(object? parameter)
+    public override void Execute(object? parameter)
     {
         //TODO
         return;
     }
 }
 
-public class SendCharactersDefinition : IActionCommandDefinition
+public class SendCharactersDefinition : ActionCommandDefinition
 {
     public static SendCharactersDefinition Instance = new();
 
-    public string ActionName => "SendCharacters";
-    public string ActionDisplayName => "Send text to window";
+    public override string ActionName => "SendCharacters";
+    public override string ActionDisplayName => "Send text to window";
 
-    public IActionCommand Create()
+    public override ActionCommand Create()
     {
         return new SendCharacters();
     }
 
-    public FrameworkElement CreateConfigElement()
+    public override FrameworkElement CreateConfigElement()
     {
         return new TextBox() { Text = "Not implemented" };
     }

@@ -10,6 +10,8 @@ public class ConfigurationButtonMenuViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public ObservableCollection<ButtonViewModel> Buttons { get; private set; }
 
+    public ObservableCollection<ApplicationMatcherViewModel> MenuSelectors { get; private set; }
+
     private string name = String.Empty;
     public string Name
     {
@@ -41,6 +43,8 @@ public class ConfigurationButtonMenuViewModel : INotifyPropertyChanged
         name = source.Name;
         canChangeName = source.CanChangeName;
         Buttons = new ObservableCollection<ButtonViewModel>();
+        MenuSelectors = new ObservableCollection<ApplicationMatcherViewModel>();
+
         for (int i = 0; i < 5; ++i)
         {
             for (int j = 0; j < 5; ++j)

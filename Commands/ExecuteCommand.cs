@@ -404,7 +404,7 @@ public class ExecuteCommandControl : ContentControl, System.Windows.Forms.IWin32
                     {
                         ((ListBoxItem)current).IsSelected = true;
                     }
-                }                
+                }
             };
 
             var xaml = Encoding.UTF8.GetBytes(ArgumentsDataTemplateXaml);

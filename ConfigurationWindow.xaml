@@ -135,7 +135,20 @@
                                 <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsPerformTask, Mode=OneWay}" Checked="ActionModeActivity_Click">Perform action</RadioButton>
 
                                 <ListBox Name="TargetMenuList" Visibility="{Binding MenuListVisibility}"
-                                         ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Menus}">
+                                         DataContextChanged="TargetMenuList_DataContextChanged"
+                                         SelectionChanged="TargetMenuList_SelectionChanged"
+                                         IsSynchronizedWithCurrentItem="True"
+                                         >
+                                    <ListBox.Resources>
+                                        <CollectionViewSource x:Key="TargetMenuListView"
+                                                              Source="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Menus}"
+                                            />
+                                    </ListBox.Resources>
+                                    <ListBox.Style>
+                                        <Style>
+                                            <Setter Property="ListBox.ItemsSource" Value="{Binding Source={StaticResource TargetMenuListView}}"></Setter>
+                                        </Style>
+                                    </ListBox.Style>
                                     
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -182,62 +195,119 @@
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
                                 </Grid.RowDefinitions>
 
                                 <Label Grid.Row="0" Grid.Column="0">Background colour:</Label>
                                 <DockPanel Grid.Row="0" Grid.Column="1">
-                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundColourBrush}" />
-                                    <TextBox Text="{Binding Path=BackgroundColour}"></TextBox>
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=DefaultStyle.BackgroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=DefaultStyle.BackgroundColour}"></TextBox>
                                 </DockPanel>
 
                                 <Label Grid.Row="1" Grid.Column="0">Hover background colour:</Label>
                                 <DockPanel Grid.Row="1" Grid.Column="1">
-                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundHoverColourBrush}" />
-                                    <TextBox Text="{Binding Path=BackgroundHoverColour}"></TextBox>
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=HoverStyle.BackgroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=HoverStyle.BackgroundColour}"></TextBox>
                                 </DockPanel>
 
                                 <Label Grid.Row="2" Grid.Column="0">Pressed background colour:</Label>
                                 <DockPanel Grid.Row="2" Grid.Column="1">
-                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=BackgroundPressedColourBrush}" />
-                                    <TextBox Text="{Binding Path=BackgroundPressedColour}"></TextBox>
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=PressedStyle.BackgroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=PressedStyle.BackgroundColour}"></TextBox>
                                 </DockPanel>
 
 
                                 <Label Grid.Row="3" Grid.Column="0">Foreground colour:</Label>
                                 <DockPanel Grid.Row="3" Grid.Column="1">
-                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundColourBrush}" />
-                                    <TextBox Text="{Binding Path=ForegroundColour}"></TextBox>
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=DefaultStyle.ForegroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=DefaultStyle.ForegroundColour}"></TextBox>
                                 </DockPanel>
 
                                 <Label Grid.Row="4" Grid.Column="0">Hover foreground colour:</Label>
                                 <DockPanel Grid.Row="4" Grid.Column="1">
-                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundHoverColourBrush}" />
-                                    <TextBox Text="{Binding Path=ForegroundHoverColour}"></TextBox>
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=HoverStyle.ForegroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=HoverStyle.ForegroundColour}"></TextBox>
                                 </DockPanel>
 
                                 <Label Grid.Row="5" Grid.Column="0">Pressed foreground colour:</Label>
                                 <DockPanel Grid.Row="5" Grid.Column="1">
-                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=ForegroundPressedColourBrush}" />
-                                    <TextBox Text="{Binding Path=ForegroundPressedColour}"></TextBox>
+                                    <Rectangle DockPanel.Dock="Left" Margin="0,0,10,0" Width="20" Height="15" VerticalAlignment="Center" Fill="{Binding Path=PressedStyle.ForegroundColourBrush}" />
+                                    <TextBox Text="{Binding Path=PressedStyle.ForegroundColour}"></TextBox>
                                 </DockPanel>
 
                                 <Label Grid.Row="6" Grid.Column="0">Font size:</Label>
                                 <DockPanel Grid.Row="6" Grid.Column="1">
-                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=FontSize}" Margin="0,0,10,0" Width="20"/>
-                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=FontSize}" />
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=DefaultStyle.FontSize}" Margin="0,0,10,0" Width="20"/>
+                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=DefaultStyle.FontSize}" />
                                 </DockPanel>
                                 
                                 <Label Grid.Row="7" Grid.Column="0">Hover font size:</Label>
                                 <DockPanel Grid.Row="7" Grid.Column="1">
-                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=HoverFontSize}" Margin="0,0,10,0" Width="20"/>
-                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=HoverFontSize}" />
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=HoverStyle.FontSize}" Margin="0,0,10,0" Width="20"/>
+                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=HoverStyle.FontSize}" />
                                 </DockPanel>
                                 
                                 <Label Grid.Row="8" Grid.Column="0">Pressed font size:</Label>
                                 <DockPanel Grid.Row="8" Grid.Column="1">
-                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=PressedFontSize}" Margin="0,0,10,0" Width="20"/>
-                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=PressedFontSize}" />
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Path=PressedStyle.FontSize}" Margin="0,0,10,0" Width="20"/>
+                                    <Slider Minimum="2" Maximum="50" Value="{Binding Path=PressedStyle.FontSize}" />
                                 </DockPanel>
+
+                                <Label Grid.Row="9" Grid.Column="0">Font family:</Label>
+                                <local:FontPicker
+                                    Grid.Row="9" Grid.Column="1"  
+                                    SelectedItem="{Binding Path=DefaultStyle.FontFamilyName}" />
+
+                                <Label Grid.Row="10" Grid.Column="0">Hover font family:</Label>
+                                <local:FontPicker
+                                    Grid.Row="10" Grid.Column="1"  
+                                    SelectedItem="{Binding Path=HoverStyle.FontFamilyName}" />
+
+                                <Label Grid.Row="11" Grid.Column="0">Pressed font family:</Label>
+                                <local:FontPicker
+                                    Grid.Row="11" Grid.Column="1"  
+                                    SelectedItem="{Binding Path=PressedStyle.FontFamilyName}" />
+
+                                <Label Grid.Row="12" Grid.Column="0">Font weight:</Label>
+                                <ComboBox
+                                    Grid.Row="12" Grid.Column="1"
+                                    SelectedItem="{Binding Path=DefaultStyle.FontWeightName}"
+                                    ItemsSource="{Binding Path=DefaultStyle.FontWeights}"/>
+                                
+                                <Label Grid.Row="13" Grid.Column="0">Hover font weight:</Label>
+                                <ComboBox
+                                    Grid.Row="13" Grid.Column="1"
+                                    SelectedItem="{Binding Path=HoverStyle.FontWeightName}"
+                                    ItemsSource="{Binding Path=HoverStyle.FontWeights}"/>
+                                
+                                <Label Grid.Row="14" Grid.Column="0">Pressed font weight:</Label>
+                                <ComboBox
+                                    Grid.Row="14" Grid.Column="1"
+                                    SelectedItem="{Binding Path=PressedStyle.FontWeightName}"
+                                    ItemsSource="{Binding Path=PressedStyle.FontWeights}"/>
+
+                                <Label Grid.Row="15" Grid.Column="0">Font style:</Label>
+                                <ComboBox
+                                    Grid.Row="15" Grid.Column="1"
+                                    SelectedItem="{Binding Path=DefaultStyle.FontStyleName}"
+                                    ItemsSource="{Binding Path=DefaultStyle.FontStyles}"/>
+
+                                <Label Grid.Row="16" Grid.Column="0">Hover font style:</Label>
+                                <ComboBox
+                                    Grid.Row="16" Grid.Column="1"
+                                    SelectedItem="{Binding Path=HoverStyle.FontStyleName}"
+                                    ItemsSource="{Binding Path=HoverStyle.FontStyles}"/>
+
+                                <Label Grid.Row="17" Grid.Column="0">Pressed font style:</Label>
+                                <ComboBox
+                                    Grid.Row="17" Grid.Column="1"
+                                    SelectedItem="{Binding Path=PressedStyle.FontStyleName}"
+                                    ItemsSource="{Binding Path=PressedStyle.FontStyles}"/>
 
                             </Grid>
                         </ScrollViewer>

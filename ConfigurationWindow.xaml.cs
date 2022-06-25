@@ -34,7 +34,7 @@ public partial class ConfigurationWindow : Window
                 ButtonGrid.Children.Add(btn);
 
                 btn.Tag = i * 5 + j;
-                var binding = new Binding($".[{(int)btn.Tag}].BackgroundColourBrush");
+                var binding = new Binding($".[{(int)btn.Tag}].DefaultStyle.BackgroundColourBrush");
                 btn.SetBinding(Control.BackgroundProperty, binding);
 
                 btn.BorderBrush = new SolidColorBrush(Colors.OrangeRed);
@@ -111,5 +111,30 @@ public partial class ConfigurationWindow : Window
     private void ActionModeActivity_Click(object sender, RoutedEventArgs e) {
         var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
         model.SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+    }
+
+    private void TargetMenuList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        var button = (ButtonViewModel)TargetMenuList.DataContext;
+        if (button == null) return;
+        var source = TargetMenuList.GetBindingExpression(ListBox.ItemsSourceProperty).ResolvedSource as ListCollectionView;
+        if (source == null) return;
+        foreach (var x in source)
+        {
+            if (((ConfigurationButtonMenuViewModel)x).Name.Equals(button.TargetMenu,StringComparison.InvariantCultureIgnoreCase))
+            {
+                source.MoveCurrentTo(x);
+                return;
+            }
+        }
+        source.MoveCurrentToPosition(-1);
+    }
+
+    private void TargetMenuList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var button = (ButtonViewModel)TargetMenuList.DataContext;
+        if (button == null) return;
+        button.TargetMenu = 
+            (TargetMenuList.SelectedItem as ConfigurationButtonMenuViewModel)?.Name ?? String.Empty;
     }
 }

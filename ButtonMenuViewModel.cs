@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace overlay_popup;
 
@@ -12,6 +13,9 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
 
     private string name = String.Empty;
     private bool canChangeName = true;
+
+    private readonly List<ApplicationMatcherViewModel> menuSelectors = new();
+    public List<ApplicationMatcherViewModel> MenuSelectors => menuSelectors;
 
     public string Name
     {
@@ -98,6 +102,11 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
                 if (i == 2 && j == 2) continue;
                 model[i, j] = config.Buttons[i * 5 + j].Clone();
             }
+        }
+
+        foreach (var m in model.MenuSelectors)
+        {
+            model.MenuSelectors.Add(m.Clone());
         }
         return model;
     }

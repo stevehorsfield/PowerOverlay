@@ -64,31 +64,42 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged
         };
     }
 
-    internal bool Matches(IntPtr hwnd)
+    private bool? CompareString(string value, string pattern, bool useRegEx)
+    {
+        if (String.IsNullOrEmpty(pattern)) return null;
+        if (String.IsNullOrEmpty(value)) return false; // has pattern but no input
+
+        if (useRegEx)
+        {
+            return Regex.IsMatch(value, pattern);
+        } else
+        {
+            return value.Equals(pattern, StringComparison.InvariantCultureIgnoreCase);
+        }
+    }
+
+    private bool? MatchesWindowTitle(IntPtr hwnd)
+    {
+        var windowTitle = NativeUtils.GetWindowTitle(hwnd);
+        return CompareString(windowTitle, WindowTitlePattern, UseRegexForWindowTitle);
+    }
+
+    private bool? MatchesExecutable(IntPtr hwnd)
     {
         var executable = NativeUtils.GetWindowProcessMainFilename(hwnd);
-        var windowTitle = NativeUtils.GetWindowTitle(hwnd);
+        return CompareString(executable, ExecutablePattern, UseRegexForExecutable);
+    }
 
-        if ((! String.IsNullOrEmpty(executable)) && (! String.IsNullOrEmpty(ExecutablePattern))) {
+    public bool Matches(IntPtr hwnd)
+    {
+        bool? matchesWindowTitle = MatchesWindowTitle(hwnd);
+        bool? matchesExecutable = MatchesExecutable(hwnd);
 
-            if (!UseRegexForExecutable &&
-                executable.Equals(ExecutablePattern, StringComparison.InvariantCultureIgnoreCase))
-                return true;
-            
-            if (UseRegexForExecutable && Regex.IsMatch(executable, ExecutablePattern))
-                return true;
+        if ( (!matchesWindowTitle.HasValue) && (!matchesExecutable.HasValue))
+        {
+            return false; // neither property available
         }
 
-
-        if ((!String.IsNullOrEmpty(windowTitle)) && (!String.IsNullOrEmpty(WindowTitlePattern))) {
-
-            if (!UseRegexForWindowTitle &&
-                windowTitle.Equals(WindowTitlePattern, StringComparison.InvariantCultureIgnoreCase))
-                return true;
-
-            if (UseRegexForWindowTitle && Regex.IsMatch(executable, WindowTitlePattern))
-                return true;
-        }
-        return false;
+        return matchesWindowTitle.GetValueOrDefault(true) && matchesExecutable.GetValueOrDefault(true);
     }
 }

@@ -55,4 +55,8 @@ public partial class NativeUtils
     public static extern IntPtr GetDesktopWindow();
     [DllImport("user32.dll")]
     public static extern IntPtr GetShellWindow();
+
+    [DllImport("user32.dll")]
+    public static extern int SetWindowPos(IntPtr hwnd, IntPtr hwndAfter, int x, int y, int cx, int cy, Win32SetWindowPosFlags flags);
+
 }

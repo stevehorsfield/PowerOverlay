@@ -27,6 +27,7 @@ public class CommandFactory
         RegisterCommandType(SwitchToApplicationDefinition.Instance);
         RegisterCommandType(SendCharactersDefinition.Instance);
         RegisterCommandType(ExecuteCommandDefinition.Instance);
+        RegisterCommandType(PositionWindowDefinition.Instance);
     }
 
 }

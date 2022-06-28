@@ -1,31 +1,51 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace overlay_popup.Commands;
 
 public class SwitchToApplication : ActionCommand
 {
-
     public override ActionCommandDefinition Definition { get { return SwitchToApplicationDefinition.Instance; } }
 
     private readonly FrameworkElement configElement = SwitchToApplicationDefinition.Instance.CreateConfigElement();
     public override FrameworkElement ConfigElement => configElement;
 
+    public ObservableCollection<ApplicationMatcherViewModel> ApplicationTargets { get; private set; }
+
+    public SwitchToApplication()
+    {
+        ApplicationTargets = new();
+        ApplicationTargets.CollectionChanged += (o, e) => { RaiseCanExecuteChanged(new EventArgs()); };
+    }
     public override bool CanExecute(object? parameter)
     {
-        return true;
+        return ApplicationTargets.Count > 0;
     }
 
     public override ActionCommand Clone()
     {
-        return new SwitchToApplication();
+        var clone = new SwitchToApplication() { };
+        foreach (var target in ApplicationTargets) clone.ApplicationTargets.Add(target);
+        return clone;
     }
 
     public override void Execute(object? parameter)
     {
-        // todo: No-Op
+        foreach (var hwnd in NativeUtils.EnumerateTopLevelWindows(false, true))
+        {
+            foreach (var target in ApplicationTargets)
+            {
+                if (target.Matches(hwnd))
+                {
+                    NativeUtils.SetForegroundWindow(hwnd);
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -43,6 +63,57 @@ public class SwitchToApplicationDefinition : ActionCommandDefinition
 
     public override FrameworkElement CreateConfigElement()
     {
-        return new TextBox() { Text = "Not implemented" };
+        var ctrl = new DockPanel();
+
+        var appTargetsLbl = new TextBlock()
+        {
+            Text = "Application targets:",
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+        DockPanel.SetDock(appTargetsLbl, Dock.Top);
+
+        var selector = new ListBox();
+        selector.Style = (Style)selector.FindResource("ApplicationTargetList");
+
+        selector.SetBinding(ListBox.ItemsSourceProperty, new Binding(nameof(SwitchToApplication.ApplicationTargets)));
+
+        RoutedEventHandler hClick = (object sender, RoutedEventArgs e) =>
+        {
+            Button? b = e.OriginalSource as Button;
+            if (b == null) return;
+            switch (b.Name)
+            {
+                case "TargetAdd":
+                    e.Handled = true;
+                    ((SwitchToApplication)b.DataContext).ApplicationTargets.Add(new ApplicationMatcherViewModel());
+                    selector.SelectedIndex = selector.Items.Count - 1;
+                    return;
+                case "TargetRemove":
+                    e.Handled = true;
+                    if (selector.SelectedIndex == -1) return;
+                    selector.SelectedIndex = selector.SelectedIndex - 1;
+                    ((SwitchToApplication)b.DataContext).ApplicationTargets.RemoveAt(selector.SelectedIndex + 1);
+                    return;
+            }
+        };
+
+        selector.DataContextChanged += (o, e) =>
+        {
+            if (selector.DataContext == null) return;
+            if (selector.SelectedIndex != -1) return;
+            if (((SwitchToApplication)selector.DataContext).ApplicationTargets.Count > 0)
+            {
+                selector.SelectedIndex = 0;
+            }
+        };
+
+        selector.AddHandler(Button.ClickEvent, hClick);
+
+        DockPanel.SetDock(selector, Dock.Top);
+
+        ctrl.Children.Add(appTargetsLbl);
+        ctrl.Children.Add(selector);
+
+        return ctrl;
     }
 }

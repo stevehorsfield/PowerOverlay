@@ -106,6 +106,14 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[0][0, 0].SetActionMode(ActionMode.PerformTask);
         AllMenus[0][0, 0].Text = "Notepad";
 
+        AllMenus[0][0, 4].Text = "Switch to notepad";
+        AllMenus[0][0, 4].SetActionMode(ActionMode.PerformTask);
+        AllMenus[0][0, 4].Action = SwitchToApplicationDefinition.Instance.Create();
+        ((SwitchToApplication)AllMenus[0][0, 4].Action!).ApplicationTargets.Add(new ApplicationMatcherViewModel());
+        ((SwitchToApplication)AllMenus[0][0, 4].Action!).ApplicationTargets[0].UseRegexForExecutable = true;
+        ((SwitchToApplication)AllMenus[0][0, 4].Action!).ApplicationTargets[0].ExecutablePattern = ".*notepad.exe$";
+
+
         AllMenus[0][1, 0].DefaultStyle.BackgroundColour = "#FF500000";
         AllMenus[0][1, 0].TargetMenu = "Alternate";
         AllMenus[0][1, 0].SetActionMode(ActionMode.SelectMenu);
@@ -156,6 +164,16 @@ public class AppViewModel : INotifyPropertyChanged {
         {
             ExecutablePattern = @"C:\Windows\system32\notepad.exe"
         });
+        AllMenus[3][0, 0].Text = "Switch to devenv";
+        AllMenus[3][0, 0].SetActionMode(ActionMode.PerformTask);
+        AllMenus[3][0, 0].Action = SwitchToApplicationDefinition.Instance.Create();
+        ((SwitchToApplication)AllMenus[3][0, 0].Action!).ApplicationTargets.Add(new ApplicationMatcherViewModel());
+        ((SwitchToApplication)AllMenus[3][0, 0].Action!).ApplicationTargets[0].UseRegexForExecutable = true;
+        ((SwitchToApplication)AllMenus[3][0, 0].Action!).ApplicationTargets[0].ExecutablePattern = ".*devenv.exe$";
+
+        AllMenus[3][0, 1].Text = "Default menu";
+        AllMenus[3][0, 1].SetActionMode(ActionMode.SelectMenu);
+        AllMenus[3][0, 1].TargetMenu = "Default";
 
         CurrentMenu = this.AllMenus[0];
     }

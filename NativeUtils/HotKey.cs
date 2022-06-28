@@ -10,12 +10,7 @@ using System.Windows.Input;
 
 public partial class NativeUtils
 {
-    [DllImport("user32.dll")]
-    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-    [DllImport("user32.dll")]
-    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
+    
     public const int WM_HOTKEY = 0x0312;
     
     private const uint MOD_NONE = 0x0000; //[NONE]

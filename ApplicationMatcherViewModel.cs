@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace overlay_popup;
 
@@ -61,5 +62,33 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged
             UseRegexForExecutable = UseRegexForExecutable,
             UseRegexForWindowTitle = UseRegexForWindowTitle,
         };
+    }
+
+    internal bool Matches(IntPtr hwnd)
+    {
+        var executable = NativeUtils.GetWindowProcessMainFilename(hwnd);
+        var windowTitle = NativeUtils.GetWindowTitle(hwnd);
+
+        if ((! String.IsNullOrEmpty(executable)) && (! String.IsNullOrEmpty(ExecutablePattern))) {
+
+            if (!UseRegexForExecutable &&
+                executable.Equals(ExecutablePattern, StringComparison.InvariantCultureIgnoreCase))
+                return true;
+            
+            if (UseRegexForExecutable && Regex.IsMatch(executable, ExecutablePattern))
+                return true;
+        }
+
+
+        if ((!String.IsNullOrEmpty(windowTitle)) && (!String.IsNullOrEmpty(WindowTitlePattern))) {
+
+            if (!UseRegexForWindowTitle &&
+                windowTitle.Equals(WindowTitlePattern, StringComparison.InvariantCultureIgnoreCase))
+                return true;
+
+            if (UseRegexForWindowTitle && Regex.IsMatch(executable, WindowTitlePattern))
+                return true;
+        }
+        return false;
     }
 }

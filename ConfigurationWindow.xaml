@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:overlay_popup" d:DataContext="{d:DesignInstance Type=local:ConfigurationViewModel}"
         mc:Ignorable="d"
-        Title="Configure" Height="800" Width="1200">
+        Title="Configure" Height="800" Width="1200" WindowState="Maximized">
     <DockPanel Margin="5">
 
         <DockPanel DockPanel.Dock="Left" Width="100">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
-                <Button Margin="0,2" Width="20" Height="20"><Bold>+</Bold></Button>
-                <Button Margin="2,2" Width="20" Height="20"><Bold>-</Bold></Button>
+                <Button Click="MenusAdd_Click" Margin="0,2" Width="20" Height="20"><Bold>+</Bold></Button>
+                <Button Click="MenusRemove_Click" Margin="2,2" Width="20" Height="20"><Bold>-</Bold></Button>
             </StackPanel>
-            <ListView ItemsSource="{Binding Path=Menus}" IsSynchronizedWithCurrentItem="True" SelectionChanged="ListView_SelectionChanged">
+            <ListView Name="MenuList" ItemsSource="{Binding Path=Menus}" IsSynchronizedWithCurrentItem="True" SelectionChanged="ListView_SelectionChanged">
                 <ListView.ItemTemplate>
                     
                     
@@ -30,7 +30,7 @@
             <Button Margin="2,0" Content="Cancel" IsCancel="True" />
         </StackPanel>
 
-        <Grid Margin="2,0,0,0" DataContext="{Binding Path=Menus/}">
+        <Grid Name="EditorGrid" Margin="2,0,0,0" DataContext="{Binding Path=Menus/}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition />
@@ -46,11 +46,87 @@
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0">Name</Label>
                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"
                          IsReadOnly="{Binding Path=IsReadOnly}"
                          ></TextBox>
+
+                <Label Grid.Row="1" Grid.Column="0">Auto show menu for:</Label>
+
+                <DockPanel Grid.Row="2" Grid.Column="0" MaxHeight="100">
+                
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+                        <Button Click="SelectorsAdd_Click" Margin="0,2" Width="20" Height="20">
+                            <Bold>+</Bold>
+                        </Button>
+                        <Button Click="SelectorsRemove_Click" Margin="2,2" Width="20" Height="20">
+                            <Bold>-</Bold>
+                        </Button>
+                    </StackPanel>
+                    <ListBox Name="SelectorsList" ItemsSource="{Binding MenuSelectors}"
+                             IsSynchronizedWithCurrentItem="True"
+                             MaxHeight="100" MinHeight="20" Width="350">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="Exe: (re: " />
+                                    <Run Run.Text="{Binding Path=UseRegexForExecutable}"/>
+                                    <Run Text=") "/>
+                                    <Run Text="{Binding Path=ExecutablePattern}"/>
+                                    <Run Text=" | Title: (re: "/>
+                                    <Run Run.Text="{Binding Path=UseRegexForWindowTitle}"/>
+                                    <Run Text=") "/>
+                                    <Run Text="{Binding Path=WindowTitlePattern}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <Grid.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=SelectorsList,Path=SelectedIndex}" Value="-1">
+                                    <Setter Property="Grid.Visibility" Value="Hidden" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0">Application:</TextBlock>
+                    <CheckBox Grid.Row="0" Grid.Column="1" Margin="5,0"
+                              IsChecked="{Binding Path=MenuSelectors/UseRegexForExecutable}"
+                              >
+                        <TextBlock>Use regex</TextBlock>
+                    </CheckBox>
+                    <TextBox Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch"
+                             Text="{Binding Path=MenuSelectors/ExecutablePattern}"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" >Window title:</TextBlock>
+                    <CheckBox Grid.Row="1" Grid.Column="1" Margin="5,0"
+                              IsChecked="{Binding Path=MenuSelectors/UseRegexForWindowTitle}">
+                            <TextBlock>Use regex</TextBlock>
+                    </CheckBox>
+                    <TextBox Grid.Row="1" Grid.Column="2"  HorizontalAlignment="Stretch"
+                             Text="{Binding Path=MenuSelectors/WindowTitlePattern}"/>
+                </Grid>
+            
+                
             </Grid>
 
             <UniformGrid DataContext="{Binding Path=Buttons}" Name="ButtonGrid" Columns="5" Rows="5" Grid.Row="1" Grid.Column="0" Width="250" Height="250">
@@ -87,11 +163,13 @@
                             <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Path=IsVisible}"/>
 
                             <Label Grid.Row="1" Grid.Column="0">Content type</Label>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
-                                <RadioButton Click="ContentFormatRadio_Click" Content="Text" Tag="PlainText" IsChecked="{Binding Path=IsPlainText, Mode=OneWay}"/>
-                                <RadioButton Click="ContentFormatRadio_Click" Content="XAML (Fragment)" Tag="XamlFragment"  IsChecked="{Binding Path=IsXamlFragment, Mode=OneWay}"/>
-                                <RadioButton Click="ContentFormatRadio_Click" Content="XAML (Full)" Tag="Xaml" IsChecked="{Binding Path=IsXaml, Mode=OneWay}"/>
-                            </StackPanel>
+
+                            <ListBox Grid.Row="1" Grid.Column="1" Name="ContentFormatList" DataContextChanged="ContentFormatList_DataContextChanged"
+                                         SelectionChanged="ContentFormatList_SelectionChanged">
+                                <ListBoxItem Content="Text" Tag="PlainText" />
+                                <ListBoxItem Content="XAML (Fragment)" Tag="XamlFragment"/>
+                                <ListBoxItem Content="XAML (Full)" Tag="Xaml" />
+                            </ListBox>
 
                             <StackPanel Grid.Row="2" Grid.Column="0">
                                 <Label>Button content</Label>
@@ -118,11 +196,11 @@
                             <Label Grid.Row="3" Grid.Column="0">Preview</Label>
                             <Border Grid.Row="3" Grid.Column="1" Width="150" Height="80" BorderThickness="2" BorderBrush="Silver"
                             Margin="10"
-                            Background="{Binding BackgroundColourBrush}">
+                            Background="{Binding DefaultStyle.BackgroundColourBrush}">
                                 <ContentPresenter Content="{Binding Content}" VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <ContentPresenter.Style>
                                         <Style>
-                                            <Setter Property="TextBlock.Foreground" Value="{Binding ForegroundColourBrush}"/>
+                                            <Setter Property="TextBlock.Foreground" Value="{Binding DefaultStyle.ForegroundColourBrush}"/>
                                         </Style>
                                     </ContentPresenter.Style>
                                 </ContentPresenter>
@@ -130,9 +208,12 @@
 
                             <Label Grid.Row="4" Grid.Column="0">Action</Label>
                             <StackPanel Grid.Row="4" Grid.Column="1">
-                                <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsNoAction, Mode=OneWay}" Checked="ActionModeNoOp_Click" >No action</RadioButton>
-                                <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsSelectMenu, Mode=OneWay}" Checked="ActionModeMenu_Click">Switch to menu</RadioButton>
-                                <RadioButton GroupName="ActionStyle" IsChecked="{Binding IsPerformTask, Mode=OneWay}" Checked="ActionModeActivity_Click">Perform action</RadioButton>
+                                <ListBox Name="ActionModeList" DataContextChanged="ActionModeList_DataContextChanged"
+                                         SelectionChanged="ActionModeList_SelectionChanged">
+                                    <ListBoxItem Content="No action" Tag="NoAction" />
+                                    <ListBoxItem Content="Select menu" Tag="SelectMenu"/>
+                                    <ListBoxItem Content="Perform action" Tag="PerformTask" />
+                                </ListBox>
 
                                 <ListBox Name="TargetMenuList" Visibility="{Binding MenuListVisibility}"
                                          DataContextChanged="TargetMenuList_DataContextChanged"
@@ -163,6 +244,8 @@
                                     <ContentPresenter Content="{Binding Path=ConfigElement}"/>
                                 </Grid>
                             </Border>
+
+                            
                         </Grid>
                     </ScrollViewer>
                 </TabItem>

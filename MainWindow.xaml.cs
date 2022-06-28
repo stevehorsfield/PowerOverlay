@@ -74,7 +74,7 @@ namespace overlay_popup
 
             NativeUtils.RegisterHotKey(this, HOTKEY_ID, Key.F2, ModifierKeys.Windows);
 
-            (this.DataContext as AppViewModel)!.RefreshCurrentApp();
+            (this.DataContext as AppViewModel)!.RefreshCurrentDesktopState();
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -87,7 +87,8 @@ namespace overlay_popup
                         case HOTKEY_ID:
                             if (this.Visibility != Visibility.Visible)
                             {
-                                (this.DataContext as AppViewModel)!.RefreshCurrentApp();
+                                (this.DataContext as AppViewModel)!.RefreshCurrentDesktopState();
+                                (this.DataContext as AppViewModel)!.SelectMenuFromApp();
                                 this.Show();
                                 this.Activate();
                             }

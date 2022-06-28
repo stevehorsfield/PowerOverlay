@@ -60,5 +60,10 @@ public class ConfigurationButtonMenuViewModel : INotifyPropertyChanged
                 Buttons.Add(source[i, j].Clone());
             }
         }
+
+        foreach (var selector in source.MenuSelectors)
+        {
+            MenuSelectors.Add(selector.Clone());
+        }
     }
 }

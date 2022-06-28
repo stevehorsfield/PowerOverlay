@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Collections.Specialized;
 using overlay_popup.Commands;
+using System.Text.RegularExpressions;
 
 namespace overlay_popup;
 
@@ -11,6 +12,8 @@ public class AppViewModel : INotifyPropertyChanged {
 
     private string appWindowTitle = String.Empty;
     private string appProcessName = String.Empty;
+    private string appProcessExecutable = String.Empty;
+    private IntPtr applicationHwnd = IntPtr.Zero;
     private ButtonMenuViewModel? currentMenu;
 
     public ObservableCollection<ButtonMenuViewModel> AllMenus { get; private set; }
@@ -26,7 +29,7 @@ public class AppViewModel : INotifyPropertyChanged {
             this.appWindowTitle = value;
             if (this.PropertyChanged != null)
             {
-                this.PropertyChanged(this, new PropertyChangedEventArgs("ApplicationWindowTitle"));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationWindowTitle)));
             }
         }
     }
@@ -39,7 +42,20 @@ public class AppViewModel : INotifyPropertyChanged {
             this.appProcessName = value;
             if (this.PropertyChanged != null)
             {
-                this.PropertyChanged(this, new PropertyChangedEventArgs("ApplicationProcessName"));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationProcessName)));
+            }
+        }
+    }
+
+    public string ApplicationProcessExecutable
+    {
+        get { return this.appProcessExecutable; }
+        set
+        {
+            this.appProcessExecutable = value;
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationProcessExecutable)));
             }
         }
     }
@@ -50,7 +66,7 @@ public class AppViewModel : INotifyPropertyChanged {
         set
         {
             this.currentMenu = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurrentMenu"));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentMenu)));
         }
     }
 
@@ -72,6 +88,10 @@ public class AppViewModel : INotifyPropertyChanged {
             {
                 Name = "Menu 3",
                 CanChangeName = true,
+            },
+            new ButtonMenuViewModel()
+            {
+                Name = "Notepad menu",
             }
         };
         
@@ -83,24 +103,28 @@ public class AppViewModel : INotifyPropertyChanged {
         action.WaitTimeoutMilliseconds = 300;
         action.Arguments.Add(@"C:\temp.txt");
         AllMenus[0][0, 0].Action = action;
-        AllMenus[0][0, 0].SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+        AllMenus[0][0, 0].SetActionMode(ActionMode.PerformTask);
         AllMenus[0][0, 0].Text = "Notepad";
 
         AllMenus[0][1, 0].DefaultStyle.BackgroundColour = "#FF500000";
         AllMenus[0][1, 0].TargetMenu = "Alternate";
-        AllMenus[0][1, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[0][1, 0].SetActionMode(ActionMode.SelectMenu);
         AllMenus[0][1, 0].SetContent(@"<TextBlock>Menu -&gt;<LineBreak/>Alternate</TextBlock>",true,true);
 
         AllMenus[0][2, 0].DefaultStyle.BackgroundColour = "#FF500000";
         AllMenus[0][2, 0].TargetMenu = "Menu 3";
-        AllMenus[0][2, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[0][2, 0].SetActionMode(ActionMode.SelectMenu);
         AllMenus[0][2, 0].Text = "Menu:\nMenu 3";
 
         AllMenus[0][3, 0].DefaultStyle.BackgroundColour = "#FF404040";
         AllMenus[0][3, 0].HoverStyle.BackgroundColour = "#FFE0E0A0";
         AllMenus[0][3, 0].HoverStyle.ForegroundColour = "#FF404080";
-        AllMenus[0][3, 0].SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+        AllMenus[0][3, 0].SetActionMode(ActionMode.PerformTask);
         AllMenus[0][3, 0].Action = SendCharactersDefinition.Instance.Create();
+        ((SendCharacters)AllMenus[0][3, 0].Action!).ApplicationTargets.Add(new ApplicationMatcherViewModel());
+        ((SendCharacters)AllMenus[0][3, 0].Action!).ApplicationTargets[0].UseRegexForExecutable = true;
+        ((SendCharacters)AllMenus[0][3, 0].Action!).ApplicationTargets[0].ExecutablePattern = ".*notepad.exe$";
+        ((SendCharacters)AllMenus[0][3, 0].Action!).Text = "Hello 🎁";
         AllMenus[0][3, 0].DefaultStyle.FontFamilyName = "Segoe UI Emoji";
         AllMenus[0][3, 0].HoverStyle.FontFamilyName = "Segoe UI Emoji";
         AllMenus[0][3, 0].PressedStyle.FontFamilyName = "Segoe UI Emoji";
@@ -109,32 +133,75 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[1][0, 0].DefaultStyle.BackgroundColour = "#FF0000FF";
         AllMenus[1][0, 1].Text = "Go to Default";
         AllMenus[1][0, 1].TargetMenu = "Default";
-        AllMenus[1][0, 1].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[1][0, 1].SetActionMode(ActionMode.SelectMenu);
 
         AllMenus[2][0, 0].Text = "Go to Alternate";
         AllMenus[2][0, 0].TargetMenu = "Alternate";
-        AllMenus[2][0, 0].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[2][0, 0].SetActionMode(ActionMode.SelectMenu);
         AllMenus[2][0, 1].Text = "Go to Default";
         AllMenus[2][0, 1].TargetMenu = "Default";
-        AllMenus[2][0, 1].SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
+        AllMenus[2][0, 1].SetActionMode(ActionMode.SelectMenu);
 
         AllMenus[0][0, 1].Text = "Sequence test";
-        AllMenus[0][0, 1].SetActionMode(ButtonViewModel.ActionMode.PerformTask);
+        AllMenus[0][0, 1].SetActionMode(ActionMode.PerformTask);
         var action2 = (SequenceCommand)SequenceCommandDefinition.Instance.Create();
         AllMenus[0][0, 1].Action = action2;
         action2.Actions.Add(ExecuteCommandDefinition.Instance.Create());
-        
+
+        AllMenus[3].MenuSelectors.Add(new ApplicationMatcherViewModel
+        {
+            ExecutablePattern = @"C:\Windows\notepad.exe"
+        });
+        AllMenus[3].MenuSelectors.Add(new ApplicationMatcherViewModel
+        {
+            ExecutablePattern = @"C:\Windows\system32\notepad.exe"
+        });
 
         CurrentMenu = this.AllMenus[0];
     }
 
-    internal void RefreshCurrentApp()
+    internal void SelectMenuFromApp()
     {
-        IntPtr hwndApp = NativeUtils.GetActiveAppHwnd();
-        this.ApplicationWindowTitle = NativeUtils.GetWindowTitle(hwndApp);
-        
-        this.ApplicationProcessName = NativeUtils.GetWindowProcessName(hwndApp);
 
+        foreach (var menu in this.AllMenus)
+        {
+            foreach (ApplicationMatcherViewModel selector in menu.MenuSelectors)
+            {
+                bool matched =
+                    (
+                        (!String.IsNullOrEmpty(selector.ExecutablePattern)) &&
+                        (
+                            (!selector.UseRegexForExecutable &&
+                                ApplicationProcessExecutable.Equals(selector.ExecutablePattern, StringComparison.InvariantCultureIgnoreCase))
+                            ||
+                            (selector.UseRegexForExecutable &&
+                                Regex.IsMatch(ApplicationProcessExecutable, selector.ExecutablePattern))
+                        )
+                    ) || (
+                        (!String.IsNullOrEmpty(selector.WindowTitlePattern)) &&
+                        (
+                            (!selector.UseRegexForWindowTitle &&
+                                ApplicationWindowTitle.Equals(selector.WindowTitlePattern, StringComparison.InvariantCultureIgnoreCase))
+                            ||
+                            (selector.UseRegexForWindowTitle &&
+                                Regex.IsMatch(ApplicationWindowTitle, selector.WindowTitlePattern))
+                        )
+                    );
+                if (matched)
+                {
+                    CurrentMenu = menu;
+                    return;
+                }
+            }
+        }
+    }
+
+    internal void RefreshCurrentDesktopState()
+    {
+        this.applicationHwnd = NativeUtils.GetActiveAppHwnd();
+        this.ApplicationWindowTitle = NativeUtils.GetWindowTitle(applicationHwnd);
+        this.ApplicationProcessExecutable = NativeUtils.GetWindowProcessMainFilename(applicationHwnd);
+        this.ApplicationProcessName = NativeUtils.GetWindowProcessName(applicationHwnd);
     }
 
     public void ApplyFrom(ConfigurationViewModel config)

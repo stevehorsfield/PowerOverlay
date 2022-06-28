@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:overlay_popup"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="overlay-popup" Height="450" Width="800"
         WindowStyle="none"
         AllowsTransparency="true"
         Topmost="true"
@@ -59,6 +59,8 @@
             <StackPanel>
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Current menu:</Bold> <Run Text="{Binding Path=CurrentMenu.Name}"></Run></TextBlock>
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>App:</Bold> <Run Text="{Binding Path=ApplicationProcessName}"></Run></TextBlock>
+                <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Exe:</Bold> <Run Text="{Binding Path=ApplicationProcessExecutable}"></Run></TextBlock>
+                
                 <TextBlock Margin="0,5" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40"><Bold>Window:</Bold> <Run Text="{Binding Path=ApplicationWindowTitle}"></Run></TextBlock>
 
                 <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"

@@ -100,19 +100,6 @@ public partial class ConfigurationWindow : Window
         model.PasteStyleFrom(source);
     }
 
-    private void ActionModeNoOp_Click(object sender, RoutedEventArgs e) {
-        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
-        model.SetActionMode(ButtonViewModel.ActionMode.NoAction);
-    }
-    private void ActionModeMenu_Click(object sender, RoutedEventArgs e) {
-        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
-        model.SetActionMode(ButtonViewModel.ActionMode.SelectMenu);
-    }
-    private void ActionModeActivity_Click(object sender, RoutedEventArgs e) {
-        var model = (ButtonViewModel)CollectionViewSource.GetDefaultView(ButtonGrid.DataContext).CurrentItem;
-        model.SetActionMode(ButtonViewModel.ActionMode.PerformTask);
-    }
-
     private void TargetMenuList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         var button = (ButtonViewModel)TargetMenuList.DataContext;
@@ -136,5 +123,107 @@ public partial class ConfigurationWindow : Window
         if (button == null) return;
         button.TargetMenu = 
             (TargetMenuList.SelectedItem as ConfigurationButtonMenuViewModel)?.Name ?? String.Empty;
+    }
+
+    private void MenusAdd_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        ((ConfigurationViewModel)this.DataContext).Menus.Add(new ConfigurationButtonMenuViewModel(new ButtonMenuViewModel() { Name = "untitled" }));
+    }
+
+    private void MenusRemove_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        if (MenuList.SelectedItem == null) return;
+        var selected = (ConfigurationButtonMenuViewModel)MenuList.SelectedItem;
+        if (!selected.CanChangeName) return;
+        var result = MessageBox.Show(this, $"Confirm delete menu '{selected.Name}'?'", "Confirm menu deletion", MessageBoxButton.YesNo);
+        if (result == MessageBoxResult.Yes)
+        {
+            MenuList.SelectedIndex =
+                MenuList.SelectedIndex == 0 ? 0 :
+                MenuList.SelectedIndex - 1; // Move away from deleted item
+            ((ConfigurationViewModel)this.DataContext).Menus.Remove(selected);
+        }
+    }
+
+    private void SelectorsAdd_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        ((ConfigurationButtonMenuViewModel)SelectorsList.DataContext)
+            .MenuSelectors.Add(new ApplicationMatcherViewModel());
+    }
+
+    private void SelectorsRemove_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        if (SelectorsList.SelectedItem == null) return;
+        var selected = (ApplicationMatcherViewModel)SelectorsList.SelectedItem;
+        SelectorsList.SelectedIndex = 
+            SelectorsList.SelectedIndex == 0 ? 0 :
+            SelectorsList.SelectedIndex - 1; // Move away from deleted item
+        ((ConfigurationButtonMenuViewModel)SelectorsList.DataContext).MenuSelectors.Remove(selected);
+    }
+
+    private void ActionModeList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (ActionModeList.DataContext == null)
+        {
+            ActionModeList.SelectedIndex = -1;
+            return;
+        }
+
+        var actionMode = ((ButtonViewModel)ActionModeList.DataContext).ActionMode;
+        var actionModeName = actionMode.ToString();
+        foreach (var item in ActionModeList.Items.Cast<ListBoxItem>())
+        {
+            if (((string)item.Tag).Equals(actionModeName,StringComparison.InvariantCultureIgnoreCase))
+            {
+                item.IsSelected = true;
+                return;
+            }
+        }
+        ActionModeList.SelectedIndex = -1;
+    }
+    private void ActionModeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        e.Handled = true;
+        if (ActionModeList.SelectedIndex == -1) return;
+        if (ActionModeList.DataContext == null) return;
+
+        var dc = (ButtonViewModel)ActionModeList.DataContext;
+        var mode = Enum.Parse<ActionMode>((string)((ListBoxItem)ActionModeList.SelectedItem).Tag);
+        dc.SetActionMode(mode);
+    }
+
+    private void ContentFormatList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (ContentFormatList.DataContext == null)
+        {
+            ContentFormatList.SelectedIndex = -1;
+            return;
+        }
+
+        var contentMode = ((ButtonViewModel)ContentFormatList.DataContext).ContentFormat;
+        var contentModeName = contentMode.ToString();
+        foreach (var item in ContentFormatList.Items.Cast<ListBoxItem>())
+        {
+            if (((string)item.Tag).Equals(contentModeName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                item.IsSelected = true;
+                return;
+            }
+        }
+        ContentFormatList.SelectedIndex = -1;
+    }
+    private void ContentFormatList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        e.Handled = true;
+        if (ContentFormatList.SelectedIndex == -1) return;
+        if (ContentFormatList.DataContext == null) return;
+
+        var dc = (ButtonViewModel)ContentFormatList.DataContext;
+        var mode = Enum.Parse<ButtonViewModel.ContentSourceType>((string)((ListBoxItem)ContentFormatList.SelectedItem).Tag);
+        dc.ContentFormat = mode;
     }
 }

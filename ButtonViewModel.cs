@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,215 +7,8 @@ using System.Windows.Media;
 using overlay_popup.Commands;
 using System.Windows.Documents;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace overlay_popup;
-
-
-public class DisplayStyleViewModel : INotifyPropertyChanged
-{
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private Color defaultBackgroundColour;
-    private Color defaultForegroundColour;
-
-    private string backgroundColour;
-    private Brush? backgroundBrush;
-    private string foregroundColour;
-    private Brush? foregroundBrush;
-    private int fontSize;
-    private FontFamily? fontFamily;
-    private string fontFamilyName;
-    private string fontWeightName;
-    private string fontStyleName;
-
-    public Brush BackgroundColourBrush
-    {
-        get
-        {
-            return XamlUtils.SetAndReturnSolidColourBrush(ref backgroundBrush, backgroundColour, defaultBackgroundColour);
-        }
-    }
-    public string BackgroundColour
-    {
-        get { return this.backgroundColour; }
-        set
-        {
-            Set2AndNotify(
-                ref this.backgroundColour, value,
-                ref this.backgroundBrush, null,
-                nameof(BackgroundColour), nameof(BackgroundColourBrush));
-        }
-    }
-
-    public Brush ForegroundColourBrush
-    {
-        get
-        {
-            return XamlUtils.SetAndReturnSolidColourBrush(
-                ref foregroundBrush, foregroundColour, defaultForegroundColour);
-        }
-    }
-    public string ForegroundColour
-    {
-        get { return this.foregroundColour; }
-        set
-        {
-            Set2AndNotify(
-                ref foregroundColour, value,
-                ref foregroundBrush, null,
-                nameof(ForegroundColour), nameof(ForegroundColourBrush));
-        }
-    }
-
-    public int FontSize
-    {
-        get { return fontSize; }
-        set
-        {
-            SetAndNotify(ref fontSize, value, nameof(FontSize));
-        }
-    }
-
-    public string FontFamilyName
-    {
-        get { return fontFamilyName; }
-        set
-        {
-            Set2AndNotify(ref fontFamilyName, value, ref fontFamily, null, nameof(FontFamilyName), nameof(FontFamily));
-        }
-    }
-    public FontFamily? FontFamily {
-        get
-        {
-            if (this.fontFamily == null)
-            {
-                if (String.IsNullOrEmpty(FontFamilyName))
-                {
-                    return new FontFamily();
-
-                }
-                fontFamily = new FontFamily(fontFamilyName);
-            }
-            return fontFamily;
-        }
-    }
-    public FontWeight FontWeight
-    {
-        get {
-            if (fontWeightName == null) return System.Windows.FontWeights.Normal;
-            var getMethod = 
-                typeof(System.Windows.FontWeights)
-                .GetProperty(fontWeightName, BindingFlags.Static | BindingFlags.Public)
-                ?.GetGetMethod();
-
-            var result = getMethod?.Invoke(null, null);
-            if (result != null) return (System.Windows.FontWeight)result;
-            return System.Windows.FontWeights.Normal;
-        }
-    }
-
-    public string FontWeightName
-    {
-        get { return fontWeightName; }
-        set
-        {
-            SetAndNotify(ref fontWeightName, value, nameof(FontWeightName), nameof(FontWeight));
-        }
-    }
-
-
-    public string FontStyleName
-    {
-        get { return fontStyleName; }
-        set
-        {
-            SetAndNotify(ref fontStyleName, value, nameof(FontStyleName), nameof(DisplayStyleViewModel.FontStyle));
-        }
-    }
-    public FontStyle FontStyle
-    {
-        get
-        {
-            if (fontStyleName == null) return System.Windows.FontStyles.Normal;
-            var getMethod =
-                typeof(System.Windows.FontStyles)
-                .GetProperty(fontStyleName, BindingFlags.Static | BindingFlags.Public)
-                ?.GetGetMethod();
-
-            var result = getMethod?.Invoke(null, null);
-            if (result != null) return (System.Windows.FontStyle)result;
-            return System.Windows.FontStyles.Normal;
-        }
-    }
-    public IEnumerable<string> FontWeights => GetFontWeights();
-    private IEnumerable<string> GetFontWeights() {
-        return 
-            typeof(System.Windows.FontWeights)
-                .GetProperties(BindingFlags.Static | System.Reflection.BindingFlags.Public)
-                .Where(x => x.GetGetMethod()?.ReturnType.IsAssignableTo(typeof(FontWeight)) ?? false)
-                .Select(x => x.Name);
-    }
-
-
-    public IEnumerable<string> FontStyles => GetFontStyles();
-    private IEnumerable<string> GetFontStyles()
-    {
-        return typeof(System.Windows.FontStyles)
-            .GetProperties(BindingFlags.Static | System.Reflection.BindingFlags.Public)
-            .Where(x => x.GetGetMethod()?.ReturnType.IsAssignableTo(typeof(FontStyle)) ?? false)
-            .Select(x => x.Name);
-    }
-
-    public DisplayStyleViewModel(
-        Color defaultBackgroundColour,
-        Color defaultForegroundColour,
-        int defaultFontSize,
-        string defaultFontFamilyName,
-        string defaultFontWeightName,
-        string defaultFontStyleName)
-    {
-        this.defaultBackgroundColour = defaultBackgroundColour;
-        this.defaultForegroundColour = defaultForegroundColour;
-
-        backgroundColour = defaultBackgroundColour.ToString();
-        foregroundColour = defaultForegroundColour.ToString();
-        fontSize = defaultFontSize;
-        fontFamilyName = defaultFontFamilyName;
-        fontWeightName = defaultFontWeightName;
-        fontStyleName = defaultFontStyleName;
-    }
-
-    public void CopyTo(DisplayStyleViewModel other)
-    {
-        other.defaultBackgroundColour = this.defaultBackgroundColour;
-        other.defaultForegroundColour = this.defaultForegroundColour;
-        other.backgroundBrush = null;
-        other.backgroundColour = this.backgroundColour;
-        other.foregroundBrush = null;
-        other.foregroundColour = this.foregroundColour;
-        other.fontSize = this.fontSize;
-        other.fontFamilyName = this.fontFamilyName;
-        other.fontWeightName = this.fontWeightName;
-        other.fontStyleName = this.fontStyleName;
-    }
-
-    private void Notify(params string[] names)
-    {
-        Array.ForEach(names, n => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n)));
-    }
-    private void SetAndNotify<T>(ref T field, T value, params string[] names)
-    {
-        field = value;
-        Notify(names);
-    }
-    private void Set2AndNotify<T, U>(ref T field, T value, ref U field2, U value2, params string[] names)
-    {
-        field = value; field2 = value2;
-        Notify(names);
-    }
-
-}
 
 public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     private FrameworkElement? content;
@@ -270,28 +62,6 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
     public DisplayStyleViewModel DefaultStyle => defaultStyle;
     public DisplayStyleViewModel HoverStyle => hoverStyle;
     public DisplayStyleViewModel PressedStyle => pressedStyle;
-
-    //private string backgroundColour = DefaultBackgroundColour.ToString();
-    //private Brush? backgroundBrush;
-
-    //private string backgroundHoverColour = DefaultBackgroundHoverColour.ToString();
-    //private Brush? backgroundHoverBrush;
-
-    //private string backgroundPressedColour = DefaultBackgroundPressedColour.ToString();
-    //private Brush? backgroundPressedBrush;
-
-    //private string foregroundColour = DefaultForegroundColour.ToString();
-    //private Brush? foregroundBrush;
-
-    //private string foregroundHoverColour = DefaultForegroundHoverColour.ToString();
-    //private Brush? foregroundHoverBrush;
-
-    //private string foregroundPressedColour = DefaultForegroundPressedColour.ToString();
-    //private Brush? foregroundPressedBrush;
-
-    //private int fontSize = DefaultFontSize;
-    //private int hoverFontSize = DefaultHoverFontSize;
-    //private int pressedFontSize = DefaultPressedFontSize;
 
     public FrameworkElement? Content {
         get { return content; }
@@ -364,156 +134,18 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
         }
     }
 
-    #region old style elements
-    //public Brush BackgroundColourBrush
-    //{
-    //    get
-    //    {
-    //        return XamlUtils.SetAndReturnSolidColourBrush(ref backgroundBrush, backgroundColour, DefaultBackgroundColour);
-    //    }
-    //}
-    //public string BackgroundColour
-    //{
-    //    get { return this.backgroundColour; }
-    //    set
-    //    {
-    //        Set2AndNotify(
-    //            ref this.backgroundColour, value,
-    //            ref this.backgroundBrush, null,
-    //            nameof(BackgroundColour), nameof(BackgroundColourBrush));
-    //    }
-    //}
-
-    //public Brush BackgroundHoverColourBrush
-    //{
-    //    get
-    //    {
-    //        return XamlUtils.SetAndReturnSolidColourBrush(ref backgroundHoverBrush, backgroundHoverColour, DefaultBackgroundHoverColour);
-    //    }
-    //}
-    //public string BackgroundHoverColour
-    //{
-    //    get { return this.backgroundHoverColour; }
-    //    set
-    //    {
-    //        Set2AndNotify(
-    //            ref this.backgroundHoverColour, value,
-    //            ref this.backgroundHoverBrush, null,
-    //            nameof(BackgroundHoverColour), nameof(BackgroundHoverColourBrush));
-    //    }
-    //}
-
-    //public Brush BackgroundPressedColourBrush
-    //{
-    //    get
-    //    {
-    //        return XamlUtils.SetAndReturnSolidColourBrush(ref backgroundPressedBrush, backgroundPressedColour, DefaultBackgroundPressedColour);
-    //    }
-    //}
-    //public string BackgroundPressedColour
-    //{
-    //    get { return this.backgroundPressedColour; }
-    //    set
-    //    {
-    //        Set2AndNotify(
-    //            ref this.backgroundPressedColour, value,
-    //            ref this.backgroundPressedBrush, null,
-    //            nameof(BackgroundPressedColour), nameof(BackgroundPressedColourBrush));
-    //    }
-    //}
-
-    //public Brush ForegroundColourBrush
-    //{
-    //    get
-    //    {
-    //        return XamlUtils.SetAndReturnSolidColourBrush(
-    //            ref foregroundBrush, foregroundColour, DefaultForegroundColour);
-    //    }
-    //}
-    //public string ForegroundColour
-    //{
-    //    get { return this.foregroundColour; }
-    //    set
-    //    {
-    //        Set2AndNotify(
-    //            ref foregroundColour, value,
-    //            ref foregroundBrush, null,
-    //            nameof(ForegroundColour), nameof(ForegroundColourBrush));
-    //    }
-    //}
-
-    //public Brush ForegroundHoverColourBrush
-    //{
-    //    get
-    //    {
-    //        return XamlUtils.SetAndReturnSolidColourBrush(
-    //            ref foregroundHoverBrush, foregroundHoverColour, DefaultForegroundHoverColour);
-    //    }
-    //}
-    //public string ForegroundHoverColour
-    //{
-    //    get { return this.foregroundHoverColour; }
-    //    set
-    //    {
-    //        Set2AndNotify(
-    //            ref foregroundHoverColour, value,
-    //            ref foregroundHoverBrush, null,
-    //            nameof(ForegroundHoverColour), nameof(ForegroundHoverColourBrush));
-    //    }
-    //}
-
-    //public Brush ForegroundPressedColourBrush
-    //{
-    //    get
-    //    {
-    //        return XamlUtils.SetAndReturnSolidColourBrush(
-    //            ref foregroundPressedBrush, foregroundPressedColour, DefaultForegroundPressedColour);
-    //    }
-    //}
-    //public string ForegroundPressedColour
-    //{
-    //    get { return this.foregroundPressedColour; }
-    //    set
-    //    {
-    //        Set2AndNotify(
-    //            ref foregroundPressedColour, value,
-    //            ref foregroundPressedBrush, null,
-    //            nameof(ForegroundPressedColour), nameof(ForegroundPressedColourBrush));
-    //    }
-    //}
-
-    //public int FontSize {
-    //    get { return fontSize; }
-    //    set
-    //    {
-    //        SetAndNotify(ref fontSize, value, nameof(FontSize));
-    //    }
-    //}
-    //public int HoverFontSize
-    //{
-    //    get { return hoverFontSize; }
-    //    set
-    //    {
-    //        SetAndNotify(ref hoverFontSize, value, nameof(HoverFontSize));
-    //    }
-    //}
-    //public int PressedFontSize
-    //{
-    //    get { return pressedFontSize; }
-    //    set
-    //    {
-    //        SetAndNotify(ref pressedFontSize, value, nameof(PressedFontSize));
-    //    }
-    //}
-    #endregion
-
-    public enum ActionMode
-    {
-        NoAction,
-        SelectMenu,
-        PerformTask
-    }
     private ActionMode actionMode = ActionMode.NoAction;
+
+    public ActionMode ActionMode { 
+        get { return this.actionMode; } 
+        set
+        {
+            SetActionMode(value);
+        }
+    }
+    public IEnumerable<string> ActionModes => Enum.GetNames<ActionMode>();
+
+
 
     public Visibility MenuListVisibility => actionMode == ActionMode.SelectMenu ? Visibility.Visible : Visibility.Collapsed;
     public Visibility ActionVisibility => actionMode == ActionMode.PerformTask ? Visibility.Visible : Visibility.Collapsed;
@@ -546,7 +178,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
         if (action == null && mode == ActionMode.PerformTask) action = SequenceCommandDefinition.Instance.Create();
 
         SetAndNotify(ref actionMode, mode, nameof(IsNoAction), nameof(IsSelectMenu), nameof(IsPerformTask), 
-            nameof(MenuListVisibility), nameof(ActionVisibility), nameof(Action));
+            nameof(MenuListVisibility), nameof(ActionVisibility), nameof(Action), nameof(ActionMode));
     }
 
     public bool CanExecute(object? o) {

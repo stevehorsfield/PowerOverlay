@@ -12,11 +12,8 @@ public partial class NativeUtils {
         IntPtr hwndThis =
             new WindowInteropHelper(App.Current.MainWindow).Handle;
         
-        unsafe {
-            IntPtr hwndLast = GetForegroundWindow();
-            return hwndLast;
-        }
-
+        IntPtr hwndLast = GetForegroundWindow();
+        return hwndLast;
     }
 
     public static string GetWindowTitle(IntPtr hwnd) {
@@ -31,38 +28,34 @@ public partial class NativeUtils {
         {
             Marshal.FreeHGlobal(buffer);
         }
-        
+    }
+    internal static string GetWindowProcessName(IntPtr hwndApp)
+    {
+        uint processId = 0;
+        uint _ = GetWindowThreadProcessId(hwndApp, ref processId);
 
-        
+        using var p = System.Diagnostics.Process.GetProcessById((int)processId);
 
+        return p.ProcessName;
     }
 
-    [DllImport("user32.dll")]
-    public unsafe static extern IntPtr GetForegroundWindow();
-
-    [DllImport("user32.dll")]
-    public unsafe static extern IntPtr GetTopWindow(IntPtr hwnd);
-
-    [DllImport("user32.dll")]
-    public unsafe static extern IntPtr FindWindowExW(IntPtr hwndParent, IntPtr hwndChildAfter, IntPtr lpszClass, IntPtr lpszWindow);
-
-    [DllImport("user32.dll")]
-    public unsafe static extern int GetWindowTextW(IntPtr hwnd, IntPtr buffer, int maxCount);
-
-    [DllImport("user32.dll")]
-    public unsafe static extern uint GetWindowThreadProcessId(IntPtr hwnd, ref uint processId);
-
-    internal static string GetWindowProcessName(IntPtr hwndApp)
+    internal static string GetWindowProcessMainFilename(IntPtr hwndApp)
     {
         unsafe
         {
             uint processId = 0;
             uint _ = GetWindowThreadProcessId(hwndApp, ref processId);
 
-            using var p = System.Diagnostics.Process.GetProcessById((int)processId);
+            try
+            {
+                using var p = System.Diagnostics.Process.GetProcessById((int)processId);
 
-            return p.ProcessName;
-            
+                return p.MainModule?.FileName ?? String.Empty;
+            }
+            catch (Exception)
+            {
+                return String.Empty;
+            }
         }
     }
 }

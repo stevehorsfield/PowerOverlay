@@ -104,7 +104,7 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
             }
         }
 
-        foreach (var m in model.MenuSelectors)
+        foreach (var m in config.MenuSelectors)
         {
             model.MenuSelectors.Add(m.Clone());
         }

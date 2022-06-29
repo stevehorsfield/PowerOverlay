@@ -82,6 +82,12 @@
                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
                       X1="0" X2="300" ClipToBounds="True" />
 
+                <CheckBox Content="Lock window" IsChecked="{Binding LockMenu}" />
+
+                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      X1="0" X2="300" ClipToBounds="True" />
+
                 <Button Margin="0,5" Click="onConfigure">Configure</Button>
 
                 <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"

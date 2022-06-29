@@ -59,4 +59,24 @@ public partial class NativeUtils
     [DllImport("user32.dll")]
     public static extern int SetWindowPos(IntPtr hwnd, IntPtr hwndAfter, int x, int y, int cx, int cy, Win32SetWindowPosFlags flags);
 
+    [DllImport("user32.dll")]
+    public static extern uint MapVirtualKeyW(uint code, Win32MapVirtualKeyMode mapType);
+
+    [DllImport("user32.dll")]
+    public static extern unsafe uint SendInput(uint count, byte* inputs, int cbSize);
+
+    [DllImport("kernel32.dll")]
+    public static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    public static extern int AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("user32.dll")]
+    public static extern unsafe int GetKeyboardState(byte* lpKeyState);
+    [DllImport("user32.dll")]
+    public static extern unsafe int SetKeyboardState(byte* lpKeyState);
+
+    [DllImport("user32.dll")]
+    public static extern short VkKeyScanW(char ch);
+
 }

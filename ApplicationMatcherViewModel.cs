@@ -80,13 +80,21 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged
 
     private bool? MatchesWindowTitle(IntPtr hwnd)
     {
-        var windowTitle = NativeUtils.GetWindowTitle(hwnd);
-        return CompareString(windowTitle, WindowTitlePattern, UseRegexForWindowTitle);
+        return MatchesWindowTitle(NativeUtils.GetWindowTitle(hwnd));
     }
 
     private bool? MatchesExecutable(IntPtr hwnd)
     {
-        var executable = NativeUtils.GetWindowProcessMainFilename(hwnd);
+        return MatchesExecutable(NativeUtils.GetWindowProcessMainFilename(hwnd));
+    }
+
+    private bool? MatchesWindowTitle(string windowTitle)
+    {
+        return CompareString(windowTitle, WindowTitlePattern, UseRegexForWindowTitle);
+    }
+
+    private bool? MatchesExecutable(string executable)
+    {
         return CompareString(executable, ExecutablePattern, UseRegexForExecutable);
     }
 
@@ -101,5 +109,19 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged
         }
 
         return matchesWindowTitle.GetValueOrDefault(true) && matchesExecutable.GetValueOrDefault(true);
+    }
+
+    public bool Matches(string windowTitle, string executable)
+    {
+        bool? matchesWindowTitle = MatchesWindowTitle(windowTitle);
+        bool? matchesExecutable = MatchesExecutable(executable);
+
+        if ((!matchesWindowTitle.HasValue) && (!matchesExecutable.HasValue))
+        {
+            return false; // neither property available
+        }
+
+        return matchesWindowTitle.GetValueOrDefault(true) && matchesExecutable.GetValueOrDefault(true);
+
     }
 }

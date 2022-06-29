@@ -124,6 +124,105 @@
                 </Setter>
             </Style.Setters>
         </Style>
-        
+
+        <Style x:Key="KeySequenceList" TargetType="ListBox">
+            <Style.Setters>
+                <Setter Property="MinHeight" Value="100"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBox">
+                            <Border BorderThickness="2" BorderBrush="CornflowerBlue" Background="AliceBlue" Padding="5">
+                                <DockPanel>
+                                    <DockPanel DockPanel.Dock="Left" MaxWidth="300" MinWidth="250">
+                                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Button Name="TargetAdd" Margin="0,2" Width="20" Height="20">
+                                                <Bold>+</Bold>
+                                            </Button>
+                                            <Button Name="TargetRemove" Margin="2,2" Width="20" Height="20">
+                                                <Bold>-</Bold>
+                                            </Button>
+                                        </StackPanel>
+                                        <ScrollViewer>
+                                            <ItemsPresenter Name="ItemsPresenter" />
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                    <Grid DataContext="{TemplateBinding SelectedItem}">
+                                        <Grid.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=SelectedIndex}" Value="-1">
+                                                        <Setter Property="Grid.Visibility" Value="Hidden" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="10px"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="10px"/>
+                                            <RowDefinition Height="auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="10px"/>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="10px"/>
+                                            <ColumnDefinition Width="auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding LeftShift}" Content="Left SHIFT"/>
+                                        <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding LeftControl}" Content="Left CTRL"/>
+                                        <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="{Binding LeftAlt}" Content="Left ALT"/>
+                                        <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding LeftWindows}" Content="Left WIN"/>
+
+                                        <CheckBox Grid.Row="0" Grid.Column="2" IsChecked="{Binding RightShift}" Content="Right SHIFT"/>
+                                        <CheckBox Grid.Row="1" Grid.Column="2" IsChecked="{Binding RightControl}" Content="Right CTRL"/>
+                                        <CheckBox Grid.Row="2" Grid.Column="2" IsChecked="{Binding RightAlt}" Content="Right ALT"/>
+                                        <CheckBox Grid.Row="3" Grid.Column="2" IsChecked="{Binding RightWindows}" Content="Right WIN"/>
+
+                                        <CheckBox Grid.Row="5" Grid.Column="0" IsChecked="{Binding IsSpecialKey}" Content="Special key" />
+                                        <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding IsNormalKey}" Content="Character key" />
+
+                                        <ComboBox Grid.Row="5" Grid.Column="2" Name="SpecialKeyCombo"
+                                                  IsEnabled="{Binding IsSpecialKey}"
+                                                  SelectedIndex="{Binding SpecialKeyIndex}"
+                                                  ItemsSource="{Binding SpecialKeys}" />
+                                        <TextBox Grid.Row="7" Grid.Column="2" 
+                                                 IsEnabled="{Binding IsNormalKey}"
+                                                 Text="{Binding NormalKeyText}" MaxLength="2"
+                                                 CharacterCasing="Upper"
+                                                 />
+
+
+                                        <!--<TextBlock Grid.Row="0" Grid.Column="0">Application:</TextBlock>
+                                        <CheckBox Grid.Row="0" Grid.Column="1" Margin="5,0" IsChecked="{Binding UseRegexForExecutable}">
+                                            <TextBlock>Use regex</TextBlock>
+                                        </CheckBox>-->
+                                        <!--<TextBox Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding ExecutablePattern}"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" >Window title:</TextBlock>
+                                        <CheckBox Grid.Row="1" Grid.Column="1" Margin="5,0" IsChecked="{Binding UseRegexForWindowTitle}">
+                                            <TextBlock>Use regex</TextBlock>
+                                        </CheckBox>
+                                        <TextBox Grid.Row="1" Grid.Column="2"  HorizontalAlignment="Stretch" Text="{Binding WindowTitlePattern}"/>-->
+                                    </Grid>
+                                </DockPanel>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType="local:SendKeyValue">
+                            <TextBlock Text="{Binding Path=DisplayValue}"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
     </Application.Resources>
 </Application>

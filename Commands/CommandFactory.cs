@@ -29,6 +29,7 @@ public class CommandFactory
         RegisterCommandType(ExecuteCommandDefinition.Instance);
         RegisterCommandType(PositionWindowDefinition.Instance);
         RegisterCommandType(SleepDefinition.Instance);
+        RegisterCommandType(SendKeysDefinition.Instance);
     }
 
 }

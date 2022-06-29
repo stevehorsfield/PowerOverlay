@@ -16,6 +16,15 @@ public class AppViewModel : INotifyPropertyChanged {
     private IntPtr applicationHwnd = IntPtr.Zero;
     private ButtonMenuViewModel? currentMenu;
 
+    private bool lockMenu;
+    public bool LockMenu { 
+        get { return lockMenu; } 
+        set { 
+            lockMenu = value; 
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LockMenu))); 
+        }
+    }
+
     public ObservableCollection<ButtonMenuViewModel> AllMenus { get; private set; }
 
 
@@ -156,6 +165,15 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[0][0, 1].Action = action2;
         action2.Actions.Add(ExecuteCommandDefinition.Instance.Create());
 
+        AllMenus[0][4, 4].Text = "Send Keys Test";
+        AllMenus[0][4, 4].SetActionMode(ActionMode.PerformTask);
+        var action3 = (SendKeys)SendKeysDefinition.Instance.Create();
+        AllMenus[0][4, 4].Action = action3;
+        action3.ApplicationTargets.Add(new ApplicationMatcherViewModel() { ExecutablePattern = ".*notepad.exe$", UseRegexForExecutable = true });
+        action3.KeySequence.Add(new SendKeyValue() { IsSpecialKey = true, SpecialKey = "HOME" });
+        action3.KeySequence.Add(new SendKeyValue() { IsSpecialKey = true, SpecialKey = "END", Modifiers = SendKeyModifierFlags.LeftShift });
+
+
         AllMenus[3].MenuSelectors.Add(new ApplicationMatcherViewModel
         {
             ExecutablePattern = @"C:\Windows\notepad.exe"
@@ -180,31 +198,16 @@ public class AppViewModel : INotifyPropertyChanged {
 
     internal void SelectMenuFromApp()
     {
+        if (CurrentMenu?.MenuSelectors.Any(x => x.Matches(ApplicationWindowTitle, ApplicationProcessExecutable)) ?? false)
+            return; // already matches
+
+        if (CurrentMenu != null && LockMenu) return;
 
         foreach (var menu in this.AllMenus)
         {
             foreach (ApplicationMatcherViewModel selector in menu.MenuSelectors)
             {
-                bool matched =
-                    (
-                        (!String.IsNullOrEmpty(selector.ExecutablePattern)) &&
-                        (
-                            (!selector.UseRegexForExecutable &&
-                                ApplicationProcessExecutable.Equals(selector.ExecutablePattern, StringComparison.InvariantCultureIgnoreCase))
-                            ||
-                            (selector.UseRegexForExecutable &&
-                                Regex.IsMatch(ApplicationProcessExecutable, selector.ExecutablePattern))
-                        )
-                    ) || (
-                        (!String.IsNullOrEmpty(selector.WindowTitlePattern)) &&
-                        (
-                            (!selector.UseRegexForWindowTitle &&
-                                ApplicationWindowTitle.Equals(selector.WindowTitlePattern, StringComparison.InvariantCultureIgnoreCase))
-                            ||
-                            (selector.UseRegexForWindowTitle &&
-                                Regex.IsMatch(ApplicationWindowTitle, selector.WindowTitlePattern))
-                        )
-                    );
+                bool matched = selector.Matches(ApplicationWindowTitle, ApplicationProcessExecutable);
                 if (matched)
                 {
                     CurrentMenu = menu;

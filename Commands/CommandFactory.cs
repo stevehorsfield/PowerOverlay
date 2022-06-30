@@ -55,10 +55,7 @@ public abstract class ActionCommandDefinition
 
 public abstract class ActionCommand : ICommand, INotifyPropertyChanged
 {
-    public virtual void WriteJson(JsonObject o)
-    {
-        Debug.WriteLine($"No JSON writer for action type '{this.Definition.ActionName}', '{this.GetType().Name}");
-    }
+    public abstract void WriteJson(JsonObject o);
     public abstract ActionCommand Clone();
     public abstract ActionCommandDefinition Definition { get; }
     public abstract FrameworkElement ConfigElement { get; }

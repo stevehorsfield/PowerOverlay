@@ -22,7 +22,7 @@ namespace overlay_popup.Commands;
 public class ExecuteCommandArgument : INotifyPropertyChanged
 {
     private string argument = String.Empty;
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
     public string Argument
     {
         get { return argument; }

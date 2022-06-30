@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -45,6 +46,14 @@ public class SwitchToApplication : ActionCommand
                     return;
                 }
             }
+        }
+    }
+
+    public override void WriteJson(JsonObject o)
+    {
+        if (ApplicationTargets.Count > 0)
+        {
+            o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
         }
     }
 }

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -494,6 +495,40 @@ public class SendKeys : ActionCommand
     private void SendKeysToWindow(IntPtr hwnd, NativeUtils.InputWrapper keys)
     {
         NativeUtils.SendKeys(hwnd, keys);
+    }
+    public override void WriteJson(JsonObject o)
+    {
+        if (ApplicationTargets.Count > 0)
+        {
+            o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
+        }
+        o.AddLowerCamel(nameof(SendToActiveApplication), JsonValue.Create(SendToActiveApplication));
+        o.AddLowerCamel(nameof(SendToDesktop), JsonValue.Create(SendToDesktop));
+        o.AddLowerCamel(nameof(SendToShell), JsonValue.Create(SendToShell));
+        o.AddLowerCamel(nameof(SendToAllMatches), JsonValue.Create(SendToAllMatches));
+        var sequence = KeySequence.Select(x =>
+        {
+            var o = new JsonObject();
+            var field = x.IsNormalKey ? "characterKey" : "virtualKey";
+            var value = String.Empty;
+            if (x.IsNormalKey && !String.IsNullOrEmpty(x.NormalKeyText) && x.NormalKeyText.Length == 1)
+                value = x.NormalKeyText;
+            if (x.IsSpecialKey && x.SpecialKeyKey != null)
+                value = x.SpecialKeyKey.Name;
+
+            o.AddLowerCamel(field, JsonValue.Create(value));
+            var flags = new List<JsonValue>();
+            foreach (var flag in Enum.GetValues<SendKeyModifierFlags>())
+            {
+                if (flag == 0) continue;
+                if (x.Modifiers.HasFlag(flag)) 
+                    flags.Add(JsonValue.Create(Enum.GetName<SendKeyModifierFlags>(flag)!.ToLowerCamelCase())!);
+            }
+            if (flags.Count > 0) o.AddLowerCamel(nameof(SendKeyValue.Modifiers), new JsonArray(flags.ToArray()));
+
+            return o;
+        }).ToArray();
+        o.AddLowerCamel(nameof(KeySequence), new JsonArray(sequence));
     }
 }
 

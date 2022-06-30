@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -151,6 +152,32 @@ public class PositionWindow : ActionCommand
                     Resize(hwnd);
                     if (!PositionAllMatches) return;
                 }
+            }
+        }
+    }
+
+    public override void WriteJson(JsonObject o)
+    {
+        if (ApplicationTargets.Count > 0)
+        {
+            o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
+        }
+        o.AddLowerCamel(nameof(PositionAllMatches), JsonValue.Create(PositionAllMatches));
+        o.AddLowerCamel(nameof(Mode), JsonValue.Create(Mode.ToString().ToLowerCamelCase));
+
+        if (Mode == PositionMode.Positioned)
+        {
+            if (SetPosition)
+            {
+                o.AddLowerCamel(nameof(SetPosition), JsonValue.Create(SetPosition));
+                o.AddLowerCamel(nameof(Left), JsonValue.Create(Left));
+                o.AddLowerCamel(nameof(Top), JsonValue.Create(Top));
+            }
+            if (SetSize)
+            {
+                o.AddLowerCamel(nameof(SetSize), JsonValue.Create(SetSize));
+                o.AddLowerCamel(nameof(Width), JsonValue.Create(Width));
+                o.AddLowerCamel(nameof(Height), JsonValue.Create(Height));
             }
         }
     }

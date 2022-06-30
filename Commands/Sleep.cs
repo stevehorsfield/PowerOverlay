@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,6 +41,11 @@ public class Sleep : ActionCommand
     {
         if (SleepMilliseconds <= 0) return;
         Thread.Sleep(SleepMilliseconds);
+    }
+
+    public override void WriteJson(JsonObject o)
+    {
+        o.AddLowerCamel(nameof(SleepMilliseconds), JsonValue.Create(SleepMilliseconds));
     }
 }
 

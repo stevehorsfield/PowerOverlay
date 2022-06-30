@@ -354,7 +354,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         {
             if (Action != null)
             {
-                n.Add(nameof(Action), CommandFactory.ToJson(action));
+                n.Add(nameof(Action), CommandFactory.ToJson(Action));
             }
         }
 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace overlay_popup;
 
-public class ApplicationMatcherViewModel : INotifyPropertyChanged
+public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJson
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -123,5 +124,15 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged
 
         return matchesWindowTitle.GetValueOrDefault(true) && matchesExecutable.GetValueOrDefault(true);
 
+    }
+
+    public JsonNode ToJson()
+    {
+        var n = new JsonObject();
+        n.AddLowerCamel(nameof(UseRegexForExecutable), JsonValue.Create(UseRegexForExecutable));
+        n.AddLowerCamel(nameof(UseRegexForWindowTitle), JsonValue.Create(UseRegexForWindowTitle));
+        n.AddLowerCamel(nameof(WindowTitlePattern), JsonValue.Create(WindowTitlePattern));
+        n.AddLowerCamel(nameof(ExecutablePattern), JsonValue.Create(ExecutablePattern));
+        return n;
     }
 }

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -34,7 +35,6 @@ public class ExecuteCommandArgument : INotifyPropertyChanged
 
 public class ExecuteCommand : ActionCommand
 {
-
     public override ExecuteCommandDefinition Definition { get { return ExecuteCommandDefinition.Instance; } }
 
     private const string NotSpecifiedVerb = "(not specified)";
@@ -229,6 +229,21 @@ public class ExecuteCommand : ActionCommand
         {
             MessageBox.Show($"Failed to launch process '{executablePath}'. Error: '{e.Message}'");
         }
+    }
+
+    public override void WriteJson(JsonObject o)
+    {
+        o.AddLowerCamel(nameof(ExecutablePath), JsonValue.Create(ExecutablePath));
+        o.AddLowerCamel(nameof(WorkingDirectory), JsonValue.Create(WorkingDirectory));
+        o.AddLowerCamel(nameof(Arguments), new JsonArray(Arguments.Select(x => JsonValue.Create(x.Argument)).ToArray()));
+        if (!String.Equals(NotSpecifiedVerb, Verb, StringComparison.InvariantCultureIgnoreCase))
+        {
+            o.AddLowerCamel(nameof(Verb), JsonValue.Create(Verb));
+        }
+        o.AddLowerCamel(nameof(WaitForInputIdle), JsonValue.Create(WaitForInputIdle));
+        o.AddLowerCamel(nameof(WaitForProcessExit), JsonValue.Create(WaitForProcessExit));
+        o.AddLowerCamel(nameof(ShellExecute), JsonValue.Create(ShellExecute));
+        o.AddLowerCamel(nameof(WaitTimeoutMilliseconds), JsonValue.Create(WaitTimeoutMilliseconds));
     }
 }
 

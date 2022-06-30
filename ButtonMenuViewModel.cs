@@ -2,10 +2,12 @@
 using System.Windows;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
+using System.Linq;
 
 namespace overlay_popup;
 
-public class ButtonMenuViewModel : INotifyPropertyChanged {
+public class ButtonMenuViewModel : INotifyPropertyChanged, IApplicationJson {
 
     private readonly ButtonViewModel[] Buttons = new ButtonViewModel[25];
 
@@ -69,24 +71,7 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
                 };
             }
         }
-
-        this[2,1].XamlFragment = @"
-        <TextBlock>abc</TextBlock>";
-        this[2, 4].Text = @"🤣🤣🤣";
     }
-
-    //internal ButtonMenuViewModel Clone()
-    //{
-    //    var other = new ButtonMenuViewModel();
-    //    other.name = this.name;
-    //    other.canChangeName = this.canChangeName;
-    //    for (int i = 0; i < this.Buttons.Length; ++i)
-    //    {
-    //        other.Buttons[i] = this.Buttons[i]?.Clone();
-    //    }
-
-    //    return other;
-    //}
 
     public static ButtonMenuViewModel CreateFrom(ConfigurationButtonMenuViewModel config)
     {
@@ -109,6 +94,24 @@ public class ButtonMenuViewModel : INotifyPropertyChanged {
             model.MenuSelectors.Add(m.Clone());
         }
         return model;
+    }
+
+    public JsonNode ToJson()
+    {
+        var n = new JsonObject();
+        n.AddLowerCamel(nameof(Name), JsonValue.Create(Name));
+        n.AddLowerCamel(nameof(MenuSelectors), MenuSelectors.ToJson());
+
+        for (int row = 0; row < 5; ++row)
+        {
+            for (int column = 0; column < 5; ++column)
+            {
+                if (row == 2 && column == 2) continue;
+                n[$"button_row{row}_column{column}"] = this[column, row].ToJson();
+            }
+        }
+
+        return n;
     }
 
 }

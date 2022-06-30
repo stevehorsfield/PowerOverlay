@@ -5,10 +5,11 @@ using System.ComponentModel;
 using System.Windows.Media;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 
 namespace overlay_popup;
 
-public class DisplayStyleViewModel : INotifyPropertyChanged
+public class DisplayStyleViewModel : INotifyPropertyChanged, IApplicationJson
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -211,4 +212,14 @@ public class DisplayStyleViewModel : INotifyPropertyChanged
         Notify(names);
     }
 
+    public JsonNode ToJson()
+    {
+        var n = new JsonObject();
+        n.AddLowerCamel(nameof(BackgroundColour), JsonValue.Create(BackgroundColour));
+        n.AddLowerCamel(nameof(ForegroundColour), JsonValue.Create(ForegroundColour));
+        n.AddLowerCamel(nameof(FontFamily), JsonValue.Create(FontFamilyName));
+        n.AddLowerCamel(nameof(FontWeight), JsonValue.Create(FontWeightName));
+        n.AddLowerCamel(nameof(FontStyle), JsonValue.Create(FontStyleName));
+        return n;
+    }
 }

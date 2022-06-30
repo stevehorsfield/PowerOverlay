@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -154,6 +155,19 @@ public class SendCharacters : ActionCommand
         }
 
         return;
+    }
+
+    public override void WriteJson(JsonObject o)
+    {
+        o.AddLowerCamel(nameof(Text), JsonValue.Create(Text));
+        if (ApplicationTargets.Count > 0)
+        {
+            o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
+        }
+        o.AddLowerCamel(nameof(SendToActiveApplication), JsonValue.Create(SendToActiveApplication));
+        o.AddLowerCamel(nameof(SendToDesktop), JsonValue.Create(SendToDesktop));
+        o.AddLowerCamel(nameof(SendToShell), JsonValue.Create(SendToShell));
+        o.AddLowerCamel(nameof(SendToAllMatches), JsonValue.Create(SendToAllMatches));
     }
 }
 

@@ -5,6 +5,10 @@ using System.Linq;
 using System.Collections.Specialized;
 using overlay_popup.Commands;
 using System.Text.RegularExpressions;
+using System.Windows;
+using System.Text.Json.Nodes;
+using System.Text.Json;
+using System.IO;
 
 namespace overlay_popup;
 
@@ -30,83 +34,25 @@ public class AppViewModel : INotifyPropertyChanged {
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public string ApplicationWindowTitle
+    internal void AddTestData()
     {
-        get { return this.appWindowTitle; }
-        set
+        AllMenus.Add(new ButtonMenuViewModel()
         {
-            this.appWindowTitle = value;
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationWindowTitle)));
-            }
-        }
-    }
-
-    public string ApplicationProcessName
-    {
-        get { return this.appProcessName; }
-        set
+            Name = "Alternate",
+            CanChangeName = true,
+        });
+        AllMenus.Add(new ButtonMenuViewModel()
         {
-            this.appProcessName = value;
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationProcessName)));
-            }
-        }
-    }
-
-    public string ApplicationProcessExecutable
-    {
-        get { return this.appProcessExecutable; }
-        set
+            Name = "Menu 3",
+            CanChangeName = true,
+        });
+        AllMenus.Add(new ButtonMenuViewModel()
         {
-            this.appProcessExecutable = value;
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationProcessExecutable)));
-            }
-        }
-    }
-
-    public ButtonMenuViewModel? CurrentMenu
-    {
-        get { return this.currentMenu; }
-        set
-        {
-            this.currentMenu = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentMenu)));
-        }
-    }
-
-    public AppViewModel()
-    {
-        this.AllMenus = new()
-        {
-            new ButtonMenuViewModel()
-            {
-                Name = "Default",
-                CanChangeName = false,
-            },
-            new ButtonMenuViewModel()
-            {
-                Name = "Alternate",
-                CanChangeName = true,
-            },
-            new ButtonMenuViewModel()
-            {
-                Name = "Menu 3",
-                CanChangeName = true,
-            },
-            new ButtonMenuViewModel()
-            {
-                Name = "Notepad menu",
-            }
-        };
-        
+            Name = "Notepad menu",
+        });
         AllMenus[0][0, 0].DefaultStyle.BackgroundColour = "#FF000000";
         AllMenus[0][0, 0].HoverStyle.BackgroundColour = "#FF400000";
-        var action = (ExecuteCommand) ExecuteCommandDefinition.Instance.Create();
+        var action = (ExecuteCommand)ExecuteCommandDefinition.Instance.Create();
         action.ExecutablePath = @"C:\windows\notepad.exe";
         action.WaitForInputIdle = true;
         action.WaitTimeoutMilliseconds = 300;
@@ -126,7 +72,7 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[0][1, 0].DefaultStyle.BackgroundColour = "#FF500000";
         AllMenus[0][1, 0].TargetMenu = "Alternate";
         AllMenus[0][1, 0].SetActionMode(ActionMode.SelectMenu);
-        AllMenus[0][1, 0].SetContent(@"<TextBlock>Menu -&gt;<LineBreak/>Alternate</TextBlock>",true,true);
+        AllMenus[0][1, 0].SetContent(@"<TextBlock>Menu -&gt;<LineBreak/>Alternate</TextBlock>", true, true);
 
         AllMenus[0][2, 0].DefaultStyle.BackgroundColour = "#FF500000";
         AllMenus[0][2, 0].TargetMenu = "Menu 3";
@@ -192,6 +138,67 @@ public class AppViewModel : INotifyPropertyChanged {
         AllMenus[3][0, 1].Text = "Default menu";
         AllMenus[3][0, 1].SetActionMode(ActionMode.SelectMenu);
         AllMenus[3][0, 1].TargetMenu = "Default";
+    }
+
+    public string ApplicationWindowTitle
+    {
+        get { return this.appWindowTitle; }
+        set
+        {
+            this.appWindowTitle = value;
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationWindowTitle)));
+            }
+        }
+    }
+
+    public string ApplicationProcessName
+    {
+        get { return this.appProcessName; }
+        set
+        {
+            this.appProcessName = value;
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationProcessName)));
+            }
+        }
+    }
+
+    public string ApplicationProcessExecutable
+    {
+        get { return this.appProcessExecutable; }
+        set
+        {
+            this.appProcessExecutable = value;
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(ApplicationProcessExecutable)));
+            }
+        }
+    }
+
+    public ButtonMenuViewModel? CurrentMenu
+    {
+        get { return this.currentMenu; }
+        set
+        {
+            this.currentMenu = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentMenu)));
+        }
+    }
+
+    public AppViewModel()
+    {
+        this.AllMenus = new()
+        {
+            new ButtonMenuViewModel()
+            {
+                Name = "Default",
+                CanChangeName = false,
+            },
+        };
 
         CurrentMenu = this.AllMenus[0];
     }
@@ -248,4 +255,44 @@ public class AppViewModel : INotifyPropertyChanged {
 
         this.CurrentMenu = (indexCurrent >= 0) ? this.AllMenus[indexCurrent] : null;
     }
+
+    public AppViewModel NewFromThis()
+    {
+        return new AppViewModel()
+        {
+            ApplicationProcessName = ApplicationProcessName ?? String.Empty,
+            ApplicationProcessExecutable = ApplicationProcessExecutable ?? String.Empty,
+            ApplicationWindowTitle = ApplicationWindowTitle ?? String.Empty,
+            LockMenu = LockMenu,
+        };
+    }
+    public AppViewModel LoadFromFile(string path)
+    {
+        MessageBox.Show($"Loading from {path}");
+        var result = new AppViewModel();
+        result.ApplicationProcessName = ApplicationProcessName ?? String.Empty;
+        result.ApplicationProcessExecutable = ApplicationProcessExecutable ?? String.Empty;
+        result.ApplicationWindowTitle = ApplicationWindowTitle ?? String.Empty;
+        result.LockMenu = LockMenu;
+        return result;
+    }
+    public void SaveToFile(string path)
+    {
+        JsonNode json = ToJson();
+
+        using var fs = new FileStream(path, FileMode.Create);
+        using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions() { Indented = true });
+        json.WriteTo(writer);
+        writer.Flush();
+    }
+
+
+    public JsonNode ToJson()
+    {
+        var n = new JsonObject();
+        n.AddLowerCamel("menus", AllMenus.ToJson());
+        return n;
+    }
 }
+
+

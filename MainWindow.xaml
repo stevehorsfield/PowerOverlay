@@ -88,6 +88,24 @@
                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
                       X1="0" X2="300" ClipToBounds="True" />
 
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="New" Margin="5" Padding="5,2,5,2" Grid.Column="0"
+                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="New"/>
+                    <Button Content="Open" Margin="5" Padding="5,2,5,2" Grid.Column="1"
+                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Open"/>
+                    <Button Content="Save" Margin="5" Padding="5,2,5,2" Grid.Column="2"
+                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Save"/>
+                </Grid>
+                
+                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      X1="0" X2="300" ClipToBounds="True" />
+
                 <Button Margin="0,5" Click="onConfigure">Configure</Button>
 
                 <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"

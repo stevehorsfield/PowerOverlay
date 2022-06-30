@@ -14,15 +14,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 namespace overlay_popup
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, ICommand
     {
-
         private const int HOTKEY_ID = 15000;
         private bool lockActive = false;
 
@@ -30,8 +31,142 @@ namespace overlay_popup
         {
             InitializeComponent();
             this.DataContext = new AppViewModel();
+            ((AppViewModel)this.DataContext).AddTestData();
 
-            
+            this.InputBindings.Add(
+                new InputBinding(this, 
+                    new KeyGesture(Key.C, ModifierKeys.Alt)) 
+                { CommandParameter = "Configure" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.M, ModifierKeys.Alt))
+                { CommandParameter = "Menu" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.N, ModifierKeys.Control))
+                { CommandParameter = "New" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.O, ModifierKeys.Control))
+                { CommandParameter = "Open" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.S, ModifierKeys.Control))
+                { CommandParameter = "Save" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.L, ModifierKeys.Control))
+                { CommandParameter = "Lock" });
+
+            #region Numeric key combination bindings
+
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Control))
+                { CommandParameter = "Control1" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D2, ModifierKeys.Control))
+                { CommandParameter = "Control2" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D3, ModifierKeys.Control))
+                { CommandParameter = "Control3" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D4, ModifierKeys.Control))
+                { CommandParameter = "Control4" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D5, ModifierKeys.Control))
+                { CommandParameter = "Control5" });
+
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Alt))
+                { CommandParameter = "Alt1" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D2, ModifierKeys.Alt))
+                { CommandParameter = "Alt2" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D3, ModifierKeys.Alt))
+                { CommandParameter = "Alt3" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D4, ModifierKeys.Alt))
+                { CommandParameter = "Alt4" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D5, ModifierKeys.Alt))
+                { CommandParameter = "Alt5" });
+
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Control | ModifierKeys.Shift))
+                { CommandParameter = "ControlShift1" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D2, ModifierKeys.Control | ModifierKeys.Shift))
+                { CommandParameter = "ControlShift2" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D3, ModifierKeys.Control | ModifierKeys.Shift))
+                { CommandParameter = "ControlShift3" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D4, ModifierKeys.Control | ModifierKeys.Shift))
+                { CommandParameter = "ControlShift4" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D5, ModifierKeys.Control | ModifierKeys.Shift))
+                { CommandParameter = "ControlShift5" });
+
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Shift | ModifierKeys.Alt))
+                { CommandParameter = "AltShift1" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Shift | ModifierKeys.Alt))
+                { CommandParameter = "AltShift2" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Shift | ModifierKeys.Alt))
+                { CommandParameter = "AltShift3" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Shift | ModifierKeys.Alt))
+                { CommandParameter = "AltShift4" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Shift | ModifierKeys.Alt))
+                { CommandParameter = "AltShift5" });
+
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D1, ModifierKeys.Control | ModifierKeys.Alt))
+                { CommandParameter = "ControlAlt1" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D2, ModifierKeys.Control | ModifierKeys.Alt))
+                { CommandParameter = "ControlAlt2" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D3, ModifierKeys.Control | ModifierKeys.Alt))
+                { CommandParameter = "ControlAlt3" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D4, ModifierKeys.Control | ModifierKeys.Alt))
+                { CommandParameter = "ControlAlt4" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                    new KeyGesture(Key.D5, ModifierKeys.Control | ModifierKeys.Alt))
+                { CommandParameter = "ControlAlt5" });
+
+            #endregion
+
             for (int i = 0; i < 5; ++i) {
                 for (int j = 0; j < 5; ++j) {
                     if (i == 2 && j == 2) continue; // skip middle location
@@ -50,18 +185,7 @@ namespace overlay_popup
         }
 
         public void onConfigure(object o, RoutedEventArgs e) {
-            lockActive = true;
-            this.Topmost = false;
-
-            var configure = new ConfigurationWindow();
-            configure.DataContext = new ConfigurationViewModel((this.DataContext as AppViewModel)!);
-            if (configure.ShowDialog() ?? false)
-            {
-                ((AppViewModel)this.DataContext).ApplyFrom((ConfigurationViewModel)configure.DataContext);
-            }
-
-            this.Topmost = true;
-            lockActive = false;
+            this.Execute("Configure");
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -92,6 +216,11 @@ namespace overlay_popup
                                 this.Show();
                                 this.Activate();
                             }
+                            else
+                            {
+                                // Toggle lock
+                                ((AppViewModel)this.DataContext).LockMenu = ! ((AppViewModel)this.DataContext)!.LockMenu;
+                            }
                             handled = true;
                             break;
                     }
@@ -110,10 +239,7 @@ namespace overlay_popup
 
         public void onMenuClick(object o, RoutedEventArgs e)
         {
-            MenuList.SelectedIndex = -1;
-            this.MenuPopup.Visibility =
-                this.MenuPopup.Visibility == Visibility.Hidden ?
-                Visibility.Visible : Visibility.Hidden;
+            this.Execute("Menu");
         }
 
         public void onQuitClick(object o, RoutedEventArgs e) {
@@ -133,5 +259,111 @@ namespace overlay_popup
             ((AppViewModel)DataContext).CurrentMenu = menu;
             this.MenuPopup.Visibility = Visibility.Hidden;
         }
+
+        public event EventHandler? CanExecuteChanged;
+        public bool CanExecute(object? parameter)
+        {
+            if (!(parameter is string)) return false;
+            if (String.IsNullOrEmpty((string)parameter)) return false;
+            switch ((string)parameter)
+            {
+                case "New": return true;
+                case "Open": return true;
+                case "Save": return true;
+                case "Menu": return true;
+                case "Configure": return true;
+                case "Lock": return true;
+                default:
+                    return Regex.IsMatch((string)parameter, @"^(Control|Alt|ControlShift|AltShift|ControlAlt)[1-5]$");
+            }
+        }
+
+        public void Execute(object? parameter)
+        {
+            if (!(parameter is string)) return;
+            var cmd = (string)parameter;
+            if (String.IsNullOrEmpty(cmd)) return;
+            var dc = (AppViewModel)this.DataContext;
+            switch (cmd)
+            {
+                case "New":
+                    DataContext = ((AppViewModel)DataContext).NewFromThis();
+                    return;
+                case "Open":
+                    {
+                        lockActive = true;
+                        Topmost = false;
+                        var ofd = new OpenFileDialog();
+                        ofd.Filter = "config files (*.json)|*.json|All files|*.*";
+                        ofd.CheckFileExists = true;
+                        var result = ofd.ShowDialog(this);
+                        lockActive = false;
+                        Topmost = true;
+                        if (!(result ?? false)) return;
+                        this.DataContext = ((AppViewModel)DataContext).LoadFromFile(ofd.FileName);
+                        return;
+                    }
+
+                case "Save":
+                    {
+                        lockActive = true;
+                        Topmost = false;
+                        var sfd = new SaveFileDialog();
+                        sfd.Filter = "config files (*.overlayconfig.json)|*.overlayconfig.json|All files|*.*";
+                        sfd.OverwritePrompt = true;
+                        sfd.CheckPathExists = true;
+                        sfd.AddExtension = true;
+                        sfd.DefaultExt = ".overlayconfig.json";
+                        var result = sfd.ShowDialog(this);
+                        lockActive = false;
+                        Topmost = true;
+                        if (!(result ?? false)) return;
+                        ((AppViewModel)this.DataContext).SaveToFile(sfd.FileName);
+
+                        return;
+                    }
+                case "Lock":
+                    // Toggle lock
+                    ((AppViewModel)this.DataContext).LockMenu = !((AppViewModel)this.DataContext)!.LockMenu;
+                    return;
+                case "Menu":
+                    MenuList.SelectedIndex = -1;
+                    this.MenuPopup.Visibility =
+                        this.MenuPopup.Visibility == Visibility.Hidden ?
+                        Visibility.Visible : Visibility.Hidden;
+                    return;
+                case "Configure":
+                    lockActive = true;
+                    this.Topmost = false;
+
+                    var configure = new ConfigurationWindow();
+                    configure.DataContext = new ConfigurationViewModel((this.DataContext as AppViewModel)!);
+                    if (configure.ShowDialog() ?? false)
+                    {
+                        ((AppViewModel)this.DataContext).ApplyFrom((ConfigurationViewModel)configure.DataContext);
+                    }
+
+                    this.Topmost = true;
+                    lockActive = false;
+                    return;
+            }
+            if (!Regex.IsMatch(cmd, @"^(Control|Alt|ControlShift|AltShift|ControlAlt)[1-5]$")) return;
+            if (dc?.CurrentMenu == null) return;
+
+            int columnIndex = int.Parse(cmd.AsSpan().Slice(cmd.Length - 1)) - 1;
+            int rowIndex = cmd.Substring(0, cmd.Length - 1) switch
+            {
+                "Control" => 0,
+                "Alt" => 1,
+                "ControlShift" => 2,
+                "AltShift" => 3,
+                "ControlAlt" => 4,
+                _ => throw new InvalidOperationException()
+            };
+            if (columnIndex == 2 && rowIndex == 2) return;
+            if (!dc.CurrentMenu[rowIndex, columnIndex].CanExecute(null)) return;
+            dc.CurrentMenu[rowIndex, columnIndex].Execute(null);
+        }
+
     }
 }

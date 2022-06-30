@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Input;
 
@@ -32,6 +34,14 @@ public class CommandFactory
         RegisterCommandType(SendKeysDefinition.Instance);
     }
 
+    public static JsonNode ToJson(ActionCommand action)
+    {
+        var n = new JsonObject();
+        n.Add("actionType", JsonValue.Create(action.Definition.ActionName.ToLowerCamelCase()));
+        action.WriteJson(n);
+        return n;
+    }
+
 }
 
 public abstract class ActionCommandDefinition
@@ -45,6 +55,10 @@ public abstract class ActionCommandDefinition
 
 public abstract class ActionCommand : ICommand, INotifyPropertyChanged
 {
+    public virtual void WriteJson(JsonObject o)
+    {
+        Debug.WriteLine($"No JSON writer for action type '{this.Definition.ActionName}', '{this.GetType().Name}");
+    }
     public abstract ActionCommand Clone();
     public abstract ActionCommandDefinition Definition { get; }
     public abstract FrameworkElement ConfigElement { get; }

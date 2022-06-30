@@ -7,10 +7,11 @@ using System.Windows.Media;
 using overlay_popup.Commands;
 using System.Windows.Documents;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 
 namespace overlay_popup;
 
-public class ButtonViewModel : ICommand, INotifyPropertyChanged {
+public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJson {
     private FrameworkElement? content;
     private string contentSource = String.Empty;
     private string? xamlErrorMessage = String.Empty;
@@ -329,18 +330,35 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged {
         source.DefaultStyle.CopyTo(this.DefaultStyle);
         source.HoverStyle.CopyTo(this.HoverStyle);
         source.PressedStyle.CopyTo(this.PressedStyle);
-
-        //this.BackgroundColour = source.BackgroundColour;
-        //this.BackgroundHoverColour = source.BackgroundHoverColour;
-        //this.BackgroundPressedColour = source.BackgroundPressedColour;
-        //this.ForegroundColour = source.ForegroundColour;
-        //this.ForegroundHoverColour = source.ForegroundHoverColour;
-        //this.ForegroundPressedColour = source.ForegroundPressedColour;
-        //this.FontSize = source.FontSize;
-        //this.HoverFontSize = source.HoverFontSize;
-        //this.PressedFontSize = source.PressedFontSize;
     }
 
     public event EventHandler? CanExecuteChanged;
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public JsonNode ToJson()
+    {
+        var n = new JsonObject();
+        n.AddLowerCamel(nameof(ContentFormat), JsonValue.Create(ContentFormat.ToString()));
+        n.AddLowerCamel(nameof(Content), JsonValue.Create(RawText));
+        n.AddLowerCamel(nameof(ActionMode), JsonValue.Create(ActionMode.ToString()));
+
+        n.AddLowerCamel(nameof(DefaultStyle), DefaultStyle.ToJson());
+        n.AddLowerCamel(nameof(HoverStyle), HoverStyle.ToJson());
+        n.AddLowerCamel(nameof(PressedStyle), PressedStyle.ToJson());
+
+        if (ActionMode == ActionMode.SelectMenu)
+        {
+            n.AddLowerCamel(nameof(TargetMenu), JsonValue.Create(TargetMenu));
+        }
+        if (ActionMode == ActionMode.PerformTask)
+        {
+            if (Action != null)
+            {
+                n.Add(nameof(Action), CommandFactory.ToJson(action));
+            }
+        }
+
+        return n;
+    }
+
 }

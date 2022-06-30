@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -38,6 +39,12 @@ public class SequenceCommand : ActionCommand
     public override void Execute(object? parameter)
     {
         foreach (var a in Actions) a.Execute(null);
+    }
+
+    public override void WriteJson(JsonObject o)
+    {
+        o.AddLowerCamel(nameof(Actions),
+            new JsonArray(Actions.Select(x => CommandFactory.ToJson(x)).ToArray()));
     }
 }
 

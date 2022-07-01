@@ -293,14 +293,22 @@ namespace overlay_popup
                     {
                         lockActive = true;
                         Topmost = false;
-                        var ofd = new OpenFileDialog();
-                        ofd.Filter = "config files (*.json)|*.json|All files|*.*";
-                        ofd.CheckFileExists = true;
-                        var result = ofd.ShowDialog(this);
-                        lockActive = false;
-                        Topmost = true;
-                        if (!(result ?? false)) return;
-                        this.DataContext = ((AppViewModel)DataContext).LoadFromFile(ofd.FileName);
+                        try
+                        {
+                            var ofd = new OpenFileDialog();
+                            ofd.Filter = "config files (*.json)|*.json|All files|*.*";
+                            ofd.CheckFileExists = true;
+                            var result = ofd.ShowDialog(this);
+                            if (!(result ?? false)) return;
+                            this.DataContext = ((AppViewModel)DataContext).LoadFromFile(ofd.FileName)
+                                ?? this.DataContext;
+                        }
+                        finally
+                        {
+                            lockActive = false;
+                            Topmost = true;
+                            Keyboard.Focus(this);
+                        }
                         return;
                     }
 
@@ -308,18 +316,24 @@ namespace overlay_popup
                     {
                         lockActive = true;
                         Topmost = false;
-                        var sfd = new SaveFileDialog();
-                        sfd.Filter = "config files (*.overlayconfig.json)|*.overlayconfig.json|All files|*.*";
-                        sfd.OverwritePrompt = true;
-                        sfd.CheckPathExists = true;
-                        sfd.AddExtension = true;
-                        sfd.DefaultExt = ".overlayconfig.json";
-                        var result = sfd.ShowDialog(this);
-                        lockActive = false;
-                        Topmost = true;
-                        if (!(result ?? false)) return;
-                        ((AppViewModel)this.DataContext).SaveToFile(sfd.FileName);
-
+                        try
+                        {
+                            var sfd = new SaveFileDialog();
+                            sfd.Filter = "config files (*.overlayconfig.json)|*.overlayconfig.json|All files|*.*";
+                            sfd.OverwritePrompt = true;
+                            sfd.CheckPathExists = true;
+                            sfd.AddExtension = true;
+                            sfd.DefaultExt = ".overlayconfig.json";
+                            var result = sfd.ShowDialog(this);
+                            if (!(result ?? false)) return;
+                            ((AppViewModel)this.DataContext).SaveToFile(sfd.FileName);
+                        }
+                        finally
+                        {
+                            lockActive = false;
+                            Topmost = true;
+                            Keyboard.Focus(this);
+                        }
                         return;
                     }
                 case "Lock":
@@ -345,6 +359,7 @@ namespace overlay_popup
 
                     this.Topmost = true;
                     lockActive = false;
+                    Keyboard.Focus(this);
                     return;
             }
             if (!Regex.IsMatch(cmd, @"^(Control|Alt|ControlShift|AltShift|ControlAlt)[1-5]$")) return;

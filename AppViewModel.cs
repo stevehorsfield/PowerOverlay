@@ -9,6 +9,7 @@ using System.Windows;
 using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.IO;
+using System.Windows.Input;
 
 namespace overlay_popup;
 
@@ -266,14 +267,29 @@ public class AppViewModel : INotifyPropertyChanged {
             LockMenu = LockMenu,
         };
     }
-    public AppViewModel LoadFromFile(string path)
+    public AppViewModel? LoadFromFile(string path)
     {
-        MessageBox.Show($"Loading from {path}");
         var result = new AppViewModel();
         result.ApplicationProcessName = ApplicationProcessName ?? String.Empty;
         result.ApplicationProcessExecutable = ApplicationProcessExecutable ?? String.Empty;
         result.ApplicationWindowTitle = ApplicationWindowTitle ?? String.Empty;
         result.LockMenu = LockMenu;
+
+        try
+        {
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var data = File.ReadAllBytes(path);
+            var reader = new Utf8JsonReader(data.AsSpan());
+            var obj = JsonNode.Parse(ref reader, new JsonNodeOptions() { PropertyNameCaseInsensitive = true }) as JsonObject;
+            if (obj == null) throw new Exception("No data found");
+            MergeFromJson(obj);
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show(Application.Current.MainWindow, $"Error reading '{path}'.\nException: {e.Message}", $"Failed to read configuration", MessageBoxButton.OK, MessageBoxImage.Error);
+            return null;
+        }
+
         return result;
     }
     public void SaveToFile(string path)
@@ -292,6 +308,11 @@ public class AppViewModel : INotifyPropertyChanged {
         var n = new JsonObject();
         n.AddLowerCamel("menus", AllMenus.ToJson());
         return n;
+    }
+
+    private void MergeFromJson(JsonObject root)
+    {
+        throw new NotImplementedException();
     }
 }
 

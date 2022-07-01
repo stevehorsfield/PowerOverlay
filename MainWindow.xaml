@@ -11,6 +11,8 @@
         Topmost="true"
         WindowStartupLocation="CenterScreen"
         Deactivated="onDeactivated"
+        
+        Focusable="true"
         >
     <Window.Background>
             <SolidColorBrush Color="#00FFFFFF" />

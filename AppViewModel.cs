@@ -10,6 +10,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.IO;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace overlay_popup;
 
@@ -251,7 +252,7 @@ public class AppViewModel : INotifyPropertyChanged {
         };
 
         var indexCurrent = finder(currentMenu);
-        if (indexCurrent == -1) indexCurrent = finder("Default");
+        if (indexCurrent == -1) indexCurrent = finder(ButtonMenuViewModel.DefaultMenuName);
         if (indexCurrent == -1 && this.AllMenus.Count > 0) indexCurrent = 0;
 
         this.CurrentMenu = (indexCurrent >= 0) ? this.AllMenus[indexCurrent] : null;
@@ -282,7 +283,7 @@ public class AppViewModel : INotifyPropertyChanged {
             var reader = new Utf8JsonReader(data.AsSpan());
             var obj = JsonNode.Parse(ref reader, new JsonNodeOptions() { PropertyNameCaseInsensitive = true }) as JsonObject;
             if (obj == null) throw new Exception("No data found");
-            MergeFromJson(obj);
+            result.MergeFromJson(obj);
         }
         catch (Exception e)
         {
@@ -312,7 +313,38 @@ public class AppViewModel : INotifyPropertyChanged {
 
     private void MergeFromJson(JsonObject root)
     {
-        throw new NotImplementedException();
+        if (!root.ContainsKey("menus")) return;
+        // Load all data before processing in case of error
+        var menus = root["menus"]!.AsArray().Select(menu => ButtonMenuViewModel.CreateFrom(menu!.AsObject())).ToArray();
+        if (menus.Select(m => m.Name.ToUpperInvariant()).Distinct().Count() != menus.Count())
+        {
+            throw new Exception("Duplicate menu name");
+        }
+
+        // Now update state
+        var currentMenuName = this.CurrentMenu?.Name;
+        var defaultMenu = menus.FirstOrDefault(x => x.IsDefaultMenu, AllMenus.First(x => x.IsDefaultMenu));
+        AllMenus.Clear();
+        AllMenus.Add(defaultMenu);
+        
+        CurrentMenu = null;
+
+        foreach (var bmenu in menus)
+        {
+            // don't re-add Default menu
+            if (bmenu.IsDefaultMenu) continue;
+
+            AllMenus.Add(bmenu);
+        }
+
+        foreach (var menu in AllMenus)
+        {
+            if (menu.Name.Equals(currentMenuName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                CurrentMenu = menu;
+                break;
+            }
+        }
     }
 }
 

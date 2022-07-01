@@ -135,4 +135,9 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
         n.AddLowerCamel(nameof(ExecutablePattern), JsonValue.Create(ExecutablePattern));
         return n;
     }
+
+    public static ApplicationMatcherViewModel FromJson(JsonNode x)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -30,4 +30,36 @@ public static class JsonStringExtension
     {
         return new JsonArray(collection.Select(x => x.ToJson()).ToArray());
     }
+
+    public static void TryGet<T>(this JsonObject o, string name, Action<T> f)
+        where T : class
+    {
+        if (o.ContainsKey(name))
+        {
+            if (typeof(T) == typeof(JsonObject)) {
+                f((o[name]!.AsObject() as T)!);
+            }
+            else if (typeof(T) == typeof(JsonArray))
+            {
+                f((o[name]!.AsArray() as T)!);
+            }
+            else if (typeof(T) == typeof(string))
+            {
+                var val = o[name]!.GetValue<string>();
+                if (!String.IsNullOrWhiteSpace(val)) f((val as T)!);
+            }
+            else
+            {
+                f(o[name]!.GetValue<T>());
+            }
+        }
+    }
+    public static void TryGetValue<T>(this JsonObject o, string name, Action<T> f)
+        where T : struct
+    {
+        if (o.ContainsKey(name))
+        {
+            f(o[name]!.GetValue<T>());
+        }
+    }
 }

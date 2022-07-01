@@ -338,6 +338,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
     public JsonNode ToJson()
     {
         var n = new JsonObject();
+        n.AddLowerCamel(nameof(IsVisible), JsonValue.Create(IsVisible));
         n.AddLowerCamel(nameof(ContentFormat), JsonValue.Create(ContentFormat.ToString()));
         n.AddLowerCamel(nameof(Content), JsonValue.Create(RawText));
         n.AddLowerCamel(nameof(ActionMode), JsonValue.Create(ActionMode.ToString()));
@@ -360,5 +361,52 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
 
         return n;
     }
+
+    public static ButtonViewModel CreateFrom(JsonObject o)
+    {
+        var result = new ButtonViewModel();
+        bool isXaml = false;
+        bool isFragment = false;
+        o.TryGetValue<bool>(nameof(IsVisible), b => result.IsVisible = b);
+        o.TryGet<string>(nameof(ContentFormat), s =>
+        {
+            switch (Enum.Parse<ContentSourceType>(s))
+            {
+                case ContentSourceType.PlainText: break;
+                case ContentSourceType.XamlFragment: isXaml = true; isFragment = true; break;
+                case ContentSourceType.Xaml: isXaml = true; break;
+            }
+        });
+        if (o.ContainsKey(nameof(Content)))
+        {
+            var contentData = o[nameof(Content)]!.GetValue<string>();
+            result.SetContent(contentData, isXaml, isFragment);
+        }
+        if (o.ContainsKey(nameof(ActionMode)))
+        {
+            result.ActionMode = Enum.Parse<ActionMode>(o[nameof(ActionMode)].GetValue<string>());
+        }
+
+        o.TryGet<JsonObject>(nameof(DefaultStyle), o => result.DefaultStyle.ReadJson(o));
+        o.TryGet<JsonObject>(nameof(HoverStyle), o => result.HoverStyle.ReadJson(o));
+        o.TryGet<JsonObject>(nameof(PressedStyle), o => result.PressedStyle.ReadJson(o));
+        o.TryGet<string>(nameof(ActionMode), s =>
+        {
+            var actionMode = Enum.Parse<ActionMode>(s);
+            result.ActionMode = actionMode;
+            switch (actionMode)
+            {
+                case ActionMode.SelectMenu:
+                    o.TryGet<string>(nameof(TargetMenu), s => result.TargetMenu = s);
+                    break;
+                case ActionMode.PerformTask:
+                    throw new NotImplementedException();
+                    break;
+            }
+        });
+
+        return result;
+    }
+
 
 }

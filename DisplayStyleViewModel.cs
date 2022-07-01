@@ -218,8 +218,19 @@ public class DisplayStyleViewModel : INotifyPropertyChanged, IApplicationJson
         n.AddLowerCamel(nameof(BackgroundColour), JsonValue.Create(BackgroundColour));
         n.AddLowerCamel(nameof(ForegroundColour), JsonValue.Create(ForegroundColour));
         n.AddLowerCamel(nameof(FontFamily), JsonValue.Create(FontFamilyName));
+        n.AddLowerCamel(nameof(FontSize), JsonValue.Create(FontSize));
         n.AddLowerCamel(nameof(FontWeight), JsonValue.Create(FontWeightName));
         n.AddLowerCamel(nameof(FontStyle), JsonValue.Create(FontStyleName));
         return n;
+    }
+
+    public void ReadJson(JsonObject o)
+    {
+        o.TryGet<string>(nameof(BackgroundColour), s => BackgroundColour = s);
+        o.TryGet<string>(nameof(ForegroundColour), s => ForegroundColour = s);
+        o.TryGet<string>(nameof(FontFamily), s => FontFamilyName = s);
+        o.TryGet<string>(nameof(FontWeight), s => FontWeightName = s);
+        o.TryGet<string>(nameof(FontStyle), s => FontStyleName = s);
+        o.TryGetValue<int>(nameof(FontSize), i => FontSize = i);
     }
 }

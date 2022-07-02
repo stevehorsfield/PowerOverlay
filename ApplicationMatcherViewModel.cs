@@ -138,6 +138,14 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
 
     public static ApplicationMatcherViewModel FromJson(JsonNode x)
     {
-        throw new NotImplementedException();
+        var o = x.AsObject();
+        var result = new ApplicationMatcherViewModel();
+
+        o.TryGetValue<bool>(nameof(UseRegexForExecutable), b => result.UseRegexForExecutable = b);
+        o.TryGetValue<bool>(nameof(UseRegexForWindowTitle), b => result.UseRegexForWindowTitle = b);
+        o.TryGet<string>(nameof(WindowTitlePattern), s => result.WindowTitlePattern = s);
+        o.TryGet<string>(nameof(ExecutablePattern), s => result.ExecutablePattern = s);
+
+        return result;
     }
 }

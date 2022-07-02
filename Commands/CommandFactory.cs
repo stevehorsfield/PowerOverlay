@@ -42,6 +42,19 @@ public class CommandFactory
         return n;
     }
 
+    public static ActionCommand? FromJson(JsonObject o)
+    {
+        var actionType = String.Empty;
+        o.TryGet<string>("actionType", s => actionType = s);
+        if (String.IsNullOrEmpty(actionType)) return null;
+
+        var builder = builders.FirstOrDefault(a =>
+            a.ActionName.Equals(actionType, StringComparison.InvariantCultureIgnoreCase)
+            , null);
+
+        var result = builder?.CreateFromJson(o);
+        return result;
+    }
 }
 
 public abstract class ActionCommandDefinition
@@ -49,8 +62,8 @@ public abstract class ActionCommandDefinition
     public abstract string ActionName { get; }
     public abstract string ActionDisplayName { get; }
     public abstract ActionCommand Create();
+    public abstract ActionCommand CreateFromJson(JsonObject o);
     public abstract FrameworkElement CreateConfigElement();
-
 }
 
 public abstract class ActionCommand : ICommand, INotifyPropertyChanged

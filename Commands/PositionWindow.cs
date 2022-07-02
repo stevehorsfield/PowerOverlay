@@ -163,7 +163,7 @@ public class PositionWindow : ActionCommand
             o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
         }
         o.AddLowerCamel(nameof(PositionAllMatches), JsonValue.Create(PositionAllMatches));
-        o.AddLowerCamel(nameof(Mode), JsonValue.Create(Mode.ToString().ToLowerCamelCase));
+        o.AddLowerCamel(nameof(Mode), JsonValue.Create(Mode.ToString().ToLowerCamelCase()));
 
         if (Mode == PositionMode.Positioned)
         {
@@ -181,6 +181,48 @@ public class PositionWindow : ActionCommand
             }
         }
     }
+
+    public static PositionWindow CreateFromJson(JsonObject o)
+    {
+        var result = new PositionWindow();
+        o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
+            foreach (var x in xs)
+            {
+                result.ApplicationTargets.Add(
+                    ApplicationMatcherViewModel.FromJson(x)
+                );
+            }
+        });
+        o.TryGet<string>(nameof(Mode), m =>
+        {
+            result.Mode = Enum.Parse<PositionMode>(m, true);
+        });
+        switch (result.Mode)
+        {
+            case PositionMode.Minimise: break;
+            case PositionMode.Restore: break;
+            case PositionMode.Maximise: break;
+            case PositionMode.Positioned:
+                {
+                    o.TryGetValue<bool>(nameof(SetSize), x => result.SetSize = x);
+                    if (result.SetSize)
+                    {
+                        o.TryGetValue<int>(nameof(Width), x => result.Width = x);
+                        o.TryGetValue<int>(nameof(Height), x => result.Height = x);
+                    }
+                    o.TryGetValue<bool>(nameof(SetPosition), x => result.SetPosition = x);
+                    if (result.SetPosition)
+                    {
+                        o.TryGetValue<int>(nameof(Left), x => result.Left = x);
+                        o.TryGetValue<int>(nameof(Top), x => result.Top = x);
+                    }
+                };
+                break;
+        }
+        o.TryGetValue<bool>(nameof(PositionAllMatches), b => result.PositionAllMatches = b);
+
+        return result;
+    }
 }
 
 public class PositionWindowDefinition : ActionCommandDefinition
@@ -193,6 +235,10 @@ public class PositionWindowDefinition : ActionCommandDefinition
     public override ActionCommand Create()
     {
         return new PositionWindow();
+    }
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return PositionWindow.CreateFromJson(o);
     }
 
     public override FrameworkElement CreateConfigElement()

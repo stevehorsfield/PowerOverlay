@@ -47,6 +47,12 @@ public class Sleep : ActionCommand
     {
         o.AddLowerCamel(nameof(SleepMilliseconds), JsonValue.Create(SleepMilliseconds));
     }
+    public static Sleep CreateFromJson(JsonObject o)
+    {
+        var result = new Sleep();
+        o.TryGetValue<int>(nameof(SleepMilliseconds), i => result.SleepMilliseconds = i);
+        return result;
+    }
 }
 
 public class SleepDefinition : ActionCommandDefinition
@@ -59,6 +65,10 @@ public class SleepDefinition : ActionCommandDefinition
     public override ActionCommand Create()
     {
         return new Sleep();
+    }
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return Sleep.CreateFromJson(o);
     }
 
     public override FrameworkElement CreateConfigElement()

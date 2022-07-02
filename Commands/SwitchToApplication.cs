@@ -56,6 +56,21 @@ public class SwitchToApplication : ActionCommand
             o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
         }
     }
+
+    public static SwitchToApplication CreateFromJson(JsonObject o)
+    {
+        var result = new SwitchToApplication();
+        o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
+            foreach (var x in xs)
+            {
+                result.ApplicationTargets.Add(
+                    ApplicationMatcherViewModel.FromJson(x)
+                );
+            }
+        });
+
+        return result;
+    }
 }
 
 public class SwitchToApplicationDefinition : ActionCommandDefinition
@@ -68,6 +83,10 @@ public class SwitchToApplicationDefinition : ActionCommandDefinition
     public override ActionCommand Create()
     {
         return new SwitchToApplication();
+    }
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return SwitchToApplication.CreateFromJson(o);
     }
 
     public override FrameworkElement CreateConfigElement()

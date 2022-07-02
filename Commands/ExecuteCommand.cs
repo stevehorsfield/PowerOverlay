@@ -245,6 +245,27 @@ public class ExecuteCommand : ActionCommand
         o.AddLowerCamel(nameof(ShellExecute), JsonValue.Create(ShellExecute));
         o.AddLowerCamel(nameof(WaitTimeoutMilliseconds), JsonValue.Create(WaitTimeoutMilliseconds));
     }
+
+    public static ExecuteCommand CreateFromJson(JsonObject o)
+    {
+        var result = new ExecuteCommand();
+
+        o.TryGet<string>(nameof(ExecutablePath), s => result.ExecutablePath = s);
+        o.TryGet<string>(nameof(WorkingDirectory), s => result.WorkingDirectory = s);
+        o.TryGet<JsonArray>(nameof(Arguments), xs => {
+            foreach (var x in xs)
+            {
+                result.Arguments.Add(x!.GetValue<string>());
+            }
+        });
+        o.TryGet<string>(nameof(Verb), s => result.Verb = s);
+        o.TryGetValue<bool>(nameof(WaitForInputIdle), b => result.WaitForInputIdle = b);
+        o.TryGetValue<bool>(nameof(WaitForProcessExit), b => result.WaitForProcessExit = b);
+        o.TryGetValue<bool>(nameof(ShellExecute), b => result.ShellExecute = b);
+        o.TryGetValue<int>(nameof(WaitTimeoutMilliseconds), i => result.WaitTimeoutMilliseconds = i);
+
+        return result;
+    }
 }
 
 public class ExecuteCommandDefinition : ActionCommandDefinition
@@ -257,6 +278,11 @@ public class ExecuteCommandDefinition : ActionCommandDefinition
     public override ActionCommand Create()
     {
         return new ExecuteCommand();
+    }
+
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return ExecuteCommand.CreateFromJson(o);
     }
 
     public override FrameworkElement CreateConfigElement()

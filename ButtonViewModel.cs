@@ -142,6 +142,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         set
         {
             SetActionMode(value);
+            CanExecuteChanged?.Invoke(this, new EventArgs());
         }
     }
     public IEnumerable<string> ActionModes => Enum.GetNames<ActionMode>();
@@ -162,16 +163,37 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         get { return action; }
         set
         {
+            if (action != null)
+            {
+                action.CanExecuteChanged -= Action_CanExecuteChanged;
+            }
             SetAndNotify(ref action, value, nameof(Action));
+            CanExecuteChanged?.Invoke(this, new EventArgs());
+            if (action != null)
+            {
+                action.CanExecuteChanged += Action_CanExecuteChanged;
+            }
         }
     }
+
+    private void Action_CanExecuteChanged(object? sender, EventArgs e)
+    {
+        RaiseCanExecuteChanged();
+    }
+
     public string TargetMenu
     {
         get { return targetMenu; }
         set
         {
             SetAndNotify(ref targetMenu, value, nameof(TargetMenu));
+            RaiseCanExecuteChanged();
         }
+    }
+
+    private void RaiseCanExecuteChanged()
+    {
+        CanExecuteChanged?.Invoke(this, new EventArgs());
     }
 
     public void SetActionMode(ActionMode mode)
@@ -180,6 +202,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
 
         SetAndNotify(ref actionMode, mode, nameof(IsNoAction), nameof(IsSelectMenu), nameof(IsPerformTask), 
             nameof(MenuListVisibility), nameof(ActionVisibility), nameof(Action), nameof(ActionMode));
+        RaiseCanExecuteChanged();
     }
 
     public bool CanExecute(object? o) {
@@ -208,7 +231,6 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
                         return;
                     }
                 }
-                MessageBox.Show(Application.Current.MainWindow, $"Menu '{targetMenu}' is not found");
                 return;
             case ActionMode.PerformTask:
                 break;
@@ -287,22 +309,11 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
     internal ButtonViewModel Clone()
     {
         var result = new ButtonViewModel()
-        {
+        { // Property accessors used to link events and other logic
             Visibility = Visibility,
-            //FontSize = FontSize,
-            //HoverFontSize = HoverFontSize,
-            //PressedFontSize = PressedFontSize,
-            //// Brushes created automatically, only colours need to be set
-            //BackgroundColour = BackgroundColour,
-            //BackgroundHoverColour = BackgroundHoverColour,
-            //BackgroundPressedColour = BackgroundPressedColour,
-            //ForegroundColour = ForegroundColour,
-            //ForegroundHoverColour = ForegroundHoverColour,
-            //ForegroundPressedColour = ForegroundPressedColour,
-
-            actionMode = actionMode,
-            targetMenu = targetMenu,
-            action = action?.Clone(),
+            ActionMode = actionMode,
+            TargetMenu = targetMenu,
+            Action = action?.Clone(), 
         };
         DefaultStyle.CopyTo(result.defaultStyle);
         HoverStyle.CopyTo(result.hoverStyle);
@@ -370,7 +381,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         o.TryGetValue<bool>(nameof(IsVisible), b => result.IsVisible = b);
         o.TryGet<string>(nameof(ContentFormat), s =>
         {
-            switch (Enum.Parse<ContentSourceType>(s))
+            switch (Enum.Parse<ContentSourceType>(s, true))
             {
                 case ContentSourceType.PlainText: break;
                 case ContentSourceType.XamlFragment: isXaml = true; isFragment = true; break;
@@ -384,7 +395,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         }
         if (o.ContainsKey(nameof(ActionMode)))
         {
-            result.ActionMode = Enum.Parse<ActionMode>(o[nameof(ActionMode)].GetValue<string>());
+            result.ActionMode = Enum.Parse<ActionMode>(o[nameof(ActionMode)]!.GetValue<string>(), true);
         }
 
         o.TryGet<JsonObject>(nameof(DefaultStyle), o => result.DefaultStyle.ReadJson(o));
@@ -392,7 +403,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         o.TryGet<JsonObject>(nameof(PressedStyle), o => result.PressedStyle.ReadJson(o));
         o.TryGet<string>(nameof(ActionMode), s =>
         {
-            var actionMode = Enum.Parse<ActionMode>(s);
+            var actionMode = Enum.Parse<ActionMode>(s, true);
             result.ActionMode = actionMode;
             switch (actionMode)
             {
@@ -400,7 +411,7 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
                     o.TryGet<string>(nameof(TargetMenu), s => result.TargetMenu = s);
                     break;
                 case ActionMode.PerformTask:
-                    throw new NotImplementedException();
+                    o.TryGet<JsonObject>(nameof(Action), o => result.Action = CommandFactory.FromJson(o));
                     break;
             }
         });

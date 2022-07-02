@@ -46,6 +46,20 @@ public class SequenceCommand : ActionCommand
         o.AddLowerCamel(nameof(Actions),
             new JsonArray(Actions.Select(x => CommandFactory.ToJson(x)).ToArray()));
     }
+    public static SequenceCommand CreateFromJson(JsonObject o)
+    {
+        var result = new SequenceCommand();
+        o.TryGet<JsonArray>(nameof(Actions), xs => {
+            foreach (var x in xs)
+            {
+                if ((!(x is JsonObject)) || (x == null)) 
+                    throw new InvalidOperationException("Sequence command action array contains invalid data");
+                var action = CommandFactory.FromJson(x.AsObject());
+                if (action != null) result.Actions.Add(action);
+            }
+        });
+        return result;
+    }
 }
 
 public class SequenceCommandDefinition : ActionCommandDefinition
@@ -59,6 +73,11 @@ public class SequenceCommandDefinition : ActionCommandDefinition
     {
         return new SequenceCommand();
     }
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return SequenceCommand.CreateFromJson(o);
+    }
+
 
     public override FrameworkElement CreateConfigElement()
     {

@@ -530,6 +530,56 @@ public class SendKeys : ActionCommand
         }).ToArray();
         o.AddLowerCamel(nameof(KeySequence), new JsonArray(sequence));
     }
+
+    public static SendKeys CreateFromJson(JsonObject o)
+    {
+        var result = new SendKeys();
+
+        o.TryGetValue<bool>(nameof(SendToActiveApplication), b => result.SendToActiveApplication = b);
+        o.TryGetValue<bool>(nameof(SendToDesktop), b => result.SendToDesktop = b);
+        o.TryGetValue<bool>(nameof(SendToShell), b => result.SendToShell = b);
+        o.TryGetValue<bool>(nameof(SendToAllMatches), b => result.SendToAllMatches = b);
+
+        o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
+            foreach (var x in xs)
+            {
+                result.ApplicationTargets.Add(
+                    ApplicationMatcherViewModel.FromJson(x!)
+                );
+            }
+        });
+
+        o.TryGet<JsonArray>(nameof(KeySequence), xs => { 
+            foreach (var x in xs)
+            {
+                var val = x!.AsObject();
+                var key = new SendKeyValue();
+                val.TryGet<string>("characterKey", s => {
+                    key.IsNormalKey = true;
+                    key.NormalKeyText = s;
+                });
+                val.TryGet<string>("virtualKey", s =>
+                {
+                    key.IsSpecialKey = true;
+                    key.SpecialKey = s;
+                });
+                val.TryGet<JsonArray>(nameof(SendKeyValue.Modifiers), ms =>
+                {
+                    SendKeyModifierFlags flags = new SendKeyModifierFlags();
+                    foreach (var m in ms)
+                    {
+                        var f = Enum.Parse<SendKeyModifierFlags>(m.GetValue<string>(), true);
+                        flags |= f;
+                    }
+                    key.Modifiers = flags;
+                });
+
+                result.KeySequence.Add(key);
+            }
+        });
+
+        return result;
+    }
 }
 
 public class SendKeysDefinition : ActionCommandDefinition
@@ -543,6 +593,11 @@ public class SendKeysDefinition : ActionCommandDefinition
     {
         return new SendKeys();
     }
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return SendKeys.CreateFromJson(o);
+    }
+
 
     public override FrameworkElement CreateConfigElement()
     {

@@ -169,6 +169,28 @@ public class SendCharacters : ActionCommand
         o.AddLowerCamel(nameof(SendToShell), JsonValue.Create(SendToShell));
         o.AddLowerCamel(nameof(SendToAllMatches), JsonValue.Create(SendToAllMatches));
     }
+
+    public static SendCharacters CreateFromJson(JsonObject o)
+    {
+        var result = new SendCharacters();
+
+        o.TryGet<string>(nameof(Text), s => result.Text = s);
+        o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
+            foreach (var x in xs)
+            {
+                result.ApplicationTargets.Add(
+                    ApplicationMatcherViewModel.FromJson(x!)
+                );
+            }
+        });
+
+        o.TryGetValue<bool>(nameof(SendToActiveApplication), b => result.SendToActiveApplication = b);
+        o.TryGetValue<bool>(nameof(SendToDesktop), b => result.SendToDesktop = b);
+        o.TryGetValue<bool>(nameof(SendToShell), b => result.SendToShell = b);
+        o.TryGetValue<bool>(nameof(SendToAllMatches), b => result.SendToAllMatches = b);
+        
+        return result;
+    }
 }
 
 public class SendCharactersDefinition : ActionCommandDefinition
@@ -182,6 +204,11 @@ public class SendCharactersDefinition : ActionCommandDefinition
     {
         return new SendCharacters();
     }
+    public override ActionCommand CreateFromJson(JsonObject o)
+    {
+        return SendCharacters.CreateFromJson(o);
+    }
+
 
     public override FrameworkElement CreateConfigElement()
     {

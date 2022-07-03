@@ -1,6 +1,6 @@
 using System;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class Model {
     public static readonly Model Instance = new Model();

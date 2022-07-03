@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text.Json.Nodes;
 using System.Linq;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class ButtonMenuViewModel : INotifyPropertyChanged, IApplicationJson {
 

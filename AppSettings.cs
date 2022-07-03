@@ -8,7 +8,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class AppSettings
 {

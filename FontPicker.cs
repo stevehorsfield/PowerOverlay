@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Controls;
 using DrawingFontFamily = System.Drawing.FontFamily;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class FontPicker : ComboBox
 {

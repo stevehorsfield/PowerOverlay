@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json.Nodes;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public interface IApplicationJson
 {

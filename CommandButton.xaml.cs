@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public partial class CommandButton : UserControl {
 

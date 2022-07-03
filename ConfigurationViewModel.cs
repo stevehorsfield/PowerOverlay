@@ -2,10 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
-using overlay_popup.Commands;
+using PowerOverlay.Commands;
 using System;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class ConfigurationViewModel : INotifyPropertyChanged {
     public event PropertyChangedEventHandler? PropertyChanged;

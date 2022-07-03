@@ -3,7 +3,7 @@ using System.Windows;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class ConfigurationButtonMenuViewModel : INotifyPropertyChanged
 {

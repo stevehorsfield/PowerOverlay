@@ -18,7 +18,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Windows.Media.Animation;
 
-namespace overlay_popup
+namespace PowerOverlay
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

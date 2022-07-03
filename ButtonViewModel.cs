@@ -4,12 +4,12 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.ComponentModel;
 using System.Windows.Media;
-using overlay_popup.Commands;
+using PowerOverlay.Commands;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJson {
     private FrameworkElement? content;

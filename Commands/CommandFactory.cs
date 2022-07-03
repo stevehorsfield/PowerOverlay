@@ -7,7 +7,7 @@ using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Input;
 
-namespace overlay_popup.Commands;
+namespace PowerOverlay.Commands;
 
 public class CommandFactory
 {

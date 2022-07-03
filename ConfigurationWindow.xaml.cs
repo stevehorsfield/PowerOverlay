@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 /// <summary>
 /// Interaction logic for ConfigurationWindow.xaml

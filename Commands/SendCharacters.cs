@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace overlay_popup.Commands;
+namespace PowerOverlay.Commands;
 
 public class SendCharacters : ActionCommand
 {

@@ -11,7 +11,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 
-namespace overlay_popup.Commands;
+namespace PowerOverlay.Commands;
 
 public class SequenceCommand : ActionCommand
 {

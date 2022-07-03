@@ -1,4 +1,4 @@
-﻿namespace overlay_popup;
+﻿namespace PowerOverlay;
 
 public enum ActionMode
 {

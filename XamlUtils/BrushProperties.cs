@@ -1,4 +1,4 @@
-﻿namespace overlay_popup;
+﻿namespace PowerOverlay;
 
 using System.Windows.Controls;
 using System.Windows.Media;

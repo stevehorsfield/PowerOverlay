@@ -17,7 +17,7 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 
-namespace overlay_popup.Commands;
+namespace PowerOverlay.Commands;
 
 public class ExecuteCommandArgument : INotifyPropertyChanged
 {

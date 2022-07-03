@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class DisplayStyleViewModel : INotifyPropertyChanged, IApplicationJson
 {

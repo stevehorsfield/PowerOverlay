@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace overlay_popup.Commands;
+namespace PowerOverlay.Commands;
 
 public class Sleep : ActionCommand
 {

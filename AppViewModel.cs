@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Collections.Specialized;
-using overlay_popup.Commands;
+using PowerOverlay.Commands;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Text.Json.Nodes;
@@ -12,7 +12,7 @@ using System.IO;
 using System.Windows.Input;
 using System.Collections.Generic;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class AppViewModel : INotifyPropertyChanged {
 

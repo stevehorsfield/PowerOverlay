@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace overlay_popup;
+namespace PowerOverlay;
 
 public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJson
 {

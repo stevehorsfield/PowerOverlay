@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:overlay_popup"
         mc:Ignorable="d"
-        Title="overlay-popup" Height="450" Width="800"
+        Title="Power Overlay" Height="450" Width="800"
         WindowStyle="none"
         AllowsTransparency="true"
         Topmost="true"
         WindowStartupLocation="CenterScreen"
         Deactivated="onDeactivated"
+        KeyUp="OnKeyUp"
         
         Focusable="true"
         >
@@ -117,7 +118,31 @@
                 <Button Margin="0,5" Click="onQuitClick">Quit</Button>
             </StackPanel>
         </Border>
-
+        <TextBlock x:Name="MessageDisplayBox" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Text="{Binding}" FontSize="36" Foreground="AliceBlue" Background="Transparent"
+                   Focusable="False" IsHitTestVisible="False"
+                   >
+            <TextBlock.DataContext>abc</TextBlock.DataContext>
+            <TextBlock.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="320" Color="gold" />
+            </TextBlock.Effect>
+            <TextBlock.Resources>
+                <Storyboard x:Key="HideMessage" BeginTime="00:00:00.000" Completed="MessageOverlay_StoryboardCompleted">
+                    <DoubleAnimation BeginTime="00:00:00.000"
+                                     Duration="00:00:00.200"
+                                     To="1.0"
+                                     From="0.0"
+                                     Storyboard.TargetProperty="Opacity"
+                                     />
+                    <DoubleAnimation BeginTime="00:00:00.500"
+                                     Duration="00:00:0.300"
+                                     To="0.0"
+                                     From="1.0"
+                                     Storyboard.TargetProperty="Opacity"
+                                     />
+                </Storyboard>
+            </TextBlock.Resources>
+        </TextBlock>
     </Grid>
 
 </Window>

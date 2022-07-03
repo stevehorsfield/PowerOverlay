@@ -16,6 +16,7 @@ using System.Windows.Interop;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
+using System.Windows.Media.Animation;
 
 namespace overlay_popup
 {
@@ -26,12 +27,20 @@ namespace overlay_popup
     {
         private const int HOTKEY_ID = 15000;
         private bool lockActive = false;
+        private readonly Storyboard MessageDisplayBoxStoryboard;
+        private readonly AppSettings settings;
 
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new AppViewModel();
-            ((AppViewModel)this.DataContext).AddTestData();
+            settings = AppSettings.Get();
+
+            this.DataContext = settings.AppViewModel;
+            //((AppViewModel)this.DataContext).AddTestData();
+
+            MessageDisplayBox.Visibility = Visibility.Collapsed;
+            MessageDisplayBox.Text = "";
+            MessageDisplayBoxStoryboard = (Storyboard)MessageDisplayBox.FindResource("HideMessage");
 
             this.InputBindings.Add(
                 new InputBinding(this, 
@@ -296,12 +305,15 @@ namespace overlay_popup
                         try
                         {
                             var ofd = new OpenFileDialog();
-                            ofd.Filter = "config files (*.json)|*.json|All files|*.*";
+                            ofd.Filter = "config files (*.overlayconfig.json)|*.overlayconfig.json|All files|*.*";
+                            ofd.InitialDirectory = settings.FileAccessPath;
                             ofd.CheckFileExists = true;
                             var result = ofd.ShowDialog(this);
                             if (!(result ?? false)) return;
+                            settings.FileAccessPath = System.IO.Path.GetDirectoryName(ofd.FileName)!;
                             this.DataContext = ((AppViewModel)DataContext).LoadFromFile(ofd.FileName)
                                 ?? this.DataContext;
+                            settings.AppViewModel = ((AppViewModel)DataContext);
                         }
                         finally
                         {
@@ -320,12 +332,14 @@ namespace overlay_popup
                         {
                             var sfd = new SaveFileDialog();
                             sfd.Filter = "config files (*.overlayconfig.json)|*.overlayconfig.json|All files|*.*";
+                            sfd.InitialDirectory = settings.FileAccessPath;
                             sfd.OverwritePrompt = true;
                             sfd.CheckPathExists = true;
                             sfd.AddExtension = true;
                             sfd.DefaultExt = ".overlayconfig.json";
                             var result = sfd.ShowDialog(this);
                             if (!(result ?? false)) return;
+                            settings.FileAccessPath = System.IO.Path.GetDirectoryName(sfd.FileName)!;
                             ((AppViewModel)this.DataContext).SaveToFile(sfd.FileName);
                         }
                         finally
@@ -355,6 +369,7 @@ namespace overlay_popup
                     if (configure.ShowDialog() ?? false)
                     {
                         ((AppViewModel)this.DataContext).ApplyFrom((ConfigurationViewModel)configure.DataContext);
+                        settings.Save();
                     }
 
                     this.Topmost = true;
@@ -380,5 +395,68 @@ namespace overlay_popup
             dc.CurrentMenu[rowIndex, columnIndex].Execute(null);
         }
 
+        private void OnKeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.PageDown:
+                    e.Handled = true;
+                    {
+                        var dc = (DataContext as AppViewModel);
+                        if (dc == null) return;
+                        var currentIndex = -1;
+                        var menuCount = dc.AllMenus.Count;
+                        if (dc.CurrentMenu != null) currentIndex = dc.AllMenus.IndexOf(dc.CurrentMenu);
+                        var newIndex = currentIndex + 1;
+                        if (newIndex >= menuCount) newIndex = 0;
+                        if (menuCount == 0) newIndex = -1;
+                        dc.CurrentMenu = newIndex == -1 ? null : dc.AllMenus[newIndex];
+                        if (dc.CurrentMenu != null)
+                        {
+                            // Trigger animation
+                            MessageDisplayBox.Visibility = Visibility.Visible;
+                            MessageDisplayBox.Opacity = 0;
+                            MessageDisplayBox.Text = dc.CurrentMenu.Name;
+                            MessageDisplayBoxStoryboard.Stop(MessageDisplayBox);
+                            MessageDisplayBoxStoryboard.Seek(MessageDisplayBox, TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+                            MessageDisplayBoxStoryboard.Begin(MessageDisplayBox, true);
+                        }
+                    }
+                    break;
+                case Key.PageUp:
+                    e.Handled = true;
+                    {
+                        var dc = (DataContext as AppViewModel);
+                        if (dc == null) return;
+                        var currentIndex = -1;
+                        var menuCount = dc.AllMenus.Count;
+                        if (dc.CurrentMenu != null) currentIndex = dc.AllMenus.IndexOf(dc.CurrentMenu);
+                        var newIndex = currentIndex - 1;
+                        if (newIndex < 0) newIndex = menuCount - 1;
+                        dc.CurrentMenu = newIndex == -1 ? null : dc.AllMenus[newIndex];
+                        if (dc.CurrentMenu != null)
+                        {
+                            // Trigger animation
+                            MessageDisplayBox.Visibility = Visibility.Visible;
+                            MessageDisplayBox.Opacity = 0;
+                            MessageDisplayBox.Text = dc.CurrentMenu.Name;
+                            MessageDisplayBoxStoryboard.Stop(MessageDisplayBox);
+                            MessageDisplayBoxStoryboard.Seek(MessageDisplayBox, TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+                            MessageDisplayBoxStoryboard.Begin(MessageDisplayBox, true);
+                        }
+                    }
+                    break;
+                case Key.Escape:
+                    e.Handled = true;
+                    if (!lockActive) Hide();
+                    break;
+            }
+        }
+
+        private void MessageOverlay_StoryboardCompleted(object sender, EventArgs e)
+        {
+            MessageDisplayBox.Visibility = Visibility.Collapsed;
+            MessageDisplayBox.Text = "";
+        }
     }
 }

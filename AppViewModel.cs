@@ -278,7 +278,6 @@ public class AppViewModel : INotifyPropertyChanged {
 
         try
         {
-            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             var data = File.ReadAllBytes(path);
             var reader = new Utf8JsonReader(data.AsSpan());
             var obj = JsonNode.Parse(ref reader, new JsonNodeOptions() { PropertyNameCaseInsensitive = true }) as JsonObject;

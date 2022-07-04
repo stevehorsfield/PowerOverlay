@@ -81,27 +81,22 @@ public class SleepDefinition : ActionCommandDefinition
         var addToGrid = (int r, int c, FrameworkElement item) =>
             { Grid.SetRow(item, r); Grid.SetColumn(item, c); ctrl.Children.Add(item); };
 
-        var addSlider = (int r, string label, string propName) =>
+        var addNumericTextBox = (int r, string label, string propName) =>
         {
             var lbl = new TextBlock { Text = label };
-            var slider = new Slider();
-            var txtValue = new TextBlock();
-            slider.SetBinding(Slider.ValueProperty, propName);
-            txtValue.SetBinding(TextBlock.TextProperty, propName);
+            var ntb = new NumericTextBox();
+            ntb.SetBinding(NumericTextBox.ValueProperty, propName);
 
-            slider.Minimum = 0;
-            slider.Maximum = 30000;
-            slider.SmallChange = 1;
-            slider.LargeChange = 100;
-            slider.Width = 200;
-            slider.HorizontalAlignment = HorizontalAlignment.Left;
+            ntb.MinValue = 0;
+            ntb.MaxValue = 30000;
+            ntb.Width = 100;
+            ntb.HorizontalAlignment = HorizontalAlignment.Left;
 
             addToGrid(r, 0, lbl);
-            addToGrid(r, 1, txtValue);
-            addToGrid(r, 2, slider);
+            addToGrid(r, 2, ntb);
         };
 
-        addSlider(1, "Delay (ms)", nameof(Sleep.SleepMilliseconds));
+        addNumericTextBox(1, "Delay (ms)", nameof(Sleep.SleepMilliseconds));
 
         return ctrl;
     }

@@ -485,14 +485,12 @@ public class ExecuteCommandControl : ContentControl, System.Windows.Forms.IWin32
             Grid.SetRow(l7, currentGridRow); Grid.SetColumn(l7, 0);
             ctrl.Children.Add(l7);
 
-            var s7 = new Slider();
+            var s7 = new NumericTextBox();
             Grid.SetRow(s7, currentGridRow); Grid.SetColumn(s7, 1);
             binding = new Binding(nameof(ExecuteCommand.WaitTimeoutMilliseconds));
-            s7.SetBinding(Slider.ValueProperty, binding);
-            s7.Minimum = 0;
-            s7.Maximum = 60000;
-            s7.LargeChange = 5000;
-            s7.SmallChange = 500;
+            s7.SetBinding(NumericTextBox.ValueProperty, binding);
+            s7.MinValue = 0;
+            s7.MaxValue = 60000;
             ctrl.Children.Add(s7);
             ++currentGridRow;
         }

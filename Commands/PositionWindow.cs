@@ -361,12 +361,28 @@ public class PositionWindowDefinition : ActionCommandDefinition
             addToGrid(r, 2, slider);
         };
 
+        var addNumericTextBox = (int r, string label, string propName, string enabledProp) =>
+        {
+            var lbl = new TextBlock { Text = label };
+            var ntb = new NumericTextBox();
+            ntb.SetBinding(NumericTextBox.ValueProperty, propName);
+            ntb.SetBinding(NumericTextBox.IsEnabledProperty, enabledProp);
+            
+            ntb.MinValue = -65536;
+            ntb.MaxValue = 65536;
+            ntb.Width = 100;
+            ntb.HorizontalAlignment = HorizontalAlignment.Left;
+
+            addToGrid(r, 0, lbl);
+            addToGrid(r, 2, ntb);
+        };
+
         addToGrid(0, 0, chkMove);
-        addSlider(1, "Left", nameof(PositionWindow.Left), nameof(PositionWindow.SetPosition));
-        addSlider(2, "Top", nameof(PositionWindow.Top), nameof(PositionWindow.SetPosition));
+        addNumericTextBox(1, "Left", nameof(PositionWindow.Left), nameof(PositionWindow.SetPosition));
+        addNumericTextBox(2, "Top", nameof(PositionWindow.Top), nameof(PositionWindow.SetPosition));
         addToGrid(3, 0, chkSize);
-        addSlider(4, "Width", nameof(PositionWindow.Width), nameof(PositionWindow.SetSize));
-        addSlider(5, "Height", nameof(PositionWindow.Height), nameof(PositionWindow.SetSize));
+        addNumericTextBox(4, "Width", nameof(PositionWindow.Width), nameof(PositionWindow.SetSize));
+        addNumericTextBox(5, "Height", nameof(PositionWindow.Height), nameof(PositionWindow.SetSize));
 
         position.Margin = new Thickness(10, 10, 10, 0);
 

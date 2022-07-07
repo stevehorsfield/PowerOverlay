@@ -133,12 +133,12 @@ namespace PowerOverlay
 
         private void Up_Click(object sender, RoutedEventArgs e)
         {
-            Value++;
+            if (Value < MaxValue) Value++;
             e.Handled = true;
         }
         private void Down_Click(object sender, RoutedEventArgs e)
         {
-            Value--;
+            if (Value > MinValue) Value--;
             e.Handled = true;
         }
 
@@ -149,6 +149,9 @@ namespace PowerOverlay
                 int value;
                 if (Int32.TryParse(DataEntry.Text, out value))
                 {
+                    if (value > MaxValue) value = MaxValue;
+                    if (value < MinValue) value = MinValue;
+
                     if (Value != value) Value = value;
                 }
 

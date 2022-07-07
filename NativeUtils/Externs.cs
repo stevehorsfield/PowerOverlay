@@ -79,4 +79,20 @@ public partial class NativeUtils
     [DllImport("user32.dll")]
     public static extern short VkKeyScanW(char ch);
 
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetMonitorInfoW(IntPtr hMonitor, ref tagMONITORINFOEX monitorInfo);
+
+    private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hDC, ref tagRECT intersectOrMonitorRect, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern unsafe int EnumDisplayMonitors(IntPtr hDC, void* clipRect, MonitorEnumProc lpfnEnum, IntPtr dwData);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int EnumDisplayDevicesW(string? name, uint devNum, ref DISPLAY_DEVICEW displayDevice, uint flags);
+
+    [DllImport("user32.dll")]
+    public static extern Int32 GetSystemMetrics(Int32 nIndex);
 }

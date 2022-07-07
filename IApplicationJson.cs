@@ -24,6 +24,11 @@ public static class JsonStringExtension
         node[propertyName.ToLowerCamelCase()] = value;
         return node;
     }
+    public static JsonObject AddLowerCamelValue<T>(this JsonObject node, string propertyName, T value)
+    {
+        node[propertyName.ToLowerCamelCase()] = JsonValue.Create<T>(value);
+        return node;
+    }
 
     public static JsonArray ToJson<T>(this IEnumerable<T> collection)
         where T : IApplicationJson

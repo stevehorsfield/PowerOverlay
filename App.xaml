@@ -37,18 +37,6 @@
             <Setter Property="Margin" Value="5px"/>
          </Style>
 
-        <!--<ListBox>
-            <ListBox.Template>
-                <ControlTemplate>
-
-                </ControlTemplate>
-            </ListBox.Template>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>-->
         <Style x:Key="ApplicationTargetList" TargetType="ListBox">
             <Style.Setters>
                 <Setter Property="MinHeight" Value="100"/>
@@ -196,19 +184,6 @@
                                                  Text="{Binding NormalKeyText}" MaxLength="2"
                                                  CharacterCasing="Upper"
                                                  />
-
-
-                                        <!--<TextBlock Grid.Row="0" Grid.Column="0">Application:</TextBlock>
-                                        <CheckBox Grid.Row="0" Grid.Column="1" Margin="5,0" IsChecked="{Binding UseRegexForExecutable}">
-                                            <TextBlock>Use regex</TextBlock>
-                                        </CheckBox>-->
-                                        <!--<TextBox Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding ExecutablePattern}"/>
-
-                                        <TextBlock Grid.Row="1" Grid.Column="0" >Window title:</TextBlock>
-                                        <CheckBox Grid.Row="1" Grid.Column="1" Margin="5,0" IsChecked="{Binding UseRegexForWindowTitle}">
-                                            <TextBlock>Use regex</TextBlock>
-                                        </CheckBox>
-                                        <TextBox Grid.Row="1" Grid.Column="2"  HorizontalAlignment="Stretch" Text="{Binding WindowTitlePattern}"/>-->
                                     </Grid>
                                 </DockPanel>
                             </Border>
@@ -224,5 +199,40 @@
                 </Setter>
             </Style.Setters>
         </Style>
-    </Application.Resources>
+
+        <Style x:Key="LayoutSizingItem" TargetType="ListBoxItem">
+            <Style.Setters>
+                <Setter Property="Background" Value="Transparent" />
+            </Style.Setters>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <!-- Override default selection behaviour -->
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="LayoutSizing" TargetType="ItemsControl">
+            <Style.Setters>
+                <Setter Property="MinHeight" Value="100"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ItemsControl">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel>
+                                    <ItemsPresenter Name="ItemsPresenter"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate DataType="local:LayoutWeight">
+                            <local:NumericTextBox MinValue="1" MaxValue="1000" Width="100" Value="{Binding Path=Weight}"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>    </Application.Resources>
 </Application>

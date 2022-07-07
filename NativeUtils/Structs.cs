@@ -376,4 +376,36 @@ public partial class NativeUtils
         VK_PA1 = 0xFD,
         VK_OEM_CLEAR = 0xFE,
     }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Unicode)]
+    public struct tagMONITORINFOEX
+    {
+        public uint cbSize;
+        public int rcMonitorLeft, rcMonitorTop, rcMonitorRight, rcMonitorBottom;
+        public int rcWorkLeft, rcWorkTop, rcWorkRight, rcWorkBottom;
+        public uint dwFlags;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string deviceName;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct tagRECT
+    {
+        public int left, top, right, bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 0, CharSet = CharSet.Unicode)]
+    public struct DISPLAY_DEVICEW
+    {
+        public uint cb;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string DeviceName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string DeviceString;
+        public uint StateFlags;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string DeviceID;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string DeviceKey;
+    }
 }

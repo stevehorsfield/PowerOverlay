@@ -677,7 +677,7 @@ public class SendKeysDefinition : ActionCommandDefinition
         addCheckbox("Send to all application matches (otherwise first match)", nameof(SendKeys.SendToAllMatches));
 
         var keylist = new ListBox();
-        keylist.Style = (Style)selector.FindResource("KeySequenceList");
+        keylist.Style = (Style)keylist.FindResource("KeySequenceList");
 
         keylist.SetBinding(ListBox.ItemsSourceProperty, new Binding(nameof(SendKeys.KeySequence)));
 

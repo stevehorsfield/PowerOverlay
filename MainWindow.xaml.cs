@@ -297,6 +297,7 @@ namespace PowerOverlay
             {
                 case "New":
                     DataContext = ((AppViewModel)DataContext).NewFromThis();
+                    settings.AppViewModel = ((AppViewModel)DataContext);
                     return;
                 case "Open":
                     {

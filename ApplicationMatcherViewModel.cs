@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -147,5 +148,22 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
         o.TryGet<string>(nameof(ExecutablePattern), s => result.ExecutablePattern = s);
 
         return result;
+    }
+}
+
+public static class ApplicationMatcherViewModelHelper
+{
+    public static IEnumerable<IntPtr> EnumerateMatchedWindows(this IEnumerable<ApplicationMatcherViewModel> targets, bool includeTopMost, bool includeMinimised)
+    {
+        foreach (var hwnd in NativeUtils.EnumerateTopLevelWindows(includeTopMost, includeMinimised, false))
+        {
+            foreach (var target in targets)
+            {
+                if (target.Matches(hwnd))
+                {
+                    yield return hwnd;
+                }
+            }
+        }
     }
 }

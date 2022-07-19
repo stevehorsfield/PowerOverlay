@@ -18,8 +18,8 @@ public partial class NativeUtils
         {
             if (hwnd == IntPtr.Zero) return false;
 
-            bool isMinimised, isTopMost;
-            var isTopLevel = IsTopLevelWindow(hwnd, out isMinimised, out isTopMost);
+            bool isMinimised, isTopMost, isHidden;
+            var isTopLevel = IsTopLevelWindow(hwnd, out isMinimised, out isTopMost, out isHidden);
 
             if (!isTopLevel.HasValue)
             {
@@ -38,10 +38,11 @@ public partial class NativeUtils
         return result;
     }
 
-    private static bool? IsTopLevelWindow(IntPtr hwnd, out bool isMinimised, out bool isTopMost)
+    private static bool? IsTopLevelWindow(IntPtr hwnd, out bool isMinimised, out bool isTopMost, out bool isHidden)
     {
         isMinimised = false;
         isTopMost = false;
+        isHidden = false;
 
         tagWINDOWINFO info = new();
         info.dwSize = (uint)Marshal.SizeOf<tagWINDOWINFO>();
@@ -53,15 +54,15 @@ public partial class NativeUtils
 
         if (info.dwStyle.HasFlag(Win32WindowStyles.WS_ICONIC)) isMinimised = true;
         if (info.dwExStyle.HasFlag(Win32ExtendedWindowStyles.WS_EX_TOPMOST)) isTopMost = true;
-        
+        if (!info.dwStyle.HasFlag(Win32WindowStyles.WS_VISIBLE)) isHidden = true;
+
         if (info.dwStyle.HasFlag(Win32WindowStyles.WS_POPUP)) return false;
         if (info.dwExStyle.HasFlag(Win32ExtendedWindowStyles.WS_EX_TOOLWINDOW)) return false;
-        if (!info.dwStyle.HasFlag(Win32WindowStyles.WS_VISIBLE)) return false;
 
         return true;
     }
 
-    public static IEnumerable<IntPtr> EnumerateTopLevelWindows(bool includeTopMost, bool includeMinimised)
+    public static IEnumerable<IntPtr> EnumerateTopLevelWindows(bool includeTopMost, bool includeMinimised, bool includeHidden)
     {
         IntPtr startingPoint = GetAnyTopLevelWindow();
         if (startingPoint == IntPtr.Zero) yield break;
@@ -72,14 +73,16 @@ public partial class NativeUtils
 
         while (hwndCurrent != IntPtr.Zero)
         {
-            bool isMinimised, isTopMost;
-            var isTopLevel = IsTopLevelWindow(hwndCurrent, out isMinimised, out isTopMost);
+            bool isMinimised, isTopMost, isHidden;
+            var isTopLevel = IsTopLevelWindow(hwndCurrent, out isMinimised, out isTopMost, out isHidden);
 
             if (isTopLevel.HasValue && isTopLevel.Value)
             {
                 if (((!isMinimised) || includeMinimised)
                      &&
                      ((!isTopMost) || includeTopMost)
+                     &&
+                     ((!isHidden) || includeHidden)
                     )
                 {
                     hwnds.Add(hwndCurrent);

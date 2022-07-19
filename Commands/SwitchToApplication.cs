@@ -36,16 +36,10 @@ public class SwitchToApplication : ActionCommand
 
     public override void Execute(object? parameter)
     {
-        foreach (var hwnd in NativeUtils.EnumerateTopLevelWindows(false, true))
+        foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {
-            foreach (var target in ApplicationTargets)
-            {
-                if (target.Matches(hwnd))
-                {
-                    NativeUtils.SetForegroundWindow(hwnd);
-                    return;
-                }
-            }
+            NativeUtils.SetForegroundWindow(hwnd);
+            return;
         }
     }
 

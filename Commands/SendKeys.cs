@@ -406,24 +406,11 @@ public class SendKeys : ActionCommand
             targets.Add(desktop);
         }
 
-        bool hasMatch = false;
-        foreach (var hwnd in NativeUtils.EnumerateTopLevelWindows(false, true))
+        foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {
             if (hwnd == desktop || hwnd == shell) continue;
-
-            foreach (var target in ApplicationTargets)
-            {
-                if (target.Matches(hwnd))
-                {
-                    targets.Add(hwnd);
-                    if (!SendToAllMatches)
-                    {
-                        hasMatch = true;
-                    }
-                    break;
-                }
-            }
-            if (hasMatch) break;
+            targets.Add(hwnd);
+            if (!SendToAllMatches) break;
         }
         var uniqueTargets = targets.Where(x => x != IntPtr.Zero).Distinct().ToList();
 

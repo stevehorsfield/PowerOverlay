@@ -31,8 +31,11 @@ namespace PowerOverlay
 
         public MainWindow()
         {
-            InitializeComponent();
             settings = AppSettings.Get();
+
+            InitializeComponent();
+            Width = settings.MainWindowWidth;
+            Height = settings.MainWindowHeight;
 
             this.DataContext = settings.AppViewModel;
             //((AppViewModel)this.DataContext).AddTestData();

@@ -17,6 +17,9 @@ public class AppSettings
     private const string SettingsFileName = "settings.json";
     private const string CacheFileName = "current.overlayconfig.json";
 
+    public const int DefaultMainWindowWidth = 800;
+    public const int DefaultMainWindowHeight = 450;
+
     private static readonly string SettingsFilePath = String.Empty;
     private static readonly string CacheFilePath = String.Empty;
 
@@ -29,6 +32,29 @@ public class AppSettings
         set
         {
             fileAccessPath = value;
+            Save();
+        }
+    }
+
+    private int mainWindowWidth, mainWindowHeight;
+    public int MainWindowWidth
+    {
+        get
+        {
+            return mainWindowWidth;
+        }
+        set
+        {
+            mainWindowWidth = value;
+            Save();
+        }
+    }
+    public int MainWindowHeight
+    {
+        get { return mainWindowHeight; }
+        set
+        {
+            mainWindowHeight = value;
             Save();
         }
     }
@@ -57,7 +83,9 @@ public class AppSettings
 
     private AppSettings()
     {
-
+        // Do not use property accessors as it will force save
+        mainWindowWidth = DefaultMainWindowWidth;
+        mainWindowHeight = DefaultMainWindowHeight;
     }
 
     public void Save()
@@ -85,6 +113,8 @@ public class AppSettings
             var obj = JsonNode.Parse(ref reader, new JsonNodeOptions() { PropertyNameCaseInsensitive = true }) as JsonObject;
 
             obj?.TryGet<string>(nameof(FileAccessPath), s => fileAccessPath = s); // do not invoke property method
+            obj?.TryGetValue<int>(nameof(MainWindowWidth), w => mainWindowWidth = w); // do not invoke property method
+            obj?.TryGetValue<int>(nameof(MainWindowHeight), h => mainWindowHeight = h); // do not invoke property method
         }
         // read menu data
         if (File.Exists(CacheFilePath))

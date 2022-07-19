@@ -214,11 +214,13 @@ namespace PowerOverlay
         {
             switch (msg)
             {
-                case NativeUtils.WM_HOTKEY:
+                case NativeUtils.WM_SYSCOMMAND:
                     switch (wParam.ToInt32())
                     {
-                        case HOTKEY_ID:
-                            break;
+                        case NativeUtils.SC_MOVE: handled = true; return IntPtr.Zero;
+                        case NativeUtils.SC_SIZE: handled = true; return IntPtr.Zero;
+                        case NativeUtils.SC_MAXIMIZE: handled = true; return IntPtr.Zero;
+                        case NativeUtils.SC_MINIMIZE: handled = true; return IntPtr.Zero;
                     }
                     break;
             }

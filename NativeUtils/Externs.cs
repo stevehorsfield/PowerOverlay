@@ -95,4 +95,7 @@ public partial class NativeUtils
 
     [DllImport("user32.dll")]
     public static extern Int32 GetSystemMetrics(Int32 nIndex);
+
+    [DllImport("user32.dll")]
+    public static extern int AllowSetForegroundWindow(uint dwProcessId);
 }

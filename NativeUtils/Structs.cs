@@ -414,4 +414,6 @@ public partial class NativeUtils
     public const int SC_MOVE = 0xF010;
     public const int SC_MINIMIZE = 0xF020;
     public const int SC_MAXIMIZE = 0xF030;
+
+    public const uint ASFW_ANY = 0xFFFFFFFF; // -1
 }

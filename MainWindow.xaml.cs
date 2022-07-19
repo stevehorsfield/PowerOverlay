@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Windows.Media.Animation;
+using PowerOverlay.IPC;
 
 namespace PowerOverlay
 {
@@ -193,6 +194,28 @@ namespace PowerOverlay
                     ButtonGrid.Children.Add(ctrl);
                 }
             }
+        }
+
+        public void HandleIPC(Message msg)
+        {
+            switch (msg.Action)
+            {
+                case MessageAction.Activate:
+                    InternalShowAndActivate(true);
+                    break;
+                case MessageAction.ActivateMenu:
+                    {
+                        var dc = (AppViewModel)this.DataContext;
+                        var menu = dc.AllMenus.FirstOrDefault(m => m.Name.Equals(msg.TargetMenu, StringComparison.CurrentCultureIgnoreCase));
+                        if (menu != null)
+                        {
+                            dc.CurrentMenu = menu;
+                        }
+                        InternalShowAndActivate(menu == null);
+                    } 
+                    break;
+            }
+
         }
 
         public void onConfigure(object o, RoutedEventArgs e) {

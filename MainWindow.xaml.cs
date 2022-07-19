@@ -227,7 +227,7 @@ namespace PowerOverlay
             return IntPtr.Zero;
         }
 
-        private void InternalShowAndActivate(bool autoSwitchMenu)
+        public void InternalShowAndActivate(bool autoSwitchMenu)
         {
             if (this.Visibility != Visibility.Visible)
             {

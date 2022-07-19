@@ -12,8 +12,10 @@
         WindowStartupLocation="CenterScreen"
         Deactivated="onDeactivated"
         KeyUp="OnKeyUp"
-        
+        Visibility="Hidden"
         Focusable="true"
+        Closed="Window_Closed"
+        ShowInTaskbar="False"
         >
     <Window.Background>
             <SolidColorBrush Color="#00FFFFFF" />

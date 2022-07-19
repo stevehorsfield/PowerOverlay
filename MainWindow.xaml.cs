@@ -25,7 +25,6 @@ namespace PowerOverlay
     /// </summary>
     public partial class MainWindow : Window, ICommand
     {
-        private const int HOTKEY_ID = 15000;
         private bool lockActive = false;
         private readonly Storyboard MessageDisplayBoxStoryboard;
         private readonly AppSettings settings;
@@ -205,8 +204,6 @@ namespace PowerOverlay
             var source = HwndSource.FromHwnd(handle);
             source.AddHook(HwndHook);
 
-            NativeUtils.RegisterHotKey(this, HOTKEY_ID, Key.F2, ModifierKeys.Windows);
-
             (this.DataContext as AppViewModel)!.RefreshCurrentDesktopState();
         }
 
@@ -218,24 +215,39 @@ namespace PowerOverlay
                     switch (wParam.ToInt32())
                     {
                         case HOTKEY_ID:
-                            if (this.Visibility != Visibility.Visible)
-                            {
-                                (this.DataContext as AppViewModel)!.RefreshCurrentDesktopState();
-                                (this.DataContext as AppViewModel)!.SelectMenuFromApp();
-                                this.Show();
-                                this.Activate();
-                            }
-                            else
-                            {
-                                // Toggle lock
-                                ((AppViewModel)this.DataContext).LockMenu = ! ((AppViewModel)this.DataContext)!.LockMenu;
-                            }
-                            handled = true;
                             break;
                     }
                     break;
             }
             return IntPtr.Zero;
+        }
+
+        private void InternalShowAndActivate(bool autoSwitchMenu)
+        {
+            if (this.Visibility != Visibility.Visible)
+            {
+                (this.DataContext as AppViewModel)!.RefreshCurrentDesktopState();
+                if (autoSwitchMenu)
+                {
+                    (this.DataContext as AppViewModel)!.SelectMenuFromApp();
+                } 
+
+                this.Show();
+                this.Activate();
+            }
+        }
+
+        public void AppHotKeyPressed()
+        {
+            if (this.Visibility != Visibility.Visible)
+            {
+                InternalShowAndActivate(true);
+            }
+            else
+            {
+                // Toggle lock
+                ((AppViewModel)this.DataContext).LockMenu = !((AppViewModel)this.DataContext)!.LockMenu;
+            }
         }
 
         public void onDeactivated(object o, EventArgs e) {
@@ -458,6 +470,11 @@ namespace PowerOverlay
         {
             MessageDisplayBox.Visibility = Visibility.Collapsed;
             MessageDisplayBox.Text = "";
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            App.Current.Shutdown(0);
         }
     }
 }

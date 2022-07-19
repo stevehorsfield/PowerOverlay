@@ -17,5 +17,19 @@ namespace PowerOverlay
         {
             Commands.CommandFactory.Init();
         }
+
+        private void Launch()
+        {
+
+        }
+
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+
+            Launch();
+        }
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+        }
     }
 }

@@ -27,3 +27,18 @@ Lots of configuration options. For example, for layout positioning:
 ![image](https://user-images.githubusercontent.com/5338720/177740479-1422a1fb-44fa-4329-bb98-c4d4001b904b.png)
 
 Settings can be saved and loaded as JSON. Changes to the current state are automatically saved into a local cache and reloaded on launch.
+
+First launch runs the overlay hidden. Subsequent launches bring the overlay to the foreground.
+A named menu can be provided as an argument.
+
+## To-do list
+
+* Add condition action (such as only launch exe if not running)
+* support app zooming (Window-SizeToContent and ViewBox) and scaling based on screen proportions
+* Addd mouse move/click action
+* Support action result conditions in sequences
+* Support track mouse monitor on activate
+* Support aligned positioning (center/middle/top/bottom/left/right...)
+* Support custom button layouts (more/fewer buttons, non-grid layout, etc.)
+* Support options dialog
+* Add per-menu global hot key support

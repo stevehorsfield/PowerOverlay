@@ -99,6 +99,23 @@ public partial class NativeUtils
     [DllImport("user32.dll")]
     public static extern int AllowSetForegroundWindow(uint dwProcessId);
 
+    [DllImport("user32.dll")]
+    public static extern int ClientToScreen(IntPtr hwnd, ref tagPOINT point);
+
+    [DllImport("user32.dll")]
+    public static extern int GetWindowRect(IntPtr hWnd, ref tagRECT lpRect);
+    [DllImport("user32.dll")]
+    public static extern int GetClientRect(IntPtr hWnd, ref tagRECT lpRect);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetDoubleClickTime();
+
     [DllImport("user32.dll")] 
     public static extern int GetCursorPos(ref tagPOINT point);
+
+    [DllImport("user32.dll")]
+    public static extern int SetCursorPos(int x, int y);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr MonitorFromPoint(tagPOINT point, uint flags);
 }

@@ -261,5 +261,31 @@
                     </Setter.Value>
                 </Setter>
             </Style.Setters>
-        </Style>    </Application.Resources>
+        </Style>
+
+        <Style x:Key="CheckBoxShadedPanel" TargetType="CheckBox">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border Padding="2" Margin="2" BorderThickness="2" BorderBrush="DarkGray">
+                                <Rectangle x:Name="rect" Fill="AliceBlue" Width="20" Height="20"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="rect" Property="Shape.Fill" Value="LightSkyBlue"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="rect" Property="Shape.Fill" Value="Blue"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="rect" Property="Shape.Fill" Value="DarkGray"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+    </Application.Resources>
 </Application>

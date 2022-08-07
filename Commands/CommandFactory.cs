@@ -32,6 +32,7 @@ public class CommandFactory
         RegisterCommandType(PositionWindowDefinition.Instance);
         RegisterCommandType(SleepDefinition.Instance);
         RegisterCommandType(SendKeysDefinition.Instance);
+        RegisterCommandType(SendMouseDefinition.Instance);
     }
 
     public static JsonNode ToJson(ActionCommand action)

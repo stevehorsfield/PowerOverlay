@@ -17,6 +17,7 @@ public partial class NativeUtils
     public struct DisplayInfo
     {
         public Rect clientRect;
+        public Rect monitorRect;
         public bool isPrimary;
         public int monitorIndex;
         public IntPtr hMonitor;
@@ -98,6 +99,10 @@ public partial class NativeUtils
                     info.Item4.rcWorkRight - info.Item4.rcWorkLeft,
                     info.Item4.rcWorkBottom - info.Item4.rcWorkTop
                     ),
+                monitorRect = new Rect(info.Item4.rcMonitorLeft, info.Item4.rcMonitorTop, 
+                info.Item4.rcMonitorRight - info.Item4.rcMonitorLeft,
+                    info.Item4.rcMonitorBottom - info.Item4.rcMonitorTop
+                    ),
                 monitorIndex = index,
                 hMonitor = info.Item3,
             });
@@ -110,11 +115,19 @@ public partial class NativeUtils
 
     public static IntPtr MonitorFromWindowOrPrimary(IntPtr hwnd)
     {
-        const uint MONITOR_DEFAULTTONULL = 0x00000000;
-        const uint MONITOR_DEFAULTTOPRIMARY = 0x00000001;
-        const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
 
         return MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+    }
+
+    public static IntPtr MonitorFromPoint(Point p)
+    {
+        tagPOINT np = new tagPOINT()
+        {
+            x = (int) p.X,
+            y = (int) p.Y,
+        };
+        IntPtr hMon = MonitorFromPoint(np, MONITOR_DEFAULTTONEAREST);
+        return hMon;
     }
 }
 

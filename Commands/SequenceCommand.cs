@@ -178,6 +178,7 @@ public class SequenceCommandControl : ContentControl
         xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
         >
     <StackPanel>
+        <Label Content=""{Binding Path=Definition.ActionDisplayName}"" Margin=""2"" Background=""SkyBlue"" FontWeight=""Bold"" />
         <ContentPresenter Content=""{Binding Path=ConfigElement}"" />
         <WrapPanel Orientation=""Horizontal"">
             <Button Name=""MoveActionUp"" Content=""Move up"" Margin=""2"" />

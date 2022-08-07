@@ -105,7 +105,7 @@ public class SendCharacters : ActionCommand
         return result;
     }
 
-    public override void Execute(object? parameter)
+    public override void ExecuteWithContext(CommandExecutionContext context)
     {
         var active = NativeUtils.GetActiveAppHwnd();
         var shell = NativeUtils.GetShellWindow();

@@ -34,7 +34,7 @@ public class SwitchToApplication : ActionCommand
         return clone;
     }
 
-    public override void Execute(object? parameter)
+    public override void ExecuteWithContext(CommandExecutionContext context)
     {
         foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {

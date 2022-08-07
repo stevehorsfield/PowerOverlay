@@ -240,7 +240,11 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         if (Action == null) return;
 
         Application.Current.MainWindow.Hide();
-        Action.Execute(null);
+        Action.Execute(new CommandExecutionContext()
+        {
+            MouseCursorPositionX = appdata.MouseX,
+            MouseCursorPositionY = appdata.MouseY
+        });
     }
 
     public void SetContent(string text, bool asXaml = false, bool includeBoilerplate = true) {

@@ -98,4 +98,7 @@ public partial class NativeUtils
 
     [DllImport("user32.dll")]
     public static extern int AllowSetForegroundWindow(uint dwProcessId);
+
+    [DllImport("user32.dll")] 
+    public static extern int GetCursorPos(ref tagPOINT point);
 }

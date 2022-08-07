@@ -36,9 +36,9 @@ public class SequenceCommand : ActionCommand
         return clone;
     }
 
-    public override void Execute(object? parameter)
+    public override void ExecuteWithContext(CommandExecutionContext context)
     {
-        foreach (var a in Actions) a.Execute(null);
+        foreach (var a in Actions) a.Execute(context);
     }
 
     public override void WriteJson(JsonObject o)

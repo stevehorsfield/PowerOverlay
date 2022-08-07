@@ -21,6 +21,7 @@ public class AppViewModel : INotifyPropertyChanged {
     private string appProcessExecutable = String.Empty;
     private IntPtr applicationHwnd = IntPtr.Zero;
     private ButtonMenuViewModel? currentMenu;
+    private int mouseX, mouseY;
 
     private bool lockMenu;
     public bool LockMenu { 
@@ -181,6 +182,32 @@ public class AppViewModel : INotifyPropertyChanged {
         }
     }
 
+    public int MouseX
+    {
+        get { return this.mouseX; }
+        set
+        {
+            this.mouseX = value;
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(MouseX)));
+            }
+        }
+    }
+
+    public int MouseY
+    {
+        get { return this.mouseY; }
+        set
+        {
+            this.mouseY = value;
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(nameof(MouseY)));
+            }
+        }
+    }
+
     public ButtonMenuViewModel? CurrentMenu
     {
         get { return this.currentMenu; }
@@ -232,6 +259,18 @@ public class AppViewModel : INotifyPropertyChanged {
         this.ApplicationWindowTitle = NativeUtils.GetWindowTitle(applicationHwnd);
         this.ApplicationProcessExecutable = NativeUtils.GetWindowProcessMainFilename(applicationHwnd);
         this.ApplicationProcessName = NativeUtils.GetWindowProcessName(applicationHwnd);
+
+        var cursorPos = NativeUtils.GetCursorPosition();
+        if (! cursorPos.HasValue)
+        {
+            this.MouseX = 0;
+            this.MouseY = 0;
+        }
+        else
+        {
+            this.MouseX = cursorPos.Value.X;
+            this.MouseY = cursorPos.Value.Y;
+        }
     }
 
     public void ApplyFrom(ConfigurationViewModel config)

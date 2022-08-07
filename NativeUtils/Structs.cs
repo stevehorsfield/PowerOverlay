@@ -416,4 +416,10 @@ public partial class NativeUtils
     public const int SC_MAXIMIZE = 0xF030;
 
     public const uint ASFW_ANY = 0xFFFFFFFF; // -1
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct tagPOINT
+    {
+        public int x, y;
+    }
 }

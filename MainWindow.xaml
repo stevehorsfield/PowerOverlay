@@ -65,6 +65,7 @@
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Current menu:</Bold> <Run Text="{Binding Path=CurrentMenu.Name}"></Run></TextBlock>
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>App:</Bold> <Run Text="{Binding Path=ApplicationProcessName}"></Run></TextBlock>
                 <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Exe:</Bold> <Run Text="{Binding Path=ApplicationProcessExecutable}"></Run></TextBlock>
+                <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Mouse pos:</Bold> <Run Text="{Binding Path=MouseX}"/>,<Run Text="{Binding Path=MouseY}"/></TextBlock>
                 
                 <TextBlock Margin="0,5" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40"><Bold>Window:</Bold> <Run Text="{Binding Path=ApplicationWindowTitle}"></Run></TextBlock>
 

@@ -201,7 +201,7 @@ public class ExecuteCommand : ActionCommand
         return clone;
     }
 
-    public override void Execute(object? parameter)
+    public override void ExecuteWithContext(CommandExecutionContext context)
     {
         try
         {

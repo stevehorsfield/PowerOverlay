@@ -86,6 +86,20 @@ public abstract class ActionCommand : ICommand, INotifyPropertyChanged
     }
 
     public abstract bool CanExecute(object? parameter);
-    public abstract void Execute(object? parameter);
+    
+    public void Execute(object? parameter)
+    {
+        var cec = parameter as CommandExecutionContext;
+        if (cec == null)
+        {
+            ExecuteWithContext(new CommandExecutionContext());
+        }
+        else
+        {
+            ExecuteWithContext(cec);
+        }
+    }
+
+    public abstract void ExecuteWithContext(CommandExecutionContext context);
 }
 

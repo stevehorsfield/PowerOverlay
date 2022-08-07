@@ -37,7 +37,7 @@ public class Sleep : ActionCommand
         return new Sleep() { SleepMilliseconds = SleepMilliseconds };
     }
 
-    public override void Execute(object? parameter)
+    public override void ExecuteWithContext(CommandExecutionContext context)
     {
         if (SleepMilliseconds <= 0) return;
         Thread.Sleep(SleepMilliseconds);

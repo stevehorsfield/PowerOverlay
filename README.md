@@ -35,10 +35,11 @@ A named menu can be provided as an argument.
 
 * Add condition action (such as only launch exe if not running)
 * support app zooming (Window-SizeToContent and ViewBox) and scaling based on screen proportions
-* Addd mouse move/click action
 * Support action result conditions in sequences
 * Support track mouse monitor on activate
 * Support aligned positioning (center/middle/top/bottom/left/right...)
 * Support custom button layouts (more/fewer buttons, non-grid layout, etc.)
 * Support options dialog
 * Add per-menu global hot key support
+* Support volume/mute settings for audio input/output (see IMMDeviceEnumerator and IAudioEndpointVolume)
+* Support webcam enable/disable

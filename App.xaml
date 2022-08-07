@@ -133,6 +133,10 @@
                                                 <Bold>-</Bold>
                                             </Button>
                                         </StackPanel>
+                                        <StackPanel DockPanel.Dock="Right" Orientation="Vertical" VerticalAlignment="Center">
+                                            <Button Margin="2" Name="KeyActionsUp">🔼</Button>
+                                            <Button Margin="2" Name="KeyActionsDown">🔽</Button>
+                                        </StackPanel>
                                         <ScrollViewer>
                                             <ItemsPresenter Name="ItemsPresenter" />
                                         </ScrollViewer>
@@ -149,8 +153,14 @@
                                         </Grid.Style>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="10px"/>
                                             <RowDefinition Height="auto"/>
                                             <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="10px"/>
+                                            <RowDefinition Height="auto"/>
+                                            <RowDefinition Height="10px"/>
                                             <RowDefinition Height="auto"/>
                                             <RowDefinition Height="10px"/>
                                             <RowDefinition Height="auto"/>
@@ -165,28 +175,42 @@
                                             <ColumnDefinition Width="auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding LeftShift}" Content="Left SHIFT"/>
-                                        <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding LeftControl}" Content="Left CTRL"/>
-                                        <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="{Binding LeftAlt}" Content="Left ALT"/>
-                                        <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding LeftWindows}" Content="Left WIN"/>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="Delay (ms):"/>
+                                        <local:NumericTextBox 
+                                            Grid.Row="0" Grid.Column="2"
+                                            Width="100" HorizontalAlignment="Left"
+                                            MinValue="0"
+                                            MaxValue="30000"
+                                            Value="{Binding Path=SleepDelayBeforeMilliseconds}" />
 
-                                        <CheckBox Grid.Row="0" Grid.Column="2" IsChecked="{Binding RightShift}" Content="Right SHIFT"/>
-                                        <CheckBox Grid.Row="1" Grid.Column="2" IsChecked="{Binding RightControl}" Content="Right CTRL"/>
-                                        <CheckBox Grid.Row="2" Grid.Column="2" IsChecked="{Binding RightAlt}" Content="Right ALT"/>
-                                        <CheckBox Grid.Row="3" Grid.Column="2" IsChecked="{Binding RightWindows}" Content="Right WIN"/>
+                                        <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="{Binding LeftShift}" Content="Left SHIFT"/>
+                                        <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding LeftControl}" Content="Left CTRL"/>
+                                        <CheckBox Grid.Row="4" Grid.Column="0" IsChecked="{Binding LeftAlt}" Content="Left ALT"/>
+                                        <CheckBox Grid.Row="5" Grid.Column="0" IsChecked="{Binding LeftWindows}" Content="Left WIN"/>
 
-                                        <CheckBox Grid.Row="5" Grid.Column="0" IsChecked="{Binding IsSpecialKey}" Content="Special key" />
-                                        <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding IsNormalKey}" Content="Character key" />
+                                        <CheckBox Grid.Row="2" Grid.Column="2" IsChecked="{Binding RightShift}" Content="Right SHIFT"/>
+                                        <CheckBox Grid.Row="3" Grid.Column="2" IsChecked="{Binding RightControl}" Content="Right CTRL"/>
+                                        <CheckBox Grid.Row="4" Grid.Column="2" IsChecked="{Binding RightAlt}" Content="Right ALT"/>
+                                        <CheckBox Grid.Row="5" Grid.Column="2" IsChecked="{Binding RightWindows}" Content="Right WIN"/>
 
-                                        <ComboBox Grid.Row="5" Grid.Column="2" Name="SpecialKeyCombo"
+                                        <CheckBox Grid.Row="7" Grid.Column="0" IsChecked="{Binding IsSpecialKey}" Content="Special key" />
+                                        <CheckBox Grid.Row="9" Grid.Column="0" IsChecked="{Binding IsNormalKey}" Content="Character key" />
+                                        <CheckBox Grid.Row="11" Grid.Column="0" IsChecked="{Binding IsDelayOnly}" Content="Delay only" />
+
+                                        <ComboBox Grid.Row="7" Grid.Column="2" Name="SpecialKeyCombo"
                                                   IsEnabled="{Binding IsSpecialKey}"
                                                   SelectedIndex="{Binding SpecialKeyIndex}"
                                                   ItemsSource="{Binding SpecialKeys}" />
-                                        <TextBox Grid.Row="7" Grid.Column="2" 
+                                        <TextBox Grid.Row="9" Grid.Column="2" 
                                                  IsEnabled="{Binding IsNormalKey}"
                                                  Text="{Binding NormalKeyText}" MaxLength="2"
                                                  CharacterCasing="Upper"
                                                  />
+
+                                        <Label Grid.Row="13" Grid.Column="0" Content="Modifier key release mode:"/>
+                                        <ComboBox Grid.Row="13" Grid.Column="2" Name="ModifierReleaseModeCombo"
+                                                  SelectedIndex="{Binding ModifierReleaseModeIndex}"
+                                                  ItemsSource="{Binding ModifierReleaseModeNames}" />
                                     </Grid>
                                 </DockPanel>
                             </Border>

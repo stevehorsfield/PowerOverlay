@@ -8,12 +8,16 @@ using System.Windows.Interop;
 using System.Windows;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 public partial class NativeUtils
 {
     public class InputWrapper
     {
         private readonly List<tagINPUT> data = new List<tagINPUT>();
+        private readonly List<int> delays = new();
+        private readonly List<bool> hasData = new();
+
         private bool awaitingKeyReset;
 
         public InputWrapper(bool sendKeyReset = true)
@@ -21,27 +25,45 @@ public partial class NativeUtils
             awaitingKeyReset = sendKeyReset;
         }
 
-        private void AddKeyModifierClear()
+        private void AddDataInternal(tagINPUT input, int delayBefore)
         {
-            awaitingKeyReset = false;
-            AddKeyInternal(true, false, Win32VirtualKey.VK_LSHIFT);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_LCONTROL);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_LMENU);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_LWIN);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_RSHIFT);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_RCONTROL);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_RMENU);
-            AddKeyInternal(true, false, Win32VirtualKey.VK_RWIN);
+            if (delayBefore < 0) throw new ArgumentException("Argument cannot be negative", nameof(delayBefore));
+
+            data.Add(input);
+            delays.Add(delayBefore);
+            hasData.Add(true);
         }
 
-        private void AddKeyInternal(bool up, bool extended, Win32VirtualKey vk)
+        public void AddSleep(int delay)
+        {
+            if (delay == 0) return;
+            if (delay < 0) throw new ArgumentException("Argument cannot be negative", nameof(delay));
+            data.Add(new tagINPUT());
+            delays.Add(delay);
+            hasData.Add(false);
+        }
+
+        private void AddKeyModifierClear(int delayBefore)
+        {
+            awaitingKeyReset = false;
+            AddKeyInternal(true, false, Win32VirtualKey.VK_LSHIFT, delayBefore);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_LCONTROL, 0);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_LMENU, 0);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_LWIN, 0);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_RSHIFT, 0);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_RCONTROL, 0);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_RMENU, 0);
+            AddKeyInternal(true, false, Win32VirtualKey.VK_RWIN, 0);
+        }
+
+        private void AddKeyInternal(bool up, bool extended, Win32VirtualKey vk, int delayBefore)
         {
             tagINPUT i = new tagINPUT();
 
             i.type = InputType.Keyboard;
             i.keyInput.wVk = (ushort)vk;
             i.keyInput.time = (uint)(DateTimeOffset.Now.ToUnixTimeMilliseconds() + data.Count);
-            i.keyInput.wScan = (ushort) MapVirtualKeyW((ushort) vk, Win32MapVirtualKeyMode.VkToScan);
+            i.keyInput.wScan = (ushort)MapVirtualKeyW((ushort)vk, Win32MapVirtualKeyMode.VkToScan);
             i.keyInput.dwFlags = 0;
             //if (i.keyInput.wScan != 0)
             //{
@@ -55,35 +77,39 @@ public partial class NativeUtils
 
             i.keyInput.dwExtraInfo = UIntPtr.Zero;
 
-            data.Add(i);
+            AddDataInternal(i, delayBefore);
         }
 
-        private void AddKey(bool up, bool extended, Win32VirtualKey vk)
+        private void AddKey(bool up, bool extended, Win32VirtualKey vk, int delayBefore)
         {
-            if (awaitingKeyReset) AddKeyModifierClear();
-            AddKeyInternal(up, extended, vk);
+            if (awaitingKeyReset)
+            {
+                AddKeyModifierClear(delayBefore);
+                delayBefore = 0;
+            }
+            AddKeyInternal(up, extended, vk, delayBefore);
         }
 
-        public void AddKeyUp(Win32VirtualKey vk, bool extended) => AddKey(true, extended, vk);
-        public void AddKeyDown(Win32VirtualKey vk, bool extended) => AddKey(false, extended, vk);
-        public void AddKeyPress(Win32VirtualKey vk, bool extended) {
-            AddKey(false, extended, vk); 
-            AddKey(true, extended, vk);
+        public void AddKeyUp(Win32VirtualKey vk, bool extended, int delayBefore) => AddKey(true, extended, vk, delayBefore);
+        public void AddKeyDown(Win32VirtualKey vk, bool extended, int delayBefore) => AddKey(false, extended, vk, delayBefore);
+        public void AddKeyPress(Win32VirtualKey vk, bool extended, int delayBefore) {
+            AddKey(false, extended, vk, delayBefore);
+            AddKey(true, extended, vk, 0);
         }
 
-        public bool AddKeyDown(char c) => AddKey(false, c);
-        public bool AddKeyUp(char c) => AddKey(true, c);
+        public bool AddKeyDown(char c, int delayBefore) => AddKey(false, c, delayBefore);
+        public bool AddKeyUp(char c, int delayBefore) => AddKey(true, c, delayBefore);
 
-        public bool AddKey(bool up, char c)
+        public bool AddKey(bool up, char c, int delayBefore)
         {
-            var vk = (byte) (VkKeyScanW(c) & 0xFF);
+            var vk = (byte)(VkKeyScanW(c) & 0xFF);
             if (vk == 0xFF) return false;
-            AddKey(up, false, (Win32VirtualKey) vk);
+            AddKey(up, false, (Win32VirtualKey)vk, delayBefore);
             return true;
         }
-        public bool AddKeyPress(char c)
+        public bool AddKeyPress(char c, int delayBefore)
         {
-            return AddKey(false, c) && AddKey(true, c);
+            return AddKey(false, c, delayBefore) && AddKey(true, c, 0);
         }
 
         public static bool IsValidChar(char c)
@@ -95,6 +121,16 @@ public partial class NativeUtils
         public Span<tagINPUT> UnsafeGetData()
         {
             return CollectionsMarshal.AsSpan(data);
+        }
+
+        public Span<int> UnsafeGetDelays()
+        {
+            return CollectionsMarshal.AsSpan(delays);
+        }
+
+        public Span<bool> UnsafeGetHasData()
+        {
+            return CollectionsMarshal.AsSpan(hasData);
         }
     }
 
@@ -136,9 +172,9 @@ public partial class NativeUtils
             var isVKPressed = (Win32VirtualKey vk) => (initialState[(byte)vk] & 0x80) == 0x80;
             var isVKToggled = (Win32VirtualKey vk) => (initialState[(byte)vk] & 0x01) == 0x01;
 
-            if (isVKToggled(Win32VirtualKey.VK_CAPITAL)) resetWrapper.AddKeyPress(Win32VirtualKey.VK_CAPITAL, false);
-            if (isVKToggled(Win32VirtualKey.VK_NUMLOCK)) resetWrapper.AddKeyPress(Win32VirtualKey.VK_NUMLOCK, true);
-            if (isVKToggled(Win32VirtualKey.VK_SCROLL)) resetWrapper.AddKeyPress(Win32VirtualKey.VK_SCROLL, true);
+            if (isVKToggled(Win32VirtualKey.VK_CAPITAL)) resetWrapper.AddKeyPress(Win32VirtualKey.VK_CAPITAL, false, 0);
+            if (isVKToggled(Win32VirtualKey.VK_NUMLOCK)) resetWrapper.AddKeyPress(Win32VirtualKey.VK_NUMLOCK, true, 0);
+            if (isVKToggled(Win32VirtualKey.VK_SCROLL)) resetWrapper.AddKeyPress(Win32VirtualKey.VK_SCROLL, true, 0);
 
             bool restoreToggles = false;
 
@@ -167,11 +203,41 @@ public partial class NativeUtils
     private static unsafe bool SendInputInternal(InputWrapper input)
     {
         var data = input.UnsafeGetData();
-        fixed (byte* pbData = &MemoryMarshal.GetReference(MemoryMarshal.Cast<tagINPUT, byte>(data)))
+        var delays = input.UnsafeGetDelays();
+        var hasDataFlags = input.UnsafeGetHasData();
+
+        int index = 0;
+
+        while (index < data.Length)
         {
-            var result = SendInput((uint)data.Length, pbData, Marshal.SizeOf<tagINPUT>());
-            return result == data.Length;
+            if (delays[index] != 0)
+            {
+                Thread.Sleep(delays[index]);
+            }
+            int nextStop = index + 1;
+
+            if (hasDataFlags[index])
+            {
+                while (nextStop < data.Length)
+                {
+                    if (delays[nextStop] != 0) break;
+                    ++nextStop;
+                }
+
+                Span<tagINPUT> group = data.Slice(index, nextStop - index);
+
+
+                fixed (byte* pbData = &MemoryMarshal.GetReference(MemoryMarshal.Cast<tagINPUT, byte>(group)))
+                {
+                    var result = SendInput((uint)group.Length, pbData, Marshal.SizeOf<tagINPUT>());
+                    if (result != group.Length) return false;
+                    System.Diagnostics.Debug.WriteLine($"SendInput completed with {group.Length} entries");
+                }
+            }
+
+            index = nextStop;
         }
+        return true;
     }
 
     // INVALID APPROACH.

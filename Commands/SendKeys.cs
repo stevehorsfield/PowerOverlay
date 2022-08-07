@@ -89,6 +89,20 @@ public class SendKeySpecialKey
     public static readonly SendKeySpecialKey Numeric9 = new SendKeySpecialKey("Numeric 9",0x69);
 }
 
+public enum SendKeyModifierReleaseMode
+{
+    KeepPressed,
+    ReleaseSelected,
+    ReleaseAll
+}
+
+public enum SendKeyMode
+{
+    NormalKey,
+    SpecialKey,
+    DelayOnly
+}
+
 public class SendKeyValue : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -169,7 +183,9 @@ public class SendKeyValue : INotifyPropertyChanged
 
     private SendKeySpecialKey? specialKey;
     private string normalKeyText = String.Empty;
-    private bool isSpecialKey;
+    private SendKeyMode mode; 
+    private int sleepDelayBeforeMilliseconds;
+    private SendKeyModifierReleaseMode releaseModifiersMode;
 
     public string ModifiersDisplayValue
     {
@@ -188,34 +204,136 @@ public class SendKeyValue : INotifyPropertyChanged
             return b.ToString();
         }
     }
+
+    public string SleepDisplay
+    {
+        get
+        {
+            return sleepDelayBeforeMilliseconds == 0 ? String.Empty : $"(+ {sleepDelayBeforeMilliseconds}ms) ";
+        }
+    }
+
+    public string ModifierReleaseDisplay
+    {
+        get
+        {
+            switch (ModifierReleaseMode)
+            {
+                case SendKeyModifierReleaseMode.KeepPressed:
+                    return String.Empty;
+                case SendKeyModifierReleaseMode.ReleaseSelected:
+                    return " releasing";
+                case SendKeyModifierReleaseMode.ReleaseAll:
+                    return " releasing all";
+            }
+            return String.Empty;
+        }
+    }
+
     public string DisplayValue { get
         {
             var keyText = String.Empty;
-
-            if (isSpecialKey && specialKey == null) return "<invalid>";
-            if (isSpecialKey) keyText = specialKey!.Name;
-            else if (normalKeyText.Length != 1) return "<invalid>";
-            else keyText = normalKeyText;
-            return $"{keyText} ({ModifiersDisplayValue})";
+            switch (mode)
+            {
+                case SendKeyMode.NormalKey:
+                    if (normalKeyText.Length != 1) return "<invalid>";
+                    else keyText = normalKeyText;
+                    break;
+                case SendKeyMode.SpecialKey:
+                    if (specialKey == null) return "<invalid>";
+                    keyText = specialKey!.Name;
+                    break;
+                case SendKeyMode.DelayOnly:
+                    keyText = "<no key>";
+                    break;
+            }
+            return $"{SleepDisplay}{keyText} ({ModifiersDisplayValue}{ModifierReleaseDisplay})";
         } 
     }
 
-    public bool IsSpecialKey
+    public SendKeyMode Mode
     {
-        get { return isSpecialKey; }
+        get { return mode; }
         set
         {
-            isSpecialKey = value;
-            Notify(nameof(IsSpecialKey), nameof(IsNormalKey), nameof(DisplayValue));
+            mode = value;
+            Notify(nameof(Mode), nameof(IsSpecialKey), nameof(IsNormalKey), nameof(IsDelayOnly), nameof(DisplayValue));
+        }
+    }
+    public bool IsSpecialKey
+    {
+        get { return mode == SendKeyMode.SpecialKey; }
+        set
+        {
+            Mode = SendKeyMode.SpecialKey;
         }
     }
     public bool IsNormalKey
     {
-        get { return !isSpecialKey; }
+        get { return mode == SendKeyMode.NormalKey; }
         set
         {
-            isSpecialKey = !value;
-            Notify(nameof(IsSpecialKey), nameof(IsNormalKey), nameof(DisplayValue));
+            Mode = SendKeyMode.NormalKey;
+        }
+    }
+    public bool IsDelayOnly
+    {
+        get { return mode == SendKeyMode.DelayOnly; }
+        set
+        {
+            Mode = SendKeyMode.DelayOnly;
+        }
+    }
+
+    public IEnumerable<string> ModifierReleaseModeNames => Enum.GetNames<SendKeyModifierReleaseMode>();
+    public SendKeyModifierReleaseMode ModifierReleaseMode
+    {
+        get { return releaseModifiersMode; }
+        set
+        {
+            releaseModifiersMode = value;
+            Notify(nameof(ModifierReleaseMode), nameof(ModifierReleaseModeName), nameof(ModifierReleaseModeIndex), nameof(DisplayValue));
+        }
+    }
+    public string ModifierReleaseModeName
+    {
+        get
+        {
+            return ModifierReleaseMode.ToString();
+        }
+        set
+        {
+            ModifierReleaseMode = Enum.Parse<SendKeyModifierReleaseMode>(value, true);
+        }
+    }
+    public int ModifierReleaseModeIndex
+    {
+        get
+        {
+            var items = ModifierReleaseModeNames.ToList();
+            return items.IndexOf(ModifierReleaseModeName.ToString());
+        }
+        set
+        {
+            var items = ModifierReleaseModeNames.ToList();
+            if (value < 0 || value >= items.Count)
+            {
+                ModifierReleaseMode = SendKeyModifierReleaseMode.KeepPressed;
+            }
+            else
+            {
+                ModifierReleaseModeName = items[value];
+            }
+        }
+    }
+
+    public int SleepDelayBeforeMilliseconds
+    {
+        get { return sleepDelayBeforeMilliseconds; }
+        set
+        {
+            sleepDelayBeforeMilliseconds = value;
+            Notify(nameof(SleepDelayBeforeMilliseconds), nameof(SleepDisplay), nameof(DisplayValue));
         }
     }
 
@@ -280,8 +398,16 @@ public class SendKeyValue : INotifyPropertyChanged
 
     public bool IsValid()
     {
-        return (IsSpecialKey && specialKey != null)
-            || ((!IsSpecialKey) && normalKeyText.Length == 1 && NativeUtils.InputWrapper.IsValidChar(normalKeyText[0]));
+        switch (mode)
+        {
+            case SendKeyMode.NormalKey:
+                return normalKeyText.Length == 1 && NativeUtils.InputWrapper.IsValidChar(normalKeyText[0]);
+            case SendKeyMode.SpecialKey:
+                return specialKey != null;
+            case SendKeyMode.DelayOnly:
+                return true;
+        }
+        return false;
     }
 
     public SendKeyValue Clone()
@@ -291,7 +417,9 @@ public class SendKeyValue : INotifyPropertyChanged
             Modifiers = Modifiers,
             SpecialKey = SpecialKey,
             NormalKeyText = NormalKeyText,
-            IsSpecialKey = IsSpecialKey,
+            Mode = Mode,
+            ModifierReleaseMode = ModifierReleaseMode,
+            SleepDelayBeforeMilliseconds = SleepDelayBeforeMilliseconds,
         };
     }
 }
@@ -331,7 +459,7 @@ public class SendKeys : ActionCommand
         }
     }
 
-    private bool sendToActiveApplication;
+    private bool sendToActiveApplication = true;
     public bool SendToActiveApplication
     {
         get { return sendToActiveApplication; }
@@ -339,6 +467,17 @@ public class SendKeys : ActionCommand
         {
             sendToActiveApplication = value;
             RaisePropertyChanged(nameof(SendToActiveApplication));
+        }
+    }
+
+    private bool releaseModifiersAtSequenceEnd = true;
+    public bool ReleaseModifiersAtSequenceEnd
+    {
+        get { return releaseModifiersAtSequenceEnd; }
+        set
+        {
+            releaseModifiersAtSequenceEnd = value;
+            RaisePropertyChanged(nameof(ReleaseModifiersAtSequenceEnd));
         }
     }
 
@@ -372,6 +511,7 @@ public class SendKeys : ActionCommand
             SendToActiveApplication = SendToActiveApplication,
             SendToDesktop = SendToDesktop,
             SendToShell = SendToShell,
+            ReleaseModifiersAtSequenceEnd = ReleaseModifiersAtSequenceEnd,
         };
 
         foreach (var x in ApplicationTargets)
@@ -428,53 +568,89 @@ public class SendKeys : ActionCommand
     private NativeUtils.InputWrapper? BuildKeyPresses()
     {
         var result = new NativeUtils.InputWrapper();
+        var flags = (SendKeyModifierFlags)0;
 
-        //result.AddKeyModifierClear();
+        int delayBefore = 0;
+
+        var processModifier = (SendKeyModifierFlags newFlags, SendKeyModifierFlags flag, NativeUtils.Win32VirtualKey vk, bool extended) =>
+        {
+            if (newFlags.HasFlag(flag) && (!flags.HasFlag(flag)))
+            {
+                // Key down
+                result.AddKeyDown(vk, extended, delayBefore);
+                flags |= flag;
+                delayBefore = 0;
+            }
+            else if (flags.HasFlag(flag) && (!newFlags.HasFlag(flag)))
+            {
+                // Key up
+                result.AddKeyUp(vk, extended, delayBefore);
+                flags &= ~flag;
+                delayBefore = 0;
+            }
+        };
 
         foreach (var key in KeySequence)
         {
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftShift)) 
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_LSHIFT, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightShift))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_RSHIFT, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftControl))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_LCONTROL, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightControl))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_RCONTROL, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftAlt))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_LMENU, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightAlt))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_RMENU, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftWindows))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_LWIN, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightWindows))
-                result.AddKeyDown(NativeUtils.Win32VirtualKey.VK_RWIN, false);
+            delayBefore = key.SleepDelayBeforeMilliseconds;
 
-            if (key.IsNormalKey)
+            processModifier(key.Modifiers, SendKeyModifierFlags.LeftShift, NativeUtils.Win32VirtualKey.VK_LSHIFT, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.LeftControl, NativeUtils.Win32VirtualKey.VK_LCONTROL, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.LeftAlt, NativeUtils.Win32VirtualKey.VK_LMENU, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.LeftWindows, NativeUtils.Win32VirtualKey.VK_LWIN, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.RightShift, NativeUtils.Win32VirtualKey.VK_RSHIFT, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.RightControl, NativeUtils.Win32VirtualKey.VK_RCONTROL, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.RightAlt, NativeUtils.Win32VirtualKey.VK_RMENU, false);
+            processModifier(key.Modifiers, SendKeyModifierFlags.RightWindows, NativeUtils.Win32VirtualKey.VK_RWIN, false);
+
+            switch (key.Mode)
             {
-                if (!result.AddKeyPress(key.NormalKeyText[0])) return null;
-            } else
-            {
-                var vk = key.SpecialKeyKey!.VirtualKeyCode;
-                result.AddKeyPress((NativeUtils.Win32VirtualKey) (byte) vk, false);
+                case SendKeyMode.NormalKey:
+                    if (!result.AddKeyPress(key.NormalKeyText[0], delayBefore)) return null;
+                    break;
+                case SendKeyMode.SpecialKey:
+                    {
+                        var vk = key.SpecialKeyKey!.VirtualKeyCode;
+                        result.AddKeyPress((NativeUtils.Win32VirtualKey)(byte)vk, false, delayBefore);
+                    }
+                    break;
+                case SendKeyMode.DelayOnly:
+                    if (delayBefore > 0) result.AddSleep(delayBefore);
+                    break;
             }
 
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftShift))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_LSHIFT, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightShift))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_RSHIFT, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftControl))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_LCONTROL, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightControl))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_RCONTROL, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftAlt))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_LMENU, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightAlt))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_RMENU, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.LeftWindows))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_LWIN, false);
-            if (key.Modifiers.HasFlag(SendKeyModifierFlags.RightWindows))
-                result.AddKeyUp(NativeUtils.Win32VirtualKey.VK_RWIN, false);
+            SendKeyModifierFlags releaseFlags = flags;
+            switch (key.ModifierReleaseMode)
+            {
+                case SendKeyModifierReleaseMode.KeepPressed:
+                    break;
+                case SendKeyModifierReleaseMode.ReleaseSelected:
+                    releaseFlags = flags & (~key.Modifiers);
+                    break;
+                case SendKeyModifierReleaseMode.ReleaseAll:
+                    releaseFlags = (SendKeyModifierFlags)0;
+                    break;
+            }
+
+            processModifier(releaseFlags, SendKeyModifierFlags.LeftShift, NativeUtils.Win32VirtualKey.VK_LSHIFT, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.LeftControl, NativeUtils.Win32VirtualKey.VK_LCONTROL, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.LeftAlt, NativeUtils.Win32VirtualKey.VK_LMENU, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.LeftWindows, NativeUtils.Win32VirtualKey.VK_LWIN, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.RightShift, NativeUtils.Win32VirtualKey.VK_RSHIFT, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.RightControl, NativeUtils.Win32VirtualKey.VK_RCONTROL, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.RightAlt, NativeUtils.Win32VirtualKey.VK_RMENU, false);
+            processModifier(releaseFlags, SendKeyModifierFlags.RightWindows, NativeUtils.Win32VirtualKey.VK_RWIN, false);
+        }
+        if (releaseModifiersAtSequenceEnd)
+        {
+            processModifier(0, SendKeyModifierFlags.LeftShift, NativeUtils.Win32VirtualKey.VK_LSHIFT, false);
+            processModifier(0, SendKeyModifierFlags.LeftControl, NativeUtils.Win32VirtualKey.VK_LCONTROL, false);
+            processModifier(0, SendKeyModifierFlags.LeftAlt, NativeUtils.Win32VirtualKey.VK_LMENU, false);
+            processModifier(0, SendKeyModifierFlags.LeftWindows, NativeUtils.Win32VirtualKey.VK_LWIN, false);
+            processModifier(0, SendKeyModifierFlags.RightShift, NativeUtils.Win32VirtualKey.VK_RSHIFT, false);
+            processModifier(0, SendKeyModifierFlags.RightControl, NativeUtils.Win32VirtualKey.VK_RCONTROL, false);
+            processModifier(0, SendKeyModifierFlags.RightAlt, NativeUtils.Win32VirtualKey.VK_RMENU, false);
+            processModifier(0, SendKeyModifierFlags.RightWindows, NativeUtils.Win32VirtualKey.VK_RWIN, false);
         }
         return result;
     }
@@ -493,17 +669,27 @@ public class SendKeys : ActionCommand
         o.AddLowerCamel(nameof(SendToDesktop), JsonValue.Create(SendToDesktop));
         o.AddLowerCamel(nameof(SendToShell), JsonValue.Create(SendToShell));
         o.AddLowerCamel(nameof(SendToAllMatches), JsonValue.Create(SendToAllMatches));
+        o.AddLowerCamelValue(nameof(ReleaseModifiersAtSequenceEnd), ReleaseModifiersAtSequenceEnd);
         var sequence = KeySequence.Select(x =>
         {
             var o = new JsonObject();
-            var field = x.IsNormalKey ? "characterKey" : "virtualKey";
-            var value = String.Empty;
-            if (x.IsNormalKey && !String.IsNullOrEmpty(x.NormalKeyText) && x.NormalKeyText.Length == 1)
-                value = x.NormalKeyText;
-            if (x.IsSpecialKey && x.SpecialKeyKey != null)
-                value = x.SpecialKeyKey.Name;
-
-            o.AddLowerCamel(field, JsonValue.Create(value));
+            o.AddLowerCamelValue(nameof(SendKeyValue.Mode), x.Mode.ToString());
+            o.AddLowerCamelValue(nameof(SendKeyValue.ModifierReleaseMode), x.ModifierReleaseMode.ToString());
+            switch (x.Mode)
+            {
+                case SendKeyMode.NormalKey:
+                    if (!String.IsNullOrEmpty(x.NormalKeyText) && x.NormalKeyText.Length == 1) {
+                       o.AddLowerCamelValue(nameof(SendKeyValue.NormalKeyText), x.NormalKeyText);
+                    }
+                    break;
+                case SendKeyMode.SpecialKey:
+                    if (x.SpecialKeyKey != null) { 
+                        o.AddLowerCamelValue(nameof(SendKeyValue.SpecialKey), x.SpecialKey);
+                    }
+                    break;
+                case SendKeyMode.DelayOnly:
+                    break;
+            }
             var flags = new List<JsonValue>();
             foreach (var flag in Enum.GetValues<SendKeyModifierFlags>())
             {
@@ -512,6 +698,7 @@ public class SendKeys : ActionCommand
                     flags.Add(JsonValue.Create(Enum.GetName<SendKeyModifierFlags>(flag)!.ToLowerCamelCase())!);
             }
             if (flags.Count > 0) o.AddLowerCamel(nameof(SendKeyValue.Modifiers), new JsonArray(flags.ToArray()));
+            o.AddLowerCamelValue(nameof(SendKeyValue.SleepDelayBeforeMilliseconds), x.SleepDelayBeforeMilliseconds);
 
             return o;
         }).ToArray();
@@ -526,6 +713,7 @@ public class SendKeys : ActionCommand
         o.TryGetValue<bool>(nameof(SendToDesktop), b => result.SendToDesktop = b);
         o.TryGetValue<bool>(nameof(SendToShell), b => result.SendToShell = b);
         o.TryGetValue<bool>(nameof(SendToAllMatches), b => result.SendToAllMatches = b);
+        o.TryGetValue<bool>(nameof(ReleaseModifiersAtSequenceEnd), b => result.ReleaseModifiersAtSequenceEnd = b);
 
         o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
             foreach (var x in xs)
@@ -541,14 +729,29 @@ public class SendKeys : ActionCommand
             {
                 var val = x!.AsObject();
                 var key = new SendKeyValue();
-                val.TryGet<string>("characterKey", s => {
-                    key.IsNormalKey = true;
-                    key.NormalKeyText = s;
-                });
-                val.TryGet<string>("virtualKey", s =>
+
+                val.TryGet<string>(nameof(SendKeyValue.Mode), m =>
                 {
-                    key.IsSpecialKey = true;
-                    key.SpecialKey = s;
+                    key.Mode = Enum.Parse<SendKeyMode>(m, true);
+                });
+                switch (key.Mode)
+                {
+                    case SendKeyMode.NormalKey:
+                        val.TryGet<string>(nameof(SendKeyValue.NormalKeyText), s => {
+                            key.NormalKeyText = s;
+                        });
+                        break;
+                    case SendKeyMode.SpecialKey:
+                        val.TryGet<string>(nameof(SendKeyValue.SpecialKey), s => {
+                            key.SpecialKey = s;
+                        });
+                        break;
+                    case SendKeyMode.DelayOnly:
+                        break;
+                }
+                val.TryGet<string>(nameof(SendKeyValue.ModifierReleaseMode), m =>
+                {
+                    key.ModifierReleaseModeName = m;
                 });
                 val.TryGet<JsonArray>(nameof(SendKeyValue.Modifiers), ms =>
                 {
@@ -560,6 +763,7 @@ public class SendKeys : ActionCommand
                     }
                     key.Modifiers = flags;
                 });
+                val.TryGetValue<int>(nameof(SendKeyValue.SleepDelayBeforeMilliseconds), d => key.SleepDelayBeforeMilliseconds = d);
 
                 result.KeySequence.Add(key);
             }
@@ -685,6 +889,17 @@ public class SendKeysDefinition : ActionCommandDefinition
                     keylist.SelectedIndex = keylist.SelectedIndex - 1;
                     ((SendKeys)b.DataContext).KeySequence.RemoveAt(keylist.SelectedIndex + 1);
                     return;
+                case "KeyActionsUp":
+                    e.Handled = true;
+                    if (keylist.SelectedIndex <= 0) return;
+                    ((SendKeys)b.DataContext).KeySequence.Move(keylist.SelectedIndex, keylist.SelectedIndex - 1);
+                    return;
+                case "KeyActionsDown":
+                    e.Handled = true;
+                    if (keylist.SelectedIndex == -1) return;
+                    if (keylist.SelectedIndex == ((SendKeys)b.DataContext).KeySequence.Count - 1) return;
+                    ((SendKeys)b.DataContext).KeySequence.Move(keylist.SelectedIndex, keylist.SelectedIndex + 1);
+                    return;
             }
         };
 
@@ -698,13 +913,27 @@ public class SendKeysDefinition : ActionCommandDefinition
             }
         };
 
+        var sp2 = new StackPanel();
+        sp2.Orientation = Orientation.Vertical;
+        DockPanel.SetDock(sp2, Dock.Bottom);
+
+        var addCheckbox2 = (string txt, string prop) =>
+        {
+            var cb = new CheckBox() { Content = txt, HorizontalAlignment = HorizontalAlignment.Left };
+            cb.SetBinding(CheckBox.IsCheckedProperty, new Binding(prop));
+            sp2.Children.Add(cb);
+        };
+
+        addCheckbox2("Auto-release modifier keys", nameof(SendKeys.ReleaseModifiersAtSequenceEnd));
+
         keylist.AddHandler(Button.ClickEvent, hClick2);
         ctrl.Children.Add(sp);
         ctrl.Children.Add(appTargetsLbl);
         ctrl.Children.Add(selector);
         ctrl.Children.Add(keysToSendLbl);
+        ctrl.Children.Add(sp2);
         ctrl.Children.Add(keylist);
-
+        
         return ctrl;
     }
 }

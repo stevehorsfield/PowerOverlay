@@ -156,6 +156,7 @@ public partial class NativeUtils
         uint threadId = GetWindowThreadProcessId(hwndTarget, ref processId);
         uint thisThreadId = GetCurrentThreadId();
 
+        bool attached = true;
         if (AttachThreadInput(thisThreadId, threadId, true) == 0) return false;
         try
         {
@@ -180,10 +181,10 @@ public partial class NativeUtils
 
             try
             {
-                if (!SendInputInternal(resetWrapper)) return false;
+                if (!SendInputInternal(resetWrapper, threadId, thisThreadId, ref attached)) return false;
                 restoreToggles = true;
 
-                return SendInputInternal(input);
+                return SendInputInternal(input, threadId, thisThreadId, ref attached);
             }
             finally
             {
@@ -191,16 +192,16 @@ public partial class NativeUtils
                 {
                     SetKeyboardState(pInitial); // ignore failures for resetting state
                 }
-                if (restoreToggles) SendInputInternal(resetWrapper);
+                if (restoreToggles) SendInputInternal(resetWrapper, threadId, thisThreadId, ref attached);
             }
         }
         finally
         {
-            AttachThreadInput(thisThreadId, threadId, false);
+            if (attached) AttachThreadInput(thisThreadId, threadId, false);
         }
     }
 
-    private static unsafe bool SendInputInternal(InputWrapper input)
+    private static unsafe bool SendInputInternal(InputWrapper input, uint threadId, uint thisThreadId, ref bool attached)
     {
         var data = input.UnsafeGetData();
         var delays = input.UnsafeGetDelays();
@@ -212,7 +213,16 @@ public partial class NativeUtils
         {
             if (delays[index] != 0)
             {
+                AttachThreadInput(thisThreadId, threadId, false);
+                attached = false;
+
                 Thread.Sleep(delays[index]);
+
+                if (AttachThreadInput(thisThreadId, threadId, true) == 0)
+                {
+                    return false;
+                }
+                attached = true;
             }
             int nextStop = index + 1;
 

@@ -322,7 +322,7 @@ namespace PowerOverlay
             {
                 this.Hide();
             }
-            this.MenuPopup.Visibility = Visibility.Hidden;
+            this.MenuPopup.IsOpen = false;
         }
 
         public void onMenuClick(object o, RoutedEventArgs e)
@@ -345,7 +345,7 @@ namespace PowerOverlay
             if (MenuList.SelectedIndex == -1) return;
             var menu = MenuList.SelectedItem as ButtonMenuViewModel;
             ((AppViewModel)DataContext).CurrentMenu = menu;
-            this.MenuPopup.Visibility = Visibility.Hidden;
+            this.MenuPopup.IsOpen = false;
         }
 
         public event EventHandler? CanExecuteChanged;
@@ -438,9 +438,7 @@ namespace PowerOverlay
                     return;
                 case "Menu":
                     MenuList.SelectedIndex = -1;
-                    this.MenuPopup.Visibility =
-                        this.MenuPopup.Visibility == Visibility.Hidden ?
-                        Visibility.Visible : Visibility.Hidden;
+                    this.MenuPopup.IsOpen = !this.MenuPopup.IsOpen;
                     return;
                 case "Configure":
                     lockActive = true;
@@ -577,6 +575,16 @@ namespace PowerOverlay
             DisplayViewBox.Height = newHeight;
             this.Left -= widthDelta / 2;
             this.Top -= heightDelta / 2;
+        }
+
+        private void MenuPopup_Closed(object sender, EventArgs e)
+        {
+            MenuButton.IsEnabled = true;
+        }
+
+        private void MenuPopup_Opened(object sender, EventArgs e)
+        {
+            MenuButton.IsEnabled = false;
         }
     }
 }

@@ -34,7 +34,6 @@ A named menu can be provided as an argument.
 ## To-do list
 
 * Add condition action (such as only launch exe if not running)
-* support app zooming (Window-SizeToContent and ViewBox) and scaling based on screen proportions
 * Support action result conditions in sequences
 * Support track mouse monitor on activate
 * Support aligned positioning (center/middle/top/bottom/left/right...)

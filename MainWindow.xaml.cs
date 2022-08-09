@@ -29,14 +29,19 @@ namespace PowerOverlay
         private bool lockActive = false;
         private readonly Storyboard MessageDisplayBoxStoryboard;
         private readonly AppSettings settings;
+        public AppSettings Settings => settings;
 
         public MainWindow()
         {
             settings = AppSettings.Get();
 
             InitializeComponent();
-            Width = settings.MainWindowWidth;
-            Height = settings.MainWindowHeight;
+
+            DisplayGrid.Width = settings.MainWindowWidth;
+            DisplayGrid.Height = settings.MainWindowHeight;
+
+            settings.PropertyChanged += Settings_PropertyChanged;
+            ApplyZoom();
 
             this.DataContext = settings.AppViewModel;
             //((AppViewModel)this.DataContext).AddTestData();
@@ -69,6 +74,22 @@ namespace PowerOverlay
                 new InputBinding(this,
                     new KeyGesture(Key.L, ModifierKeys.Control))
                 { CommandParameter = "Lock" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                new KeyGesture(Key.Add, ModifierKeys.Control))
+                { CommandParameter = "ZoomMore" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                new KeyGesture(Key.OemPlus, ModifierKeys.Control))
+                { CommandParameter = "ZoomMore" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                new KeyGesture(Key.Subtract, ModifierKeys.Control))
+                { CommandParameter = "ZoomLess" });
+            this.InputBindings.Add(
+                new InputBinding(this,
+                new KeyGesture(Key.OemMinus, ModifierKeys.Control))
+                { CommandParameter = "ZoomLess" });
 
             #region Numeric key combination bindings
 
@@ -193,6 +214,24 @@ namespace PowerOverlay
 
                     ButtonGrid.Children.Add(ctrl);
                 }
+            }
+        }
+
+        private void Settings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(AppSettings.DisplayZoom):
+                    ApplyZoom();
+                    return;
+                case nameof(AppSettings.MainWindowHeight):
+                    DisplayGrid.Width = settings.MainWindowHeight;
+                    ApplyZoom();
+                    return;
+                case nameof(AppSettings.MainWindowWidth):
+                    DisplayGrid.Width = settings.MainWindowWidth;
+                    ApplyZoom();
+                    return;
             }
         }
 
@@ -322,6 +361,8 @@ namespace PowerOverlay
                 case "Menu": return true;
                 case "Configure": return true;
                 case "Lock": return true;
+                case "ZoomMore": return true;
+                case "ZoomLess": return true;
                 default:
                     return Regex.IsMatch((string)parameter, @"^(Control|Alt|ControlShift|AltShift|ControlAlt)[1-5]$");
             }
@@ -417,6 +458,22 @@ namespace PowerOverlay
                     lockActive = false;
                     Keyboard.Focus(this);
                     return;
+                case "ZoomMore":
+                    {
+                        var zoom = settings.DisplayZoomLogValue;
+                        zoom += 0.1;
+                        if (zoom > 2.0) zoom = 2.0;
+                        if (zoom != settings.DisplayZoomLogValue) settings.DisplayZoomLogValue = zoom;
+                    }
+                    return;
+                case "ZoomLess":
+                    {
+                        var zoom = settings.DisplayZoomLogValue;
+                        zoom -= 0.1;
+                        if (zoom < -2.0) zoom = -2.0;
+                        if (zoom != settings.DisplayZoomLogValue) settings.DisplayZoomLogValue = zoom;
+                    }
+                    return;
             }
             if (!Regex.IsMatch(cmd, @"^(Control|Alt|ControlShift|AltShift|ControlAlt)[1-5]$")) return;
             if (dc?.CurrentMenu == null) return;
@@ -503,6 +560,23 @@ namespace PowerOverlay
         private void Window_Closed(object sender, EventArgs e)
         {
             App.Current.Shutdown(0);
+        }
+
+        private void ApplyZoom()
+        {
+            var midX = this.Left + (this.Width / 2);
+            var midY = this.Top + (this.Height / 2);
+
+            var newWidth = settings.MainWindowWidth * settings.DisplayZoom;
+            var newHeight = settings.MainWindowHeight * settings.DisplayZoom;
+
+            var widthDelta = newWidth - DisplayViewBox.Width;
+            var heightDelta = newHeight - DisplayViewBox.Height;
+
+            DisplayViewBox.Width = newWidth;
+            DisplayViewBox.Height = newHeight;
+            this.Left -= widthDelta / 2;
+            this.Top -= heightDelta / 2;
         }
     }
 }

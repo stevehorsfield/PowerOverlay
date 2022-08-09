@@ -12,140 +12,170 @@
         WindowStartupLocation="CenterScreen"
         Deactivated="onDeactivated"
         KeyUp="OnKeyUp"
-        Visibility="Hidden"
+        Visibility="Hidden" d:Visibility="Visible"
         Focusable="true"
         Closed="Window_Closed"
         ShowInTaskbar="False"
+        
+        SizeToContent="WidthAndHeight"
         >
     <Window.Background>
-            <SolidColorBrush Color="#00FFFFFF" />
+            <SolidColorBrush Color="#00FFFFFF" d:Color="#FF202020" />
     </Window.Background>
-    <Grid Name="DisplayGrid" ShowGridLines="true"><!-- Single element grid to allow overlapping content -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Viewbox Stretch="Uniform" Name="DisplayViewBox">
 
-        <DockPanel Grid.Column="0" Grid.Row="0">
-            <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="40" Background="Transparent">
-                <Border Grid.Row="0" Grid.Column="5" Padding="7" BorderThickness="0" HorizontalAlignment="Right">
-                    <Button BorderThickness="0" Click="onMenuClick" Content="⚙" FontSize="16" Padding="5" FontWeight="Bold" Foreground="Gold" Background="Transparent" />
-                </Border>
-            </StackPanel>
+        <Grid Name="DisplayGrid" ShowGridLines="true">
+            <!-- Single element grid to allow overlapping content -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <StackPanel DockPanel.Dock="Bottom" Height="40" Background="Transparent" />
-            <StackPanel DockPanel.Dock="Left" Width="40" Background="Transparent" />
-            <StackPanel DockPanel.Dock="Right" Width="40" Background="Transparent" />
+            <DockPanel Grid.Column="0" Grid.Row="0">
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="40" Background="Transparent">
+                    <Border Grid.Row="0" Grid.Column="5" Padding="7" BorderThickness="0" HorizontalAlignment="Right">
+                        <Button BorderThickness="0" Click="onMenuClick" Content="⚙" FontSize="16" Padding="5" FontWeight="Bold" Foreground="Gold" Background="Transparent" />
+                    </Border>
+                </StackPanel>
 
-            <Grid Name="ButtonGrid" DataContext="{Binding Path=CurrentMenu}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-            </Grid>
-        </DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Height="40" Background="Transparent" />
+                <StackPanel DockPanel.Dock="Left" Width="40" Background="Transparent" />
+                <StackPanel DockPanel.Dock="Right" Width="40" Background="Transparent" />
 
-        <Border Name="MenuPopup" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Visibility="Hidden"
-                VerticalAlignment="Top"
-                Margin="20,20" Width="300" Padding="5,5"
-                Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
-            <StackPanel>
-                <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Current menu:</Bold> <Run Text="{Binding Path=CurrentMenu.Name}"></Run></TextBlock>
-                <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>App:</Bold> <Run Text="{Binding Path=ApplicationProcessName}"></Run></TextBlock>
-                <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Exe:</Bold> <Run Text="{Binding Path=ApplicationProcessExecutable}"></Run></TextBlock>
-                <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Mouse pos:</Bold> <Run Text="{Binding Path=MouseX}"/>,<Run Text="{Binding Path=MouseY}"/></TextBlock>
-                
-                <TextBlock Margin="0,5" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40"><Bold>Window:</Bold> <Run Text="{Binding Path=ApplicationWindowTitle}"></Run></TextBlock>
-
-                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                      X1="0" X2="300" ClipToBounds="True" />
-
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <ListView Name="MenuList" ItemsSource="{Binding Path=AllMenus}" Background="Transparent" BorderThickness="0"
-                              SelectionChanged="MenuList_SelectionChanged">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" Margin="0,5"  />
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </ScrollViewer>
-
-                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                      X1="0" X2="300" ClipToBounds="True" />
-
-                <CheckBox Content="Lock window" IsChecked="{Binding LockMenu}" />
-
-                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                      X1="0" X2="300" ClipToBounds="True" />
-
-                <Grid>
+                <Grid Name="ButtonGrid" DataContext="{Binding Path=CurrentMenu}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Content="New" Margin="5" Padding="5,2,5,2" Grid.Column="0"
-                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="New"/>
-                    <Button Content="Open" Margin="5" Padding="5,2,5,2" Grid.Column="1"
-                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Open"/>
-                    <Button Content="Save" Margin="5" Padding="5,2,5,2" Grid.Column="2"
-                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Save"/>
                 </Grid>
+            </DockPanel>
+
+            <Border Name="MenuPopup" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Visibility="Hidden"
+                    d:Visibility="Visible"
+                    VerticalAlignment="Top"
+                    Margin="20,20" Width="450" Padding="5,5"
+                    Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="10px"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Current menu:</Bold> <Run Text="{Binding Path=CurrentMenu.Name}"></Run></TextBlock>
+                        <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>App:</Bold> <Run Text="{Binding Path=ApplicationProcessName}"></Run></TextBlock>
+                        <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Exe:</Bold> <Run Text="{Binding Path=ApplicationProcessExecutable}"></Run></TextBlock>
+                        <TextBlock Margin="0,5" TextWrapping="Wrap"><Bold>Mouse pos:</Bold> <Run Text="{Binding Path=MouseX}"/>,<Run Text="{Binding Path=MouseY}"/></TextBlock>
+
+                        <TextBlock Margin="0,5" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="40"><Bold>Window:</Bold> <Run Text="{Binding Path=ApplicationWindowTitle}"></Run></TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2">
+
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="120">
+                            <ListView Name="MenuList" ItemsSource="{Binding Path=AllMenus}" Background="Transparent" BorderThickness="0"
+                                  SelectionChanged="MenuList_SelectionChanged">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" Margin="0,5"  />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </ScrollViewer>
+
+                        <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          X1="0" X2="300" ClipToBounds="True" />
+
+                        <CheckBox Content="Lock window" IsChecked="{Binding LockMenu}" />
+
+                        <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          X1="0" X2="300" ClipToBounds="True" />
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Content="New" Margin="5" Padding="5,2,5,2" Grid.Column="0"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="New"/>
+                            <Button Content="Open" Margin="5" Padding="5,2,5,2" Grid.Column="1"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Open"/>
+                            <Button Content="Save" Margin="5" Padding="5,2,5,2" Grid.Column="2"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Save"/>
+                        </Grid>
+
+                        <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          X1="0" X2="300" ClipToBounds="True" />
+
+                        <Button Margin="0,5" Click="onConfigure">Configure</Button>
+
+                        <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          X1="0" X2="300" ClipToBounds="True" />
+
+                        <DockPanel>
+                            <Label Content="Display zoom:" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                            <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=Window},Path=Settings.DisplayZoom,StringFormat=F2}"
+                                       Width="50" VerticalAlignment="Center" Padding="5,0,5,0"/>
+                            <Slider Orientation="Horizontal" Minimum="-2" Maximum="2" VerticalAlignment="Center" LargeChange="0.2" SmallChange="0.05"
+                                Value="{Binding RelativeSource={RelativeSource AncestorType=Window},Path=Settings.DisplayZoomLogValue}"
+                                />
+                        </DockPanel>
+
+
+                        <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          X1="0" X2="300" ClipToBounds="True" />
+
+                        <Button Margin="0,5" Click="onQuitClick">Quit</Button>
+                    </StackPanel>
+                </Grid>
+
                 
-                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                      X1="0" X2="300" ClipToBounds="True" />
-
-                <Button Margin="0,5" Click="onConfigure">Configure</Button>
-
-                <Line StrokeThickness="5" Stroke="Silver" Margin="3,2"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                      X1="0" X2="300" ClipToBounds="True" />
-
-                <Button Margin="0,5" Click="onQuitClick">Quit</Button>
-            </StackPanel>
-        </Border>
-        <TextBlock x:Name="MessageDisplayBox" HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Text="{Binding}" FontSize="36" Foreground="AliceBlue" Background="Transparent"
-                   Focusable="False" IsHitTestVisible="False"
-                   >
-            <TextBlock.DataContext>abc</TextBlock.DataContext>
-            <TextBlock.Effect>
-                <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="320" Color="gold" />
-            </TextBlock.Effect>
-            <TextBlock.Resources>
-                <Storyboard x:Key="HideMessage" BeginTime="00:00:00.000" Completed="MessageOverlay_StoryboardCompleted">
-                    <DoubleAnimation BeginTime="00:00:00.000"
-                                     Duration="00:00:00.200"
-                                     To="1.0"
-                                     From="0.0"
-                                     Storyboard.TargetProperty="Opacity"
-                                     />
-                    <DoubleAnimation BeginTime="00:00:00.500"
-                                     Duration="00:00:0.300"
-                                     To="0.0"
-                                     From="1.0"
-                                     Storyboard.TargetProperty="Opacity"
-                                     />
-                </Storyboard>
-            </TextBlock.Resources>
-        </TextBlock>
-    </Grid>
+            </Border>
+            <TextBlock x:Name="MessageDisplayBox" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="{Binding}" FontSize="36" Foreground="AliceBlue" Background="Transparent"
+                       Focusable="False" IsHitTestVisible="False"
+                       >
+                <TextBlock.DataContext>abc</TextBlock.DataContext>
+                <TextBlock.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="320" Color="gold" />
+                </TextBlock.Effect>
+                <TextBlock.Resources>
+                    <Storyboard x:Key="HideMessage" BeginTime="00:00:00.000" Completed="MessageOverlay_StoryboardCompleted">
+                        <DoubleAnimation BeginTime="00:00:00.000"
+                                         Duration="00:00:00.200"
+                                         To="1.0"
+                                         From="0.0"
+                                         Storyboard.TargetProperty="Opacity"
+                                         />
+                        <DoubleAnimation BeginTime="00:00:00.500"
+                                         Duration="00:00:0.300"
+                                         To="0.0"
+                                         From="1.0"
+                                         Storyboard.TargetProperty="Opacity"
+                                         />
+                    </Storyboard>
+                </TextBlock.Resources>
+            </TextBlock>
+        </Grid>
+    </Viewbox>
 
 </Window>

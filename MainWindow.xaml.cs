@@ -232,6 +232,9 @@ namespace PowerOverlay
                     DisplayGrid.Width = settings.MainWindowWidth;
                     ApplyZoom();
                     return;
+                case nameof(AppSettings.ShowOnScreenNumber):
+                    if (this.Visibility == Visibility.Visible) ApplyLayout(); // no need to do it otherwise
+                    return;
             }
         }
 
@@ -301,6 +304,7 @@ namespace PowerOverlay
 
                 this.Show();
                 this.Activate();
+                this.ApplyLayout();
             }
         }
 
@@ -575,6 +579,33 @@ namespace PowerOverlay
             DisplayViewBox.Height = newHeight;
             this.Left -= widthDelta / 2;
             this.Top -= heightDelta / 2;
+        }
+
+        private void ApplyLayout()
+        {
+            var displays = NativeUtils.GetDisplayCoordinates();
+            if (displays == null) return;
+
+            var hmonCursor = NativeUtils.MonitorFromPoint(
+                new Point(((AppViewModel)DataContext).MouseX, ((AppViewModel)DataContext).MouseY));
+
+            NativeUtils.DisplayInfo targetMonitor;
+            var primaryMonitor = displays.FirstOrDefault(x => x.isPrimary);
+            if (settings.ShowOnCursorScreen)
+            {
+                targetMonitor = displays.FirstOrDefault(x => x.hMonitor == hmonCursor, primaryMonitor);
+            }
+            else
+            {
+                var monitorIndex = settings.ShowOnScreenNumber!.Value;
+                targetMonitor = displays.Count >= monitorIndex ? displays[monitorIndex] : primaryMonitor;
+            }
+
+            var boxWidth = settings.MainWindowWidth * settings.DisplayZoom;
+            var boxHeight = settings.MainWindowHeight * settings.DisplayZoom;
+
+            this.Left = targetMonitor.clientRect.Left + (targetMonitor.clientRect.Width / 2) - (boxWidth / 2);
+            this.Top = targetMonitor.clientRect.Top + (targetMonitor.clientRect.Height / 2) - (boxHeight / 2);
         }
 
         private void MenuPopup_Closed(object sender, EventArgs e)

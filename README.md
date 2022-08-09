@@ -35,7 +35,6 @@ A named menu can be provided as an argument.
 
 * Add condition action (such as only launch exe if not running)
 * Support action result conditions in sequences
-* Support track mouse monitor on activate
 * Support aligned positioning (center/middle/top/bottom/left/right...)
 * Support custom button layouts (more/fewer buttons, non-grid layout, etc.)
 * Support options dialog

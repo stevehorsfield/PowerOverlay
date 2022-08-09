@@ -100,6 +100,58 @@ public class AppSettings : INotifyPropertyChanged
         }
     }
 
+    private int? showOnScreenNumber;
+
+    public int? ShowOnScreenNumber
+    {
+        get { return showOnScreenNumber; }
+        set {
+            showOnScreenNumber = value;
+            Save();
+            Notify(
+                nameof(ShowOnScreenNumber),
+                nameof(ShowOnCursorScreen),
+                nameof(ShowOnScreen0), 
+                nameof(ShowOnScreen1), 
+                nameof(ShowOnScreen2), 
+                nameof(ShowOnScreen3), 
+                nameof(ShowOnScreen4));
+        }
+    }
+    public bool ShowOnCursorScreen
+    {
+        get { return !showOnScreenNumber.HasValue; }
+        set { if (value) ShowOnScreenNumber = null; }
+    }
+
+    public bool ShowOnScreen0
+    {
+        get { return (showOnScreenNumber ?? -1) == 0; }
+        set { if (value) ShowOnScreenNumber = 0; }
+    }
+
+    public bool ShowOnScreen1
+    {
+        get { return (showOnScreenNumber ?? -1) == 1; }
+        set { if (value) ShowOnScreenNumber = 1; }
+    }
+
+    public bool ShowOnScreen2
+    {
+        get { return (showOnScreenNumber ?? -1) == 2; }
+        set { if (value) ShowOnScreenNumber = 2; }
+    }
+    public bool ShowOnScreen3
+    {
+        get { return (showOnScreenNumber ?? -1) == 3; }
+        set { if (value) ShowOnScreenNumber = 3; }
+    }
+    public bool ShowOnScreen4
+    {
+        get { return (showOnScreenNumber ?? -1) == 4; }
+        set { if (value) ShowOnScreenNumber = 4; }
+    }
+
     private AppViewModel appViewModel = new();
     public AppViewModel AppViewModel {
         get {
@@ -129,6 +181,7 @@ public class AppSettings : INotifyPropertyChanged
         mainWindowWidth = DefaultMainWindowWidth;
         mainWindowHeight = DefaultMainWindowHeight;
         displayZoom = 1.0;
+        showOnScreenNumber = null;
     }
 
     public void Save()
@@ -137,6 +190,7 @@ public class AppSettings : INotifyPropertyChanged
         var settings = new JsonObject();
         settings.AddLowerCamel(nameof(FileAccessPath), JsonValue.Create<string>(FileAccessPath));
         settings.AddLowerCamelValue(nameof(DisplayZoom), DisplayZoom);
+        if (ShowOnScreenNumber.HasValue) settings.AddLowerCamel(nameof(ShowOnScreenNumber), ShowOnScreenNumber.Value);
         
         using var fs = new FileStream(SettingsFilePath, FileMode.Create);
         using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions() { Indented = true });
@@ -163,6 +217,7 @@ public class AppSettings : INotifyPropertyChanged
             {
                 if (d >= 0.1 && d <= 10.0) displayZoom = d;
             });
+            obj?.TryGetValue<int>(nameof(ShowOnScreenNumber), d => showOnScreenNumber = d);
         }
         // read menu data
         if (File.Exists(CacheFilePath))

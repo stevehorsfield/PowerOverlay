@@ -444,4 +444,25 @@ public partial class NativeUtils
     const uint MONITOR_DEFAULTTONULL = 0x00000000;
     const uint MONITOR_DEFAULTTOPRIMARY = 0x00000001;
     const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
+
+    public enum WmAppCommandSource
+    {
+        Key = 0,
+        Mouse = 0x8000,
+        Oem = 0x1000,
+    }
+
+    [Flags]
+    public enum WmAppCommandModifiers
+    {
+        MK_CONTROL = 0x0008, // The CTRL key is down.
+        MK_LBUTTON = 0x0001, // The left mouse button is down.
+        MK_MBUTTON = 0x0010, // The middle mouse button is down.
+        MK_RBUTTON = 0x0002, // The right mouse button is down.
+        MK_SHIFT = 0x0004, // The SHIFT key is down.
+        MK_XBUTTON1 = 0x0020, // The first X button is down.
+        MK_XBUTTON2 = 0x0040, // The second X button is down.
+    }
+
+    public const uint WM_APPCOMMAND = 0x0319;
 }

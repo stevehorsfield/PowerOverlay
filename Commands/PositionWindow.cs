@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PowerOverlay.Commands;
 
@@ -694,8 +696,10 @@ public class PositionWindowDefinition : ActionCommandDefinition
     public static PositionWindowDefinition Instance = new();
 
     public override string ActionName => "PositionWindow";
-    public override string ActionDisplayName => "Position window";
+    public override string ActionDisplayName => "Reposition window";
 
+    public override string ActionShortName => "Reposition";
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/PositionWindow.png"));
     public override ActionCommand Create()
     {
         return new PositionWindow();

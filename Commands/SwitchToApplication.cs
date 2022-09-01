@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PowerOverlay.Commands;
 
@@ -73,6 +75,9 @@ public class SwitchToApplicationDefinition : ActionCommandDefinition
 
     public override string ActionName => "SwitchApp";
     public override string ActionDisplayName => "Switch to app";
+    public override string ActionShortName => "Switch App";
+
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/SwitchToApp.png"));
 
     public override ActionCommand Create()
     {

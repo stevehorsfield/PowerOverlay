@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace PowerOverlay.Commands;
 
@@ -63,6 +63,10 @@ public abstract class ActionCommandDefinition
 {
     public abstract string ActionName { get; }
     public abstract string ActionDisplayName { get; }
+    public abstract string ActionShortName { get; }
+
+    public abstract ImageSource ActionImage { get; }
+
     public abstract ActionCommand Create();
     public abstract ActionCommand CreateFromJson(JsonObject o);
     public abstract FrameworkElement CreateConfigElement();

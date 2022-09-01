@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PowerOverlay.Commands;
 
@@ -62,6 +64,9 @@ public class SleepDefinition : ActionCommandDefinition
     public override string ActionName => "Sleep";
     public override string ActionDisplayName => "Delay";
 
+    public override string ActionShortName => "Delay";
+
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/Sleep.png"));
     public override ActionCommand Create()
     {
         return new Sleep();

@@ -10,6 +10,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PowerOverlay.Commands;
 
@@ -849,6 +851,10 @@ public class SendMouseDefinition : ActionCommandDefinition
 
     public override string ActionName => "SendMouse";
     public override string ActionDisplayName => "Send mouse inputs";
+
+    public override string ActionShortName => "Mouse";
+
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/SendMouse.png"));
 
     public override ActionCommand Create()
     {

@@ -9,6 +9,8 @@ using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PowerOverlay.Commands;
 
@@ -186,6 +188,9 @@ public class SendCharactersDefinition : ActionCommandDefinition
 
     public override string ActionName => "SendCharacters";
     public override string ActionDisplayName => "Send text to window";
+    public override string ActionShortName => "Text";
+
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/SendCharacters.png"));
 
     public override ActionCommand Create()
     {

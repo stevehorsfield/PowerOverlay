@@ -9,6 +9,8 @@ using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PowerOverlay.Commands;
 
@@ -489,6 +491,8 @@ public class SendAppCommandDefinition : ActionCommandDefinition
 
     public override string ActionName => "SendAppCommand";
     public override string ActionDisplayName => "Send WM__APPCOMMAND";
+    public override string ActionShortName => "App Command";
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/SendAppCommand.png"));
 
     public override ActionCommand Create()
     {

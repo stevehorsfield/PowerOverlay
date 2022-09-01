@@ -13,6 +13,15 @@
 
   <ItemGroup>
     <None Remove="AppIcon.ico" />
+    <None Remove="Commands\ExecuteCommand.png" />
+    <None Remove="Commands\PositionWindow.png" />
+    <None Remove="Commands\SendAppCommand.png" />
+    <None Remove="Commands\SendCharacters.png" />
+    <None Remove="Commands\SendKeys.png" />
+    <None Remove="Commands\SendMouse.png" />
+    <None Remove="Commands\Sequence.png" />
+    <None Remove="Commands\Sleep.png" />
+    <None Remove="Commands\SwitchToApp.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +30,15 @@
 
   <ItemGroup>
     <EmbeddedResource Include="AppIcon.ico" />
+    <Resource Include="Commands\SendAppCommand.png" />
+    <Resource Include="Commands\SendMouse.png" />
+    <Resource Include="Commands\SendKeys.png" />
+    <Resource Include="Commands\SendCharacters.png" />
+    <Resource Include="Commands\Sleep.png" />
+    <Resource Include="Commands\ExecuteCommand.png" />
+    <Resource Include="Commands\PositionWindow.png" />
+    <Resource Include="Commands\SwitchToApp.png" />
+    <Resource Include="Commands\Sequence.png" />
   </ItemGroup>
 
   <ItemGroup>

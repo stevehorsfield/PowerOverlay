@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 
 namespace PowerOverlay.Commands;
@@ -274,6 +275,9 @@ public class ExecuteCommandDefinition : ActionCommandDefinition
 
     public override string ActionName => "ExecuteCommand";
     public override string ActionDisplayName => "Execute a command";
+    public override string ActionShortName => "Execute";
+
+    public override ImageSource ActionImage => new BitmapImage(new Uri("pack://application:,,,/Commands/ExecuteCommand.png"));
 
     public override ActionCommand Create()
     {

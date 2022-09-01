@@ -78,19 +78,26 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="auto"/>
                                             <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="auto"/>
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0">Application:</TextBlock>
                                         <CheckBox Grid.Row="0" Grid.Column="1" Margin="5,0" IsChecked="{Binding UseRegexForExecutable}">
                                             <TextBlock>Use regex</TextBlock>
                                         </CheckBox>
-                                        <TextBox Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch" Text="{Binding ExecutablePattern}"/>
+                                        <CheckBox Grid.Row="0" Grid.Column="2" Margin="5,0" IsChecked="{Binding MatchCaseForExecutable}">
+                                            <TextBlock>Match case</TextBlock>
+                                        </CheckBox>
+                                        <TextBox Grid.Row="0" Grid.Column="3" HorizontalAlignment="Stretch" Text="{Binding ExecutablePattern}"/>
 
                                         <TextBlock Grid.Row="1" Grid.Column="0" >Window title:</TextBlock>
                                         <CheckBox Grid.Row="1" Grid.Column="1" Margin="5,0" IsChecked="{Binding UseRegexForWindowTitle}">
                                             <TextBlock>Use regex</TextBlock>
                                         </CheckBox>
-                                        <TextBox Grid.Row="1" Grid.Column="2"  HorizontalAlignment="Stretch" Text="{Binding WindowTitlePattern}"/>
+                                        <CheckBox Grid.Row="1" Grid.Column="2" Margin="5,0" IsChecked="{Binding MatchCaseForWindowTitle}">
+                                            <TextBlock>Match case</TextBlock>
+                                        </CheckBox>
+                                        <TextBox Grid.Row="1" Grid.Column="3"  HorizontalAlignment="Stretch" Text="{Binding WindowTitlePattern}"/>
                                     </Grid>
                                 </DockPanel>
                             </Border>

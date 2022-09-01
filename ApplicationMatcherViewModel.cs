@@ -15,6 +15,8 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
 
     private bool useRegexForExecutable = false;
     private bool useRegexForWindowTitle = false;
+    private bool matchCaseForExecutable = false;
+    private bool matchCaseForWindowTitle = false;
 
     public bool UseRegexForExecutable
     {
@@ -33,6 +35,26 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
         {
             useRegexForWindowTitle = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UseRegexForWindowTitle)));
+        }
+    }
+
+    public bool MatchCaseForExecutable
+    {
+        get { return matchCaseForExecutable; }
+        set
+        {
+            matchCaseForExecutable = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MatchCaseForExecutable)));
+        }
+    }
+
+    public bool MatchCaseForWindowTitle
+    {
+        get { return matchCaseForWindowTitle; }
+        set
+        {
+            matchCaseForWindowTitle = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MatchCaseForWindowTitle)));
         }
     }
 
@@ -63,20 +85,22 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
             WindowTitlePattern = WindowTitlePattern,
             UseRegexForExecutable = UseRegexForExecutable,
             UseRegexForWindowTitle = UseRegexForWindowTitle,
+            MatchCaseForExecutable = MatchCaseForExecutable,
+            MatchCaseForWindowTitle = MatchCaseForWindowTitle,
         };
     }
 
-    private bool? CompareString(string value, string pattern, bool useRegEx)
+    private static bool? CompareString(string value, string pattern, bool useRegEx, bool matchingCase)
     {
         if (String.IsNullOrEmpty(pattern)) return null;
         if (String.IsNullOrEmpty(value)) return false; // has pattern but no input
 
         if (useRegEx)
         {
-            return Regex.IsMatch(value, pattern);
+            return Regex.IsMatch(value, pattern, matchingCase ? RegexOptions.None : RegexOptions.IgnoreCase);
         } else
         {
-            return value.Equals(pattern, StringComparison.InvariantCultureIgnoreCase);
+            return value.Equals(pattern, matchingCase ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase);
         }
     }
 
@@ -92,12 +116,12 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
 
     private bool? MatchesWindowTitle(string windowTitle)
     {
-        return CompareString(windowTitle, WindowTitlePattern, UseRegexForWindowTitle);
+        return CompareString(windowTitle, WindowTitlePattern, UseRegexForWindowTitle, MatchCaseForWindowTitle);
     }
 
     private bool? MatchesExecutable(string executable)
     {
-        return CompareString(executable, ExecutablePattern, UseRegexForExecutable);
+        return CompareString(executable, ExecutablePattern, UseRegexForExecutable, MatchCaseForExecutable);
     }
 
     public bool Matches(IntPtr hwnd)
@@ -134,6 +158,8 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
         n.AddLowerCamel(nameof(UseRegexForWindowTitle), JsonValue.Create(UseRegexForWindowTitle));
         n.AddLowerCamel(nameof(WindowTitlePattern), JsonValue.Create(WindowTitlePattern));
         n.AddLowerCamel(nameof(ExecutablePattern), JsonValue.Create(ExecutablePattern));
+        n.AddLowerCamelValue(nameof(MatchCaseForExecutable), MatchCaseForExecutable);
+        n.AddLowerCamelValue(nameof(MatchCaseForWindowTitle), MatchCaseForWindowTitle);
         return n;
     }
 
@@ -146,6 +172,8 @@ public class ApplicationMatcherViewModel : INotifyPropertyChanged, IApplicationJ
         o.TryGetValue<bool>(nameof(UseRegexForWindowTitle), b => result.UseRegexForWindowTitle = b);
         o.TryGet<string>(nameof(WindowTitlePattern), s => result.WindowTitlePattern = s);
         o.TryGet<string>(nameof(ExecutablePattern), s => result.ExecutablePattern = s);
+        o.TryGetValue<bool>(nameof(MatchCaseForExecutable), b => result.MatchCaseForExecutable = b);
+        o.TryGetValue<bool>(nameof(MatchCaseForWindowTitle), b => result.MatchCaseForWindowTitle = b);
 
         return result;
     }

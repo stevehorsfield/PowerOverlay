@@ -16,6 +16,8 @@
         <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Left">Application targets:</TextBlock>
         <ListBox Name="selector" DockPanel.Dock="Top" Style="{StaticResource ApplicationTargetList}"
                  ButtonBase.Click="AppSelector_Click"
+                 ItemsSource="{Binding Path=ApplicationTargets}"
+                 IsSynchronizedWithCurrentItem="True"
                  Margin="10,0,10,10"
                  />
         <Grid>

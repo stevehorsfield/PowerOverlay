@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -385,7 +386,7 @@ public class SendAppCommand : ActionCommand
         return result;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override Task ExecuteWithContext(CommandExecutionContext context)
     {
         var active = NativeUtils.GetActiveAppHwnd();
         var shell = NativeUtils.GetShellWindow();
@@ -416,13 +417,14 @@ public class SendAppCommand : ActionCommand
 
         foreach (var target in uniqueTargets)
         {
+            DebugLog.Log($"Sending WM_APPCOMMAND '{getCommandName(Command)}' to window 0x{target.ToString("X16")} (repeat: {RepeatCount})");
             for (int i = 0; i < RepeatCount; ++i)
             {
                 NativeUtils.SendWmAppCommand(target, (int)Command, Source, Modifiers);
             }
         }
 
-        return;
+        return Task.CompletedTask;
     }
 
     public override void WriteJson(JsonObject o)

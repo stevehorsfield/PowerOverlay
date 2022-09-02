@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -202,7 +203,7 @@ public class ExecuteCommand : ActionCommand
         return clone;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override Task ExecuteWithContext(CommandExecutionContext context)
     {
         try
         {
@@ -230,6 +231,7 @@ public class ExecuteCommand : ActionCommand
         {
             MessageBox.Show($"Failed to launch process '{executablePath}'. Error: '{e.Message}'");
         }
+        return Task.CompletedTask;
     }
 
     public override void WriteJson(JsonObject o)

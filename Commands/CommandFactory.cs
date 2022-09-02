@@ -6,6 +6,8 @@ using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace PowerOverlay.Commands;
 
@@ -95,17 +97,26 @@ public abstract class ActionCommand : ICommand, INotifyPropertyChanged
     
     public void Execute(object? parameter)
     {
+        var task = AsTask(parameter);
+        if (task.Status == TaskStatus.Created) task.Start(TaskScheduler.FromCurrentSynchronizationContext());
+        Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+    }
+
+    public Task AsTask(object? parameter)
+    {
+        DebugLog.Log($"Executing action of type {Definition.ActionName} ({Definition.ActionDisplayName})");
+
         var cec = parameter as CommandExecutionContext;
         if (cec == null)
         {
-            ExecuteWithContext(new CommandExecutionContext());
+            return ExecuteWithContext(new CommandExecutionContext());
         }
         else
         {
-            ExecuteWithContext(cec);
+            return ExecuteWithContext(cec);
         }
     }
 
-    public abstract void ExecuteWithContext(CommandExecutionContext context);
+    public abstract Task ExecuteWithContext(CommandExecutionContext context);
 }
 

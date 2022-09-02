@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -37,9 +38,12 @@ public class SequenceCommand : ActionCommand
         return clone;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override async Task ExecuteWithContext(CommandExecutionContext context)
     {
-        foreach (var a in Actions) a.Execute(context);
+        foreach (var a in Actions)
+        {
+            await a.AsTask(context);
+        }
     }
 
     public override void WriteJson(JsonObject o)

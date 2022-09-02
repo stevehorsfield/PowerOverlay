@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -107,7 +108,7 @@ public class SendCharacters : ActionCommand
         return result;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override Task ExecuteWithContext(CommandExecutionContext context)
     {
         var active = NativeUtils.GetActiveAppHwnd();
         var shell = NativeUtils.GetShellWindow();
@@ -143,7 +144,7 @@ public class SendCharacters : ActionCommand
             NativeUtils.SendText(target, textUTF16);
         }
 
-        return;
+        return Task.CompletedTask;
     }
 
     public override void WriteJson(JsonObject o)

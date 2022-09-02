@@ -9,6 +9,8 @@ using System.Windows;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
+using System.Windows.Threading;
+using System.Threading.Tasks;
 
 public partial class NativeUtils
 {
@@ -225,19 +227,19 @@ public partial class NativeUtils
             AddSleep(doubleClickTimeMilliseconds + 20);
         }
 
-        public Span<tagINPUT> UnsafeGetData()
+        public ReadOnlyMemory<tagINPUT> GetData()
         {
-            return CollectionsMarshal.AsSpan(data);
+            return data.ToArray().AsMemory();
         }
 
-        public Span<int> UnsafeGetDelays()
+        public ReadOnlyMemory<int> GetDelays()
         {
-            return CollectionsMarshal.AsSpan(delays);
+            return delays.ToArray().AsMemory();
         }
 
-        public Span<bool> UnsafeGetHasData()
+        public ReadOnlyMemory<bool> GetHasData()
         {
-            return CollectionsMarshal.AsSpan(hasData);
+            return hasData.ToArray().AsMemory();
         }
     }
 
@@ -253,7 +255,7 @@ public partial class NativeUtils
     //    }
     //}
 
-    public static unsafe bool SendKeys(IntPtr hwndTarget, InputWrapper input)
+    public static async Task<bool> SendKeys(IntPtr hwndTarget, InputWrapper input)
     {
         if (hwndTarget == IntPtr.Zero) return false;
         SetForegroundWindow(hwndTarget); // must be activated to ensure we get correct focus target
@@ -263,16 +265,28 @@ public partial class NativeUtils
         uint threadId = GetWindowThreadProcessId(hwndTarget, ref processId);
         uint thisThreadId = GetCurrentThreadId();
 
-        bool attached = true;
-        if (AttachThreadInput(thisThreadId, threadId, true) == 0) return false;
+        bool[] attached = { false }; // cannot use ref with async, so using a one-element array
+        if (thisThreadId != threadId)
+        {
+            DebugLog.Log($"Attaching input hook");
+            attached[0] = true;
+            if (AttachThreadInput(thisThreadId, threadId, true) == 0)
+            {
+                DebugLog.Log($"Failed to attach input hook");
+                return false;
+            }
+        }
         try
         {
             var initialState = new byte[256];
             var updateState = new byte[256];
 
-            fixed (byte* pInitial = &MemoryMarshal.GetReference(initialState.AsSpan()))
+            unsafe
             {
-                if (GetKeyboardState(pInitial) == 0) return false;
+                fixed (byte* pInitial = &MemoryMarshal.GetReference(initialState.AsSpan()))
+                {
+                    if (GetKeyboardState(pInitial) == 0) return false;
+                }
             }
             Array.Copy(initialState, updateState, initialState.Length);
 
@@ -288,52 +302,70 @@ public partial class NativeUtils
 
             try
             {
-                if (!SendInputInternal(resetWrapper, threadId, thisThreadId, ref attached)) return false;
+                if (! await SendInputInternal(resetWrapper, threadId, thisThreadId, attached)) return false;
                 restoreToggles = true;
 
-                return SendInputInternal(input, threadId, thisThreadId, ref attached);
+                return await SendInputInternal(input, threadId, thisThreadId, attached);
             }
             finally
             {
-                fixed (byte* pInitial = &MemoryMarshal.GetReference(initialState.AsSpan()))
+                unsafe
                 {
-                    SetKeyboardState(pInitial); // ignore failures for resetting state
+                    fixed (byte* pInitial = &MemoryMarshal.GetReference(initialState.AsSpan()))
+                    {
+                        SetKeyboardState(pInitial); // ignore failures for resetting state
+                    }
                 }
-                if (restoreToggles) SendInputInternal(resetWrapper, threadId, thisThreadId, ref attached);
+                if (restoreToggles) await SendInputInternal(resetWrapper, threadId, thisThreadId, attached);
             }
         }
         finally
         {
-            if (attached) AttachThreadInput(thisThreadId, threadId, false);
+            if (attached[0])
+            {
+                DebugLog.Log($"Detaching input hook");
+                AttachThreadInput(thisThreadId, threadId, false);
+            }
         }
     }
 
-    private static unsafe bool SendInputInternal(InputWrapper input, uint threadId, uint thisThreadId, ref bool attached)
+    private static async Task<bool> SendInputInternal(InputWrapper input, uint threadId, uint thisThreadId, bool[] attached /* array as cannot use ref with async */)
     {
-        var data = input.UnsafeGetData();
-        var delays = input.UnsafeGetDelays();
-        var hasDataFlags = input.UnsafeGetHasData();
+        var data = input.GetData();
+        var delays = input.GetDelays();
+        var hasDataFlags = input.GetHasData();
 
         int index = 0;
 
         while (index < data.Length)
         {
-            if (delays[index] != 0)
+            if (delays.Span[index] != 0)
             {
-                AttachThreadInput(thisThreadId, threadId, false);
-                attached = false;
-
-                Thread.Sleep(delays[index]);
-
-                if (AttachThreadInput(thisThreadId, threadId, true) == 0)
+                if (attached[0])
                 {
-                    return false;
+                    DebugLog.Log($"Detaching input hook");
+                    AttachThreadInput(thisThreadId, threadId, false);
+                    attached[0] = false;
+
+                    DebugLog.Log($"Executing delay of {delays.Span[index]}ms");
+                    await Sleeper.Sleep(delays.Span[index]);
+
+                    DebugLog.Log($"Attaching input hook");
+                    if (AttachThreadInput(thisThreadId, threadId, true) == 0)
+                    {
+                        DebugLog.Log($"Failed to attach input hook");
+                        return false;
+                    }
+                    attached[0] = true;
                 }
-                attached = true;
+                else
+                {
+                    await Sleeper.Sleep(delays.Span[index]);
+                }
             }
             int nextStop = index + 1;
 
-            if (hasDataFlags[index])
+            if (hasDataFlags.Span[index])
             {
                 var funcIsMouseMove = (tagINPUT x) =>
                 {
@@ -342,19 +374,19 @@ public partial class NativeUtils
                     return false;
                 };
 
-                if (!funcIsMouseMove(data[index]))
+                if (!funcIsMouseMove(data.Span[index]))
                 {
                     while (nextStop < data.Length)
                     {
-                        if (delays[nextStop] != 0) break;
-                        if (funcIsMouseMove(data[nextStop])) break;
+                        if (delays.Span[nextStop] != 0) break;
+                        if (funcIsMouseMove(data.Span[nextStop])) break;
                         ++nextStop;
                     }
                 }
 
-                Span<tagINPUT> group = data.Slice(index, nextStop - index);
+                ReadOnlyMemory<tagINPUT> group = data.Slice(index, nextStop - index);
 
-                bool isMouseMove = funcIsMouseMove(data[index]); // handled one at a time
+                bool isMouseMove = funcIsMouseMove(data.Span[index]); // handled one at a time
 
                 bool handled = false;
 
@@ -363,7 +395,7 @@ public partial class NativeUtils
                     var cursorPos = GetCursorPosition();
                     if (cursorPos.HasValue)
                     {
-                        var targetPos = input.ScreenFromMouseInput(group[0]);
+                        var targetPos = input.ScreenFromMouseInput(group.Span[0]);
 
                         int x, y, x0, y0;
                         x = cursorPos.Value.X;
@@ -371,7 +403,7 @@ public partial class NativeUtils
                         x0 = (int) targetPos.X;
                         y0 = (int) targetPos.Y;
 
-                        System.Diagnostics.Debug.WriteLine(
+                        DebugLog.Log(
                             $"Moving from {x},{y} to {x0},{y0}");
 
                         var wrapper = new InputWrapper(false);
@@ -398,11 +430,14 @@ public partial class NativeUtils
                                 wrapper.AddMouseMove(x, y, 0);
                             }
                         }
-                        var moveData = wrapper.UnsafeGetData();
-                        fixed (byte* pbMoveData = &MemoryMarshal.GetReference(MemoryMarshal.Cast<tagINPUT, byte>(moveData)))
+                        var moveData = wrapper.GetData();
+                        unsafe
                         {
-                            var result = SendInput((uint)moveData.Length, pbMoveData, Marshal.SizeOf<tagINPUT>());
-                            if (result != moveData.Length) return false;
+                            fixed (byte* pbMoveData = &MemoryMarshal.GetReference(MemoryMarshal.Cast<tagINPUT, byte>(moveData.Span)))
+                            {
+                                var result = SendInput((uint)moveData.Length, pbMoveData, Marshal.SizeOf<tagINPUT>());
+                                if (result != moveData.Length) return false;
+                            }
                         }
 
                         handled = true;
@@ -410,11 +445,14 @@ public partial class NativeUtils
                 }
                 if (! handled)
                 {
-                    fixed (byte* pbData = &MemoryMarshal.GetReference(MemoryMarshal.Cast<tagINPUT, byte>(group)))
+                    unsafe
                     {
-                        var result = SendInput((uint)group.Length, pbData, Marshal.SizeOf<tagINPUT>());
-                        if (result != group.Length) return false;
-                        System.Diagnostics.Debug.WriteLine($"SendInput completed with {group.Length} entries");
+                        fixed (byte* pbData = &MemoryMarshal.GetReference(MemoryMarshal.Cast<tagINPUT, byte>(group.Span)))
+                        {
+                            var result = SendInput((uint)group.Length, pbData, Marshal.SizeOf<tagINPUT>());
+                            if (result != group.Length) return false;
+                            DebugLog.Log($"SendInput completed with {group.Length} entries");
+                        }
                     }
                 }
             }
@@ -422,111 +460,5 @@ public partial class NativeUtils
             index = nextStop;
         }
         return true;
-    }
-
-    // INVALID APPROACH.
-    // Sending via WM_KEYUP/DOWN etc. Doesn't manage thread modifier state and isn't interpreted correctly by apps.
-    //public static bool SendKeys(IntPtr hwndTarget, InputWrapper input)
-    //{
-    //    if (hwndTarget == IntPtr.Zero) return false;
-
-    //    SetForegroundWindow(hwndTarget); // must be activated to ensure we get correct focus target
-    //    System.Threading.Thread.Sleep(50); // Allow window to get activation
-
-    //    uint processId = 0;
-    //    uint threadId = GetWindowThreadProcessId(hwndTarget, ref processId);
-    //    GuiThreadInfo guiInfo = new GuiThreadInfo();
-    //    guiInfo.cbSize = (uint)Marshal.SizeOf<GuiThreadInfo>();
-    //    if (GetGUIThreadInfo(threadId, ref guiInfo) == 0) return false; // error
-
-    //    bool sendAsSysKeys = guiInfo.hwndFocus == IntPtr.Zero;
-    //    IntPtr sendTarget = guiInfo.hwndFocus != IntPtr.Zero ? guiInfo.hwndFocus : hwndTarget;
-
-    //    bool leftAltPressed = false;
-    //    bool rightAltPressed = false;
-
-    //    var data = input.UnsafeGetData();
-    //    foreach (var ki in data)
-    //    {
-    //        if (ki.type != InputType.Keyboard) throw new NotSupportedException("Non-keyboard input in SendKeys");
-
-    //        bool isKeyUp = ki.keyInput.dwFlags.HasFlag(Win32KeyboardInputFlags.KeyUp);
-    //        bool isLeftAlt = ki.keyInput.wVk == (ushort)Win32VirtualKey.VK_LMENU;
-    //        bool isRightAlt = ki.keyInput.wVk == (ushort)Win32VirtualKey.VK_RMENU;
-    //        bool isF10 = ki.keyInput.wVk == (ushort)Win32VirtualKey.VK_F10;
-
-    //        bool isSysKey = isLeftAlt || isRightAlt || isF10 || sendAsSysKeys;
-
-    //        const uint WM_KEYDOWN = 0x0100;
-    //        const uint WM_KEYUP = 0x0101;
-    //        const uint WM_SYSKEYDOWN = 0x0104;
-    //        const uint WM_SYSKEYUP = 0x0105;
-
-    //        if (isLeftAlt) leftAltPressed = !isKeyUp;
-    //        if (isRightAlt) rightAltPressed = !isKeyUp;
-
-    //        bool isExtended = (Win32VirtualKey) ki.keyInput.wVk switch
-    //        {
-    //            Win32VirtualKey.VK_RCONTROL => true,
-    //            Win32VirtualKey.VK_RMENU => true,
-    //            Win32VirtualKey.VK_INSERT => true,
-    //            Win32VirtualKey.VK_DELETE => true,
-    //            Win32VirtualKey.VK_HOME => true,
-    //            Win32VirtualKey.VK_END => true,
-    //            Win32VirtualKey.VK_NEXT => true,
-    //            Win32VirtualKey.VK_PRIOR => true,
-    //            Win32VirtualKey.VK_LEFT => true,
-    //            Win32VirtualKey.VK_RIGHT => true,
-    //            Win32VirtualKey.VK_UP => true,
-    //            Win32VirtualKey.VK_DOWN => true,
-    //            Win32VirtualKey.VK_NUMLOCK => true,
-    //            Win32VirtualKey.VK_PRINT => true,
-    //            Win32VirtualKey.VK_PAUSE => true,
-    //            Win32VirtualKey.VK_DIVIDE => true,
-    //            _ => false
-    //        };
-                
-    //        bool altDown = leftAltPressed || rightAltPressed;
-
-    //        var msgType = (isSysKey) ? 
-    //            ((isKeyUp) ? WM_SYSKEYUP : WM_SYSKEYDOWN) 
-    //            : (isKeyUp ? WM_KEYUP : WM_KEYDOWN);
-
-    //        IntPtrToInt64Union wParam = new IntPtrToInt64Union();
-    //        IntPtrToInt64Union lParam = new IntPtrToInt64Union();
-
-    //        var vkActual = ki.keyInput.wVk;
-    //        vkActual = ((Win32VirtualKey)vkActual) switch
-    //        {
-    //            Win32VirtualKey.VK_LSHIFT => (ushort) Win32VirtualKey.VK_SHIFT,
-    //            Win32VirtualKey.VK_RSHIFT => (ushort) Win32VirtualKey.VK_SHIFT,
-    //            Win32VirtualKey.VK_LCONTROL => (ushort) Win32VirtualKey.VK_CONTROL,
-    //            Win32VirtualKey.VK_RCONTROL => (ushort) Win32VirtualKey.VK_CONTROL,
-    //            Win32VirtualKey.VK_LMENU => (ushort) Win32VirtualKey.VK_MENU,
-    //            Win32VirtualKey.VK_RMENU => (ushort) Win32VirtualKey.VK_MENU,
-    //            _ => vkActual
-    //        };
-
-    //        var scanActual = ki.keyInput.wScan;
-    //        if (vkActual != ki.keyInput.wVk)
-    //        {
-    //            scanActual = (ushort) MapVirtualKeyW(vkActual, isExtended ? Win32MapVirtualKeyMode.VkToScanEx : Win32MapVirtualKeyMode.VkToScan);
-    //        }
-
-    //        // https://docs.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input#keystroke-message-flags
-    //        wParam.value = vkActual;
-    //        lParam.value = 0;
-    //        lParam.value += 1 << 32; // repeat count = 1
-    //        lParam.value += (isKeyUp) ? 0x80000000 : 0; // is up
-    //        lParam.value += (leftAltPressed || rightAltPressed) ? 0x20000000 : 0;
-    //        lParam.value += (isExtended) ? 0x01000000 : 0;
-    //        lParam.value += (isKeyUp) ? 0x40000000 : 0; // was down
-    //        lParam.value += (ki.keyInput.wScan != 0) ? ((uint)(byte)scanActual) << 48 : 0;
-
-    //        if (PostMessageW(sendTarget, msgType, wParam.ptr, lParam.ptr) == 0) return false;
-    //        Thread.Sleep(10);
-    //    }
-    //    return true;
-    //}
-    
+    }    
 }

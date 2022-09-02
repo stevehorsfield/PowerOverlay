@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -540,13 +541,14 @@ public class PositionWindow : ActionCommand
         return result;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override Task ExecuteWithContext(CommandExecutionContext context)
     {
         foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {
             Resize(hwnd);
-            if (!PositionAllMatches) return;
+            if (!PositionAllMatches) return Task.CompletedTask;
         }
+        return Task.CompletedTask;
     }
 
     public override void WriteJson(JsonObject o)

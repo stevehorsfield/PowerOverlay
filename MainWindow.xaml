@@ -178,6 +178,12 @@
                           HorizontalAlignment="Stretch" VerticalAlignment="Center"
                           X1="0" X2="300" ClipToBounds="True" />
 
+                            <Button Margin="5,5" Click="onDebugLogClick">Show log</Button>
+
+                            <Line StrokeThickness="5" Stroke="Silver" Margin="5,2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          X1="0" X2="300" ClipToBounds="True" />
+
                             <Button Margin="5,5" Click="onQuitClick">Quit</Button>
                         </StackPanel>
                     </Grid>

@@ -271,6 +271,8 @@ public class AppViewModel : INotifyPropertyChanged {
             this.MouseX = cursorPos.Value.X;
             this.MouseY = cursorPos.Value.Y;
         }
+        DebugLog.Log($"Running app: {ApplicationWindowTitle}, {ApplicationProcessExecutable}, {ApplicationProcessName}");
+        DebugLog.Log($"Mouse position: {MouseX}, {MouseY}");
     }
 
     public void ApplyFrom(ConfigurationViewModel config)

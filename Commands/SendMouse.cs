@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -540,7 +541,7 @@ public class SendMouse : ActionCommand
         return result;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override async Task ExecuteWithContext(CommandExecutionContext context)
     {
         var active = NativeUtils.GetActiveAppHwnd();
         var target = IntPtr.Zero;
@@ -558,7 +559,7 @@ public class SendMouse : ActionCommand
         Point cursor = new Point(context.MouseCursorPositionX, context.MouseCursorPositionY);
         Point location = GetInitialPoint(target, cursor);
 
-        ProcessActions(target, location, cursor);
+        await ProcessActions(target, location, cursor);
 
         var newLocation = NativeUtils.GetCursorPosition();
         if (newLocation.HasValue)
@@ -568,7 +569,7 @@ public class SendMouse : ActionCommand
         }
     }
 
-    private void ProcessActions(IntPtr hwnd, Point originLocation, Point cursor)
+    private async Task ProcessActions(IntPtr hwnd, Point originLocation, Point cursor)
     {
         var wrapper = new NativeUtils.InputWrapper();
         var flags = (SendKeyModifierFlags)0;
@@ -689,9 +690,9 @@ public class SendMouse : ActionCommand
             processModifier(0, SendKeyModifierFlags.RightWindows, NativeUtils.Win32VirtualKey.VK_RWIN, false);
         }
 
-        System.Diagnostics.Debug.WriteLine(
-            $"Origin: {originLocation.X},{originLocation.Y}");
-        NativeUtils.SendKeys(hwnd, wrapper);
+        DebugLog.Log($"Origin: {originLocation.X},{originLocation.Y}");
+
+        await NativeUtils.SendKeys(hwnd, wrapper);
     }
 
     private Point GetInitialPoint(IntPtr hwndTarget, Point cursor)

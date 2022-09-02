@@ -240,6 +240,7 @@ namespace PowerOverlay
 
         public void HandleIPC(Message msg)
         {
+            DebugLog.Log($"IPC received: {msg.Action}");
             switch (msg.Action)
             {
                 case MessageAction.Activate:
@@ -310,6 +311,7 @@ namespace PowerOverlay
 
         public void AppHotKeyPressed()
         {
+            DebugLog.Log("Application hotkey pressed");
             if (this.Visibility != Visibility.Visible)
             {
                 InternalShowAndActivate(true);
@@ -616,6 +618,14 @@ namespace PowerOverlay
         private void MenuPopup_Opened(object sender, EventArgs e)
         {
             MenuButton.IsEnabled = false;
+        }
+
+        private void onDebugLogClick(object sender, RoutedEventArgs e)
+        {
+            lockActive = true;
+            MenuPopup.IsOpen = false;
+            ((App)App.Current).DebugWindow.Show();
+            lockActive = false;
         }
     }
 }

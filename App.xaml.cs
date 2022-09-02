@@ -21,9 +21,18 @@ namespace PowerOverlay
 
         private NamedPipeServer? Pipe { get; set; }
 
+        public DebugLog DebugLog { get; private set; }
+
+        public readonly DebugWindow DebugWindow;
+
         static App()
         {
             Commands.CommandFactory.Init();
+        }
+        public App()
+        {
+            DebugLog = new DebugLog();
+            DebugWindow = new DebugWindow();
         }
 
         private void Launch()
@@ -63,7 +72,12 @@ namespace PowerOverlay
                 );
             TrayContextMenu.Items.Add(screenMenu);
             TrayContextMenu.Items.Add("-");
-            
+            var displayDebugWindow = () =>
+            {
+                (App.Current as App)?.DebugWindow.Show();
+            };
+            TrayContextMenu.Items.Add("Debug log", null, (s,e) => displayDebugWindow());
+            TrayContextMenu.Items.Add("-");
             TrayContextMenu.Items.Add("Quit", null, (s, e) => App.Current.Shutdown(0));
 
             TrayContextMenu.Opening += (o, e) =>

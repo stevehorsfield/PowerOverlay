@@ -8,6 +8,9 @@ using PowerOverlay.Commands;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
+using System.Windows.Threading;
+using Windows.UI.Core;
 
 namespace PowerOverlay;
 
@@ -220,8 +223,10 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         switch (actionMode)
         {
             case ActionMode.NoAction:
+                DebugLog.Log($"Button pressed. No action configured");
                 return;
             case ActionMode.SelectMenu:
+                DebugLog.Log($"Button pressed. Menu selection: '{targetMenu}'");
                 if (targetMenu == String.Empty) return;
                 foreach (var m in appdata.AllMenus)
                 {
@@ -231,20 +236,50 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
                         return;
                     }
                 }
+                DebugLog.Log($"Requested menu not found");
                 return;
             case ActionMode.PerformTask:
                 break;
             default:
                 throw new NotImplementedException($"Action type {actionMode} is not implemented");
         }
-        if (Action == null) return;
+        if (Action == null)
+        {
+            DebugLog.Log($"Button pressed. No action configured");
+            return;
+        }
+        DebugLog.Log($"Button pressed. Executing configured actions");
 
         Application.Current.MainWindow.Hide();
-        Action.Execute(new CommandExecutionContext()
+
+        try
         {
-            MouseCursorPositionX = appdata.MouseX,
-            MouseCursorPositionY = appdata.MouseY
-        });
+            var task = Action.AsTask(new CommandExecutionContext()
+            {
+                MouseCursorPositionX = appdata.MouseX,
+                MouseCursorPositionY = appdata.MouseY
+            });
+
+            if (task != null)
+            {
+                if (task.Status == TaskStatus.Created) task.Start(TaskScheduler.FromCurrentSynchronizationContext());
+                task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        DebugLog.Log($"Actions completed with error: {t.Exception?.Message ?? "No error details available"}");
+                    }
+                    else
+                    {
+                        DebugLog.Log($"Actions completed without error");
+                    }
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+            }
+        }
+        catch (Exception e)
+        {
+            DebugLog.Log($"Actions completed with error: {e.Message}");
+        }
     }
 
     public void SetContent(string text, bool asXaml = false, bool includeBoilerplate = true) {

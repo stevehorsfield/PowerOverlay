@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -36,13 +37,14 @@ public class SwitchToApplication : ActionCommand
         return clone;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override Task ExecuteWithContext(CommandExecutionContext context)
     {
         foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {
             NativeUtils.SetForegroundWindow(hwnd);
-            return;
+            return Task.CompletedTask;
         }
+        return Task.CompletedTask;
     }
 
     public override void WriteJson(JsonObject o)

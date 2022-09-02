@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -527,7 +528,7 @@ public class SendKeys : ActionCommand
         return result;
     }
 
-    public override void ExecuteWithContext(CommandExecutionContext context)
+    public override async Task ExecuteWithContext(CommandExecutionContext context)
     {
         var active = NativeUtils.GetActiveAppHwnd();
         var shell = NativeUtils.GetShellWindow();
@@ -561,7 +562,7 @@ public class SendKeys : ActionCommand
 
         foreach (var target in uniqueTargets)
         {
-            SendKeysToWindow(target, keys);
+            await NativeUtils.SendKeys(target, keys);
         }
 
         return;
@@ -657,10 +658,6 @@ public class SendKeys : ActionCommand
         return result;
     }
 
-    private void SendKeysToWindow(IntPtr hwnd, NativeUtils.InputWrapper keys)
-    {
-        NativeUtils.SendKeys(hwnd, keys);
-    }
     public override void WriteJson(JsonObject o)
     {
         if (ApplicationTargets.Count > 0)

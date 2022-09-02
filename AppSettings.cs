@@ -152,6 +152,19 @@ public class AppSettings : INotifyPropertyChanged
         set { if (value) ShowOnScreenNumber = 4; }
     }
 
+    private int sizeToScreenPercent;
+    public int SizeToScreenPercent
+    {
+        get { return sizeToScreenPercent; }
+        set
+        {
+            if (value < 0) sizeToScreenPercent = 0;
+            else if (value > 100) sizeToScreenPercent = 100;
+            else sizeToScreenPercent = value;
+            
+        }
+    }
+
     private AppViewModel appViewModel = new();
     public AppViewModel AppViewModel {
         get {
@@ -182,6 +195,7 @@ public class AppSettings : INotifyPropertyChanged
         mainWindowHeight = DefaultMainWindowHeight;
         displayZoom = 1.0;
         showOnScreenNumber = null;
+        sizeToScreenPercent = 0;
     }
 
     public void Save()
@@ -191,6 +205,7 @@ public class AppSettings : INotifyPropertyChanged
         settings.AddLowerCamel(nameof(FileAccessPath), JsonValue.Create<string>(FileAccessPath));
         settings.AddLowerCamelValue(nameof(DisplayZoom), DisplayZoom);
         if (ShowOnScreenNumber.HasValue) settings.AddLowerCamel(nameof(ShowOnScreenNumber), ShowOnScreenNumber.Value);
+        settings.AddLowerCamelValue(nameof(SizeToScreenPercent), SizeToScreenPercent);
         
         using var fs = new FileStream(SettingsFilePath, FileMode.Create);
         using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions() { Indented = true });
@@ -218,6 +233,7 @@ public class AppSettings : INotifyPropertyChanged
                 if (d >= 0.1 && d <= 10.0) displayZoom = d;
             });
             obj?.TryGetValue<int>(nameof(ShowOnScreenNumber), d => showOnScreenNumber = d);
+            obj?.TryGetValue<int>(nameof(SizeToScreenPercent), d => sizeToScreenPercent = d);
         }
         // read menu data
         if (File.Exists(CacheFilePath))

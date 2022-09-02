@@ -603,8 +603,20 @@ namespace PowerOverlay
                 targetMonitor = displays.Count >= monitorIndex ? displays[monitorIndex] : primaryMonitor;
             }
 
-            var boxWidth = settings.MainWindowWidth * settings.DisplayZoom;
-            var boxHeight = settings.MainWindowHeight * settings.DisplayZoom;
+            double boxWidth, boxHeight;
+            if (settings.SizeToScreenPercent == 0)
+            {
+                boxWidth = settings.MainWindowWidth * settings.DisplayZoom;
+                boxHeight = settings.MainWindowHeight * settings.DisplayZoom;
+            }
+            else
+            {
+                var rect = targetMonitor.clientRect;
+                boxWidth = rect.Width * settings.SizeToScreenPercent / 100.0;
+                boxHeight = rect.Height * settings.SizeToScreenPercent / 100.0;
+            }
+            DisplayViewBox.Width = boxWidth;
+            DisplayViewBox.Height = boxHeight;
 
             this.Left = targetMonitor.clientRect.Left + (targetMonitor.clientRect.Width / 2) - (boxWidth / 2);
             this.Top = targetMonitor.clientRect.Top + (targetMonitor.clientRect.Height / 2) - (boxHeight / 2);

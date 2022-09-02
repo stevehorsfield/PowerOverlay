@@ -71,6 +71,22 @@ namespace PowerOverlay
                 new System.Windows.Forms.ToolStripMenuItem("Screen 4", null, (o, e) => ((MainWindow)MainWindow).Settings.ShowOnScreen4 = true)
                 );
             TrayContextMenu.Items.Add(screenMenu);
+            var sizingMenu = new System.Windows.Forms.ToolStripMenuItem("Overlay size", null,
+                new System.Windows.Forms.ToolStripMenuItem("Default", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 0),
+                new System.Windows.Forms.ToolStripMenuItem("10%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 10),
+                new System.Windows.Forms.ToolStripMenuItem("20%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 20),
+                new System.Windows.Forms.ToolStripMenuItem("25%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 25),
+                new System.Windows.Forms.ToolStripMenuItem("33%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 33),
+                new System.Windows.Forms.ToolStripMenuItem("40%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 40),
+                new System.Windows.Forms.ToolStripMenuItem("50%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 50),
+                new System.Windows.Forms.ToolStripMenuItem("60%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 60),
+                new System.Windows.Forms.ToolStripMenuItem("67%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 67),
+                new System.Windows.Forms.ToolStripMenuItem("75%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 75),
+                new System.Windows.Forms.ToolStripMenuItem("80%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 80),
+                new System.Windows.Forms.ToolStripMenuItem("90%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 90),
+                new System.Windows.Forms.ToolStripMenuItem("100%", null, (o, e) => ((MainWindow)MainWindow).Settings.SizeToScreenPercent = 100)
+                );
+            TrayContextMenu.Items.Add(sizingMenu);
             TrayContextMenu.Items.Add("-");
             var displayDebugWindow = () =>
             {
@@ -104,6 +120,33 @@ namespace PowerOverlay
                         }
                         else item.Text = $"Screen {x - 1} - not available";
                     }
+                }
+
+                foreach (var x in sizingMenu.DropDownItems)
+                {
+                    (x as System.Windows.Forms.ToolStripMenuItem)!.Checked = false;
+                }
+                var targetIndex = -1;
+                switch (((MainWindow)MainWindow).Settings.SizeToScreenPercent)
+                {
+                    case 0: targetIndex = 0; break;
+                    case 10: targetIndex = 1; break;
+                    case 20: targetIndex = 2; break;
+                    case 25: targetIndex = 3; break;
+                    case 33: targetIndex = 4; break;
+                    case 40: targetIndex = 5; break;
+                    case 50: targetIndex = 6; break;
+                    case 60: targetIndex = 7; break;
+                    case 67: targetIndex = 8; break;
+                    case 75: targetIndex = 9; break;
+                    case 80: targetIndex = 10; break;
+                    case 90: targetIndex = 11; break;
+                    case 100: targetIndex = 12; break;
+                    default: break;
+                }
+                if (targetIndex != -1)
+                {
+                    (sizingMenu.DropDownItems[targetIndex] as System.Windows.Forms.ToolStripMenuItem)!.Checked = true;
                 }
             };
         }

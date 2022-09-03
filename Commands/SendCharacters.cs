@@ -81,12 +81,74 @@ public class SendCharacters : ActionCommand
         }
     }
 
+    private string dateTimeFormatString = String.Empty;
+    public string DateTimeFormatString
+    {
+        get { return dateTimeFormatString; }
+        set
+        {
+            dateTimeFormatString = value;
+            RaisePropertyChanged(nameof(DateTimeFormatString));
+        }
+    }
+
+    private bool isDateTime;
+    public bool IsDateTime
+    {
+        get { return isDateTime; }
+        set
+        {
+            isDateTime = value;
+            RaisePropertyChanged(nameof(IsDateTime));
+            RaisePropertyChanged(nameof(IsDateTimeCheckboxBehaviour));
+            RaisePropertyChanged(nameof(IsFixedStringCheckboxBehaviour));
+        }
+    }
+
+    private bool isUTC;
+    public bool IsUTC
+    {
+        get { return isUTC; }
+        set
+        {
+            isUTC = value;
+            RaisePropertyChanged(nameof(IsUTC));
+        }
+    }
+
+    public bool IsDateTimeCheckboxBehaviour
+    {
+        get { return isDateTime; }
+        set
+        {
+            if (value) isDateTime = value;
+            RaisePropertyChanged(nameof(IsDateTime));
+            RaisePropertyChanged(nameof(IsDateTimeCheckboxBehaviour));
+            RaisePropertyChanged(nameof(IsFixedStringCheckboxBehaviour));
+        }
+    }
+
+    public bool IsFixedStringCheckboxBehaviour
+    {
+        get { return ! isDateTime; }
+        set
+        {
+            if (value) isDateTime = ! value;
+            RaisePropertyChanged(nameof(IsDateTime));
+            RaisePropertyChanged(nameof(IsDateTimeCheckboxBehaviour));
+            RaisePropertyChanged(nameof(IsFixedStringCheckboxBehaviour));
+        }
+    }
+
     public override bool CanExecute(object? parameter)
     {
-        return ((!String.IsNullOrEmpty(Text))
-            && (
-            (appTargets.Count > 0)
-            || sendToDesktop || sendToShell || sendToActiveApplication
+        return (
+            ( ((!IsDateTime) && (!String.IsNullOrEmpty(Text)))
+              ||
+              (IsDateTime && (!String.IsNullOrEmpty(DateTimeFormatString)))
+            ) && (
+              (appTargets.Count > 0)
+              || sendToDesktop || sendToShell || sendToActiveApplication
             ));
     }
 
@@ -99,6 +161,9 @@ public class SendCharacters : ActionCommand
             SendToActiveApplication = SendToActiveApplication,
             SendToDesktop = SendToDesktop,
             SendToShell = SendToShell,
+            DateTimeFormatString = DateTimeFormatString,
+            IsUTC = IsUTC,
+            IsDateTime = IsDateTime,
         };
 
         foreach (var x in ApplicationTargets)
@@ -137,7 +202,24 @@ public class SendCharacters : ActionCommand
         }
         var uniqueTargets = targets.Where(x => x != IntPtr.Zero).Distinct().ToList();
 
-        var textUTF16 = MemoryMarshal.Cast<byte, Int16>(Encoding.Unicode.GetBytes(Text).AsSpan());
+        string sourceText;
+        if (IsDateTime)
+        {
+            if (IsUTC)
+            {
+                sourceText = DateTimeOffset.UtcNow.ToString(DateTimeFormatString);
+            }
+            else
+            {
+                sourceText = DateTimeOffset.Now.ToString(DateTimeFormatString);
+            }
+        }
+        else
+        {
+            sourceText = Text;
+        }
+
+        var textUTF16 = MemoryMarshal.Cast<byte, Int16>(Encoding.Unicode.GetBytes(sourceText).AsSpan());
 
         foreach (var target in uniqueTargets)
         {
@@ -149,7 +231,16 @@ public class SendCharacters : ActionCommand
 
     public override void WriteJson(JsonObject o)
     {
-        o.AddLowerCamel(nameof(Text), JsonValue.Create(Text));
+        o.AddLowerCamelValue(nameof(IsDateTime), IsDateTime);
+        if (IsDateTime)
+        {
+            o.AddLowerCamel(nameof(DateTimeFormatString), DateTimeFormatString);
+            o.AddLowerCamelValue(nameof(IsUTC), IsUTC);
+        } else
+        {
+            o.AddLowerCamel(nameof(Text), JsonValue.Create(Text));
+        }
+
         if (ApplicationTargets.Count > 0)
         {
             o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
@@ -164,6 +255,9 @@ public class SendCharacters : ActionCommand
     {
         var result = new SendCharacters();
 
+        o.TryGetValue<bool>(nameof(IsDateTime), b => result.IsDateTime = b);
+        o.TryGetValue<bool>(nameof(IsUTC), b => result.IsUTC = b);
+        o.TryGet<string>(nameof(DateTimeFormatString), s => result.DateTimeFormatString = s);
         o.TryGet<string>(nameof(Text), s => result.Text = s);
         o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
             foreach (var x in xs)
@@ -205,96 +299,6 @@ public class SendCharactersDefinition : ActionCommandDefinition
 
     public override FrameworkElement CreateConfigElement()
     {
-        var ctrl = new DockPanel();
-
-        var appTargetsLbl = new TextBlock()
-        {
-            Text = "Application targets:",
-            HorizontalAlignment = HorizontalAlignment.Left
-        };
-        DockPanel.SetDock(appTargetsLbl, Dock.Top);
-
-        var textToSendLbl = new TextBlock()
-        {
-            Text = "Text to send:",
-            HorizontalAlignment = HorizontalAlignment.Left
-        };
-        DockPanel.SetDock(textToSendLbl, Dock.Top);
-
-
-        var selector = new ListBox();
-        selector.Style = (Style)selector.FindResource("ApplicationTargetList");
-
-        selector.SetBinding(ListBox.ItemsSourceProperty, new Binding(nameof(SendCharacters.ApplicationTargets)));
-
-        RoutedEventHandler hClick = (object sender, RoutedEventArgs e) =>
-        {
-            Button? b = e.OriginalSource as Button;
-            if (b == null) return;
-            switch (b.Name)
-            {
-                case "TargetAdd":
-                    e.Handled = true;
-                    ((SendCharacters)b.DataContext).ApplicationTargets.Add(new ApplicationMatcherViewModel());
-                    selector.SelectedIndex = selector.Items.Count - 1;
-                    return;
-                case "TargetRemove":
-                    e.Handled = true;
-                    if (selector.SelectedIndex == -1) return;
-                    selector.SelectedIndex = selector.SelectedIndex - 1;
-                    ((SendCharacters)b.DataContext).ApplicationTargets.RemoveAt(selector.SelectedIndex + 1);
-                    return;
-            }
-        };
-
-        selector.DataContextChanged += (o, e) =>
-        {
-            if (selector.DataContext == null) return;
-            if (selector.SelectedIndex != -1) return;
-            if (((SendCharacters)selector.DataContext).ApplicationTargets.Count > 0)
-            {
-                selector.SelectedIndex = 0;
-            }
-        };
-
-        selector.AddHandler(Button.ClickEvent, hClick);
-
-        //    new ApplicationTargetControl();
-        //selector.SetBinding(ApplicationTargetControl.DataContextProperty, 
-        //    new Binding(nameof(SendCharacters.ApplicationTargets)));
-        DockPanel.SetDock(selector, Dock.Top);
-
-        var sp = new StackPanel();
-        sp.Orientation = Orientation.Vertical;
-        DockPanel.SetDock(sp, Dock.Top);
-
-        var addCheckbox = (string txt, string prop) =>
-        {
-            var cb = new CheckBox() { Content = txt, HorizontalAlignment = HorizontalAlignment.Left };
-            cb.SetBinding(CheckBox.IsCheckedProperty, new Binding(prop));
-            sp.Children.Add(cb);
-        };
-
-        addCheckbox("Send to desktop", nameof(SendCharacters.SendToDesktop));
-        addCheckbox("Send to shell", nameof(SendCharacters.SendToShell));
-        addCheckbox("Send to active application", nameof(SendCharacters.SendToActiveApplication));
-        addCheckbox("Send to all application matches (otherwise first match)", nameof(SendCharacters.SendToAllMatches));
-
-        var txtbox = new TextBox()
-        {
-            AcceptsReturn = true,
-            AcceptsTab = true,
-            TextWrapping = TextWrapping.NoWrap,
-            MinHeight = 100,
-        };
-        txtbox.SetBinding(TextBox.TextProperty, "Text");
-
-        ctrl.Children.Add(sp);
-        ctrl.Children.Add(appTargetsLbl);
-        ctrl.Children.Add(selector);
-        ctrl.Children.Add(textToSendLbl);
-        ctrl.Children.Add(txtbox);
-
-        return ctrl;
+        return new SendCharactersConfigControl();
     }
 }

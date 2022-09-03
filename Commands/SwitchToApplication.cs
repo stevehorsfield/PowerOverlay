@@ -18,6 +18,49 @@ public class SwitchToApplication : ActionCommand
     private readonly FrameworkElement configElement = SwitchToApplicationDefinition.Instance.CreateConfigElement();
     public override FrameworkElement ConfigElement => configElement;
 
+    private bool switchToOriginalWindow;
+
+    public bool SwitchToOriginalWindow
+    {
+        get
+        {
+            return switchToOriginalWindow;
+        }
+        set
+        {
+            switchToOriginalWindow = value;
+            RaisePropertyChanged(nameof(SwitchToOriginalWindow));
+            RaisePropertyChanged(nameof(ApplicationTargetsEnabled));
+            RaisePropertyChanged(nameof(SwitchToOriginalWindowCheckboxBehaviour));
+            RaisePropertyChanged(nameof(SwitchToOtherWindowCheckboxBehaviour));
+        }
+    }
+    public bool SwitchToOriginalWindowCheckboxBehaviour
+    {
+        get
+        {
+            return SwitchToOriginalWindow;
+        }
+        set
+        {
+            if (value) SwitchToOriginalWindow = value;
+        }
+    }
+
+    public bool SwitchToOtherWindowCheckboxBehaviour
+    {
+        get
+        {
+            return ! SwitchToOriginalWindow;
+        }
+        set
+        {
+            if (value) SwitchToOriginalWindow = !value;
+        }
+    }
+
+    public bool ApplicationTargetsEnabled => !SwitchToOriginalWindow;
+
     public ObservableCollection<ApplicationMatcherViewModel> ApplicationTargets { get; private set; }
 
     public SwitchToApplication()
@@ -27,45 +70,70 @@ public class SwitchToApplication : ActionCommand
     }
     public override bool CanExecute(object? parameter)
     {
-        return ApplicationTargets.Count > 0;
+        return SwitchToOriginalWindow || (ApplicationTargets.Count > 0);
     }
 
     public override ActionCommand Clone()
     {
         var clone = new SwitchToApplication() { };
+        clone.SwitchToOriginalWindow = SwitchToOriginalWindow;
         foreach (var target in ApplicationTargets) clone.ApplicationTargets.Add(target);
         return clone;
     }
 
     public override Task ExecuteWithContext(CommandExecutionContext context)
     {
-        foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
+        if (SwitchToOriginalWindow)
         {
-            NativeUtils.SetForegroundWindow(hwnd);
-            return Task.CompletedTask;
+            if (context.OriginalActiveWindowHwnd != IntPtr.Zero)
+            {
+                DebugLog.Log($"Switching to original active window 0x{context.OriginalActiveWindowHwnd.ToString("X16")}");
+                NativeUtils.SetForegroundWindow(context.OriginalActiveWindowHwnd);
+            }
+            else
+            {
+                DebugLog.Log("Attempt to switch to original active window failed as handle unavailable");
+            }
+        }
+        else
+        {
+            foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
+            {
+                DebugLog.Log($"Switching to matched window 0x{hwnd.ToString("X16")}");
+                NativeUtils.SetForegroundWindow(hwnd);
+                return Task.CompletedTask;
+            }
         }
         return Task.CompletedTask;
     }
 
     public override void WriteJson(JsonObject o)
     {
-        if (ApplicationTargets.Count > 0)
+        o.AddLowerCamelValue(nameof(SwitchToOriginalWindow), SwitchToOriginalWindow);
+        if (! SwitchToOriginalWindow)
         {
-            o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
+            if (ApplicationTargets.Count > 0)
+            {
+                o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
+            }
         }
     }
 
     public static SwitchToApplication CreateFromJson(JsonObject o)
     {
         var result = new SwitchToApplication();
-        o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
-            foreach (var x in xs)
-            {
-                result.ApplicationTargets.Add(
-                    ApplicationMatcherViewModel.FromJson(x)
-                );
-            }
-        });
+        o.TryGetValue<bool>(nameof(SwitchToOriginalWindow), b => result.SwitchToOriginalWindow = b);
+        if (! result.SwitchToOriginalWindow)
+        {
+            o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
+                foreach (var x in xs)
+                {
+                    result.ApplicationTargets.Add(
+                        ApplicationMatcherViewModel.FromJson(x)
+                    );
+                }
+            });
+        }
 
         return result;
     }
@@ -92,57 +160,58 @@ public class SwitchToApplicationDefinition : ActionCommandDefinition
 
     public override FrameworkElement CreateConfigElement()
     {
-        var ctrl = new DockPanel();
+        return new SwitchToAppConfigControl();
+        //var ctrl = new DockPanel();
 
-        var appTargetsLbl = new TextBlock()
-        {
-            Text = "Application targets:",
-            HorizontalAlignment = HorizontalAlignment.Left
-        };
-        DockPanel.SetDock(appTargetsLbl, Dock.Top);
+        //var appTargetsLbl = new TextBlock()
+        //{
+        //    Text = "Application targets:",
+        //    HorizontalAlignment = HorizontalAlignment.Left
+        //};
+        //DockPanel.SetDock(appTargetsLbl, Dock.Top);
 
-        var selector = new ListBox();
-        selector.Style = (Style)selector.FindResource("ApplicationTargetList");
+        //var selector = new ListBox();
+        //selector.Style = (Style)selector.FindResource("ApplicationTargetList");
 
-        selector.SetBinding(ListBox.ItemsSourceProperty, new Binding(nameof(SwitchToApplication.ApplicationTargets)));
+        //selector.SetBinding(ListBox.ItemsSourceProperty, new Binding(nameof(SwitchToApplication.ApplicationTargets)));
 
-        RoutedEventHandler hClick = (object sender, RoutedEventArgs e) =>
-        {
-            Button? b = e.OriginalSource as Button;
-            if (b == null) return;
-            switch (b.Name)
-            {
-                case "TargetAdd":
-                    e.Handled = true;
-                    ((SwitchToApplication)b.DataContext).ApplicationTargets.Add(new ApplicationMatcherViewModel());
-                    selector.SelectedIndex = selector.Items.Count - 1;
-                    return;
-                case "TargetRemove":
-                    e.Handled = true;
-                    if (selector.SelectedIndex == -1) return;
-                    selector.SelectedIndex = selector.SelectedIndex - 1;
-                    ((SwitchToApplication)b.DataContext).ApplicationTargets.RemoveAt(selector.SelectedIndex + 1);
-                    return;
-            }
-        };
+        //RoutedEventHandler hClick = (object sender, RoutedEventArgs e) =>
+        //{
+        //    Button? b = e.OriginalSource as Button;
+        //    if (b == null) return;
+        //    switch (b.Name)
+        //    {
+        //        case "TargetAdd":
+        //            e.Handled = true;
+        //            ((SwitchToApplication)b.DataContext).ApplicationTargets.Add(new ApplicationMatcherViewModel());
+        //            selector.SelectedIndex = selector.Items.Count - 1;
+        //            return;
+        //        case "TargetRemove":
+        //            e.Handled = true;
+        //            if (selector.SelectedIndex == -1) return;
+        //            selector.SelectedIndex = selector.SelectedIndex - 1;
+        //            ((SwitchToApplication)b.DataContext).ApplicationTargets.RemoveAt(selector.SelectedIndex + 1);
+        //            return;
+        //    }
+        //};
 
-        selector.DataContextChanged += (o, e) =>
-        {
-            if (selector.DataContext == null) return;
-            if (selector.SelectedIndex != -1) return;
-            if (((SwitchToApplication)selector.DataContext).ApplicationTargets.Count > 0)
-            {
-                selector.SelectedIndex = 0;
-            }
-        };
+        //selector.DataContextChanged += (o, e) =>
+        //{
+        //    if (selector.DataContext == null) return;
+        //    if (selector.SelectedIndex != -1) return;
+        //    if (((SwitchToApplication)selector.DataContext).ApplicationTargets.Count > 0)
+        //    {
+        //        selector.SelectedIndex = 0;
+        //    }
+        //};
 
-        selector.AddHandler(Button.ClickEvent, hClick);
+        //selector.AddHandler(Button.ClickEvent, hClick);
 
-        DockPanel.SetDock(selector, Dock.Top);
+        //DockPanel.SetDock(selector, Dock.Top);
 
-        ctrl.Children.Add(appTargetsLbl);
-        ctrl.Children.Add(selector);
+        //ctrl.Children.Add(appTargetsLbl);
+        //ctrl.Children.Add(selector);
 
-        return ctrl;
+        //return ctrl;
     }
 }

@@ -10,4 +10,5 @@ public class CommandExecutionContext
 {
     public int MouseCursorPositionX;
     public int MouseCursorPositionY;
+    public IntPtr OriginalActiveWindowHwnd;
 }

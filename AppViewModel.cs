@@ -182,6 +182,16 @@ public class AppViewModel : INotifyPropertyChanged {
         }
     }
 
+    public IntPtr ApplicationHwnd
+    {
+        get { return this.applicationHwnd; }
+        set
+        {
+            this.applicationHwnd = value;
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ApplicationHwnd)));
+        }
+    }
+
     public int MouseX
     {
         get { return this.mouseX; }

@@ -257,7 +257,8 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
             var task = Action.AsTask(new CommandExecutionContext()
             {
                 MouseCursorPositionX = appdata.MouseX,
-                MouseCursorPositionY = appdata.MouseY
+                MouseCursorPositionY = appdata.MouseY,
+                OriginalActiveWindowHwnd = appdata.ApplicationHwnd,
             });
 
             if (task != null)

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <None Remove="AppIcon.ico" />
+    <None Remove="Commands\CloseCommand.png" />
     <None Remove="Commands\ExecuteCommand.png" />
     <None Remove="Commands\PositionWindow.png" />
     <None Remove="Commands\SendAppCommand.png" />
@@ -30,6 +31,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="AppIcon.ico" />
+    <Resource Include="Commands\CloseCommand.png" />
     <Resource Include="Commands\SendAppCommand.png" />
     <Resource Include="Commands\SendMouse.png" />
     <Resource Include="Commands\SendKeys.png" />
@@ -43,6 +45,19 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Core" Version="6.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Commands\CloseCommandConfigControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Commands\CloseCommandConfigControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

@@ -36,6 +36,7 @@ public class CommandFactory
         RegisterCommandType(SendKeysDefinition.Instance);
         RegisterCommandType(SendMouseDefinition.Instance);
         RegisterCommandType(SendAppCommandDefinition.Instance);
+        RegisterCommandType(CloseCommandDefinition.Instance);
     }
 
     public static JsonNode ToJson(ActionCommand action)

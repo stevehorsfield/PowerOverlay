@@ -9,9 +9,6 @@ using System.Windows.Interop;
 public partial class NativeUtils {
     
     public static IntPtr GetActiveAppHwnd() {
-        IntPtr hwndThis =
-            new WindowInteropHelper(App.Current.MainWindow).Handle;
-        
         IntPtr hwndLast = GetForegroundWindow();
         return hwndLast;
     }

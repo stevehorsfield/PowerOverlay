@@ -1,10 +1,9 @@
 .vs/**
 .vscode/**
-bin/**
-obj/**
-*.csproj.user
-*.pubxml.user
-PowerOverlay/bin/**
-PowerOverlay/obj/**
 PowerOverlay/.vs/**
 PowerOverlay/.vscode/**
+**/*.user
+**/*.obj
+**/x64/**
+**/bin/**
+**/obj/**

@@ -4,3 +4,7 @@ bin/**
 obj/**
 *.csproj.user
 *.pubxml.user
+PowerOverlay/bin/**
+PowerOverlay/obj/**
+PowerOverlay/.vs/**
+PowerOverlay/.vscode/**

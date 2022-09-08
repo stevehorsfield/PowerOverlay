@@ -16,7 +16,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBox Name="DataEntry" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" LostFocus="TextBox_LostFocus"
-                 />
+                 d:Text="123" VerticalContentAlignment="Center" />
         <Button Content="🔼" Grid.Row="0" Grid.Column="1" Click="Up_Click" FontSize="8" Padding="0"/>
         <Button Content="🔽" Grid.Row="1" Grid.Column="1" Click="Down_Click" FontSize="8" Padding="0"/>
     </Grid>

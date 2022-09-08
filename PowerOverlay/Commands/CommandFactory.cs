@@ -37,6 +37,7 @@ public class CommandFactory
         RegisterCommandType(SendMouseDefinition.Instance);
         RegisterCommandType(SendAppCommandDefinition.Instance);
         RegisterCommandType(CloseCommandDefinition.Instance);
+        RegisterCommandType(AudioControlDefinition.Instance);
     }
 
     public static JsonNode ToJson(ActionCommand action)

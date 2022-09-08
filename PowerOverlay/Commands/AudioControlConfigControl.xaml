@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="PowerOverlay.Commands.AudioControlConfigControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PowerOverlay"
+             xmlns:commands="clr-namespace:PowerOverlay.Commands"
+             mc:Ignorable="d" d:Background="Silver"
+             d:DesignHeight="450" d:DesignWidth="800"
+             DataContextChanged="UserControl_DataContextChanged"
+             >
+    <StackPanel Margin="0,0,0,20">
+        <TextBlock Margin="0,0,0,5">Device selection:</TextBlock>
+        <CheckBox IsChecked="{Binding UseDefaultDeviceCheckboxBehaviour}" Margin="20,0,0,5">Default device:</CheckBox>
+        <StackPanel Margin="20,0,0,5" Orientation="Horizontal" IsEnabled="{Binding UseDefaultDevice}">
+            <TextBlock Margin="20,0,0,0" Width="100">Device kind:</TextBlock>
+            <CheckBox IsChecked="{Binding IsSpeakerCheckboxBehaviour}" Margin="0,0,10,0">Speaker</CheckBox>
+            <CheckBox IsChecked="{Binding IsMicrophoneCheckboxBehaviour}" Margin="0,0,10,0">Microphone</CheckBox>
+        </StackPanel>
+        <StackPanel Margin="20,0,0,5" Orientation="Horizontal" IsEnabled="{Binding UseDefaultDevice}">
+            <TextBlock Margin="20,0,0,0" Width="100">Device role:</TextBlock>
+            <CheckBox IsChecked="{Binding IsConsoleCheckboxBehaviour}" Margin="0,0,10,0">Console</CheckBox>
+            <CheckBox IsChecked="{Binding IsMultimediaCheckboxBehaviour}" Margin="0,0,10,0">Multimedia</CheckBox>
+            <CheckBox IsChecked="{Binding IsCommunicationsCheckboxBehaviour}" Margin="0,0,10,0">Communications</CheckBox>
+        </StackPanel>
+        <CheckBox Margin="20,5,0,5" IsChecked="{Binding UseSpecificDeviceCheckboxBehaviour}">Specific device:</CheckBox>
+        <ComboBox Margin="40,0,0,0" Width="380" HorizontalAlignment="Left" 
+                  IsEnabled="{Binding UseSpecificDevice}"
+                  ItemsSource="{Binding Path=Devices}"
+                  Text="{Binding DeviceEndpointID}"
+                  IsEditable="True"
+                  TextSearch.TextPath="ID"
+                  >
+            <ComboBox.ItemTemplate>
+                <DataTemplate DataType="commands:DiscoveredAudioDevice">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Width="80" Text="{Binding MicrophoneOrSpeakerIndicatorText}"/>
+                        <TextBlock Text="{Binding FriendlyName}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <TextBlock Margin="0,20,0,5">Selected device:</TextBlock>
+        <TextBlock Margin="20,0,0,0">Name: <Run Text="{Binding Path=SelectedDevice.FriendlyName}"/></TextBlock>
+        <TextBlock Margin="20,0,0,0">Device: <Run Text="{Binding Path=SelectedDevice.DeviceName}"/></TextBlock>
+        <TextBlock Margin="20,0,0,0">Muted: <Run Text="{Binding Path=SelectedDevice.IsMuted}"/></TextBlock>
+        <TextBlock Margin="20,0,0,0">Volume: <Run Text="{Binding Path=SelectedDevice.Volume}"/>%</TextBlock>
+
+        <TextBlock Margin="0,20,0,5">Actions:</TextBlock>
+        <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding SetVolume}" Margin="20,0,10,0" VerticalAlignment="Center">Set volume</CheckBox>
+            <local:NumericTextBox IsEnabled="{Binding SetVolume}" MinValue="0" MaxValue="100" Width="100" Value="{Binding Volume}"></local:NumericTextBox>
+            <TextBlock Margin="10,0,0,0" VerticalAlignment="Center">Adjustment:</TextBlock>
+            <CheckBox IsChecked="{Binding VolumeAdjustmentModeIsSetCheckboxBehaviour}"
+                      Margin="5,0,10,0" VerticalAlignment="Center">Set to value</CheckBox>
+            <CheckBox IsChecked="{Binding VolumeAdjustmentModeIsIncreaseCheckboxBehaviour}"
+                      Margin="0,0,10,0" VerticalAlignment="Center">Increase by value</CheckBox>
+            <CheckBox IsChecked="{Binding VolumeAdjustmentModeIsDecreaseCheckboxBehaviour}"
+                      Margin="0,0,10,0" VerticalAlignment="Center">Decrease by value</CheckBox>
+        </StackPanel>
+        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding SetMute}" Margin="20,0,10,0" VerticalAlignment="Center">Set mute</CheckBox>
+            <CheckBox IsEnabled="{Binding SetMute}" IsChecked="{Binding IsMuteCheckboxBehaviour}" Margin="0,0,10,0">Mute</CheckBox>
+            <CheckBox IsEnabled="{Binding SetMute}" IsChecked="{Binding IsUnmuteCheckboxBehaviour}" Margin="0,0,10,0">Unmute</CheckBox>
+            <CheckBox IsEnabled="{Binding SetMute}" IsChecked="{Binding IsToggleMuteCheckboxBehaviour}" Margin="0,0,10,0">Toggle state</CheckBox>
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>

@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Windows.AI.MachineLearning;
 using Windows.ApplicationModel.Resources.Core;
 
 namespace PowerOverlay.Test;
@@ -93,8 +94,9 @@ public class ImageLocatorTest
     [Test,Apartment(ApartmentState.STA)]
     public void CanLocateImage()
     {
-        const string screenImage = "pack://siteoforigin:,,,/LocateImageTestBitmap-test-simple-2.png";
-        const string searchImage = "pack://siteoforigin:,,,/LocateImageTestBitmap-test-simple-2.png";
+        const string screenImage = "pack://siteoforigin:,,,/LocateImageTestBitmap-white-background.png";
+        const string searchImage = "pack://siteoforigin:,,,/LocateImageTestBitmap-transparent-background.png";
+        const double matchThreshold = 1.5;
 
         System.Windows.Window testWindow, testWindow2;
         #region show image to detect
@@ -133,7 +135,7 @@ public class ImageLocatorTest
         Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         #endregion
 
-        IntPtr hwnd = new WindowInteropHelper(testWindow).Handle;
+        IntPtr hwnd = NativeUtils.GetDesktopWindow();// new WindowInteropHelper(testWindow).Handle;
 
         byte[]? pixels;
         int stride;
@@ -165,18 +167,6 @@ public class ImageLocatorTest
 
             Console.WriteLine($"Height: {height}, Width: {width}, Stride: {stride}");
             source.CopyPixels(pixels, stride, 0);
-
-            //for (int j = 0; j < 40; ++j)
-            //{
-            //    for (int i = 0; i < 40; ++i)
-            //    {
-            //        Console.Write("{0:X2} ", pixels[(stride * j) + i * pixelWIDTH + indexRED]);
-            //        Console.Write("{0:X2} ", pixels[(stride * j) + i * pixelWIDTH + indexGREEN]);
-            //        Console.Write("{0:X2} ", pixels[(stride * j) + i * pixelWIDTH + indexBLUE]);
-            //        Console.Write("    ");
-            //    }
-            //    Console.WriteLine();
-            //}
 
             testWindow2 = new System.Windows.Window()
             {
@@ -264,7 +254,7 @@ public class ImageLocatorTest
 
         for (int originY = 0; originY < (height - searchHeight); ++originY)
         {
-            Console.WriteLine($"Testing row {originY}");
+            //Console.WriteLine($"Testing row {originY}");
             for (int originX = 0; originX < (width - searchWidth); ++originX)
             {
                 bool matches = true;
@@ -277,14 +267,14 @@ public class ImageLocatorTest
                     (searchStride * nonMaskTestOffsetY) +
                     (pixelWIDTH * nonMaskTestOffsetX)
                     ;
-                if (pixels[testImageOffset] != searchPixels[testSearchOffset])
+                if (!checkPixel(matchThreshold, pixels, searchPixels, testImageOffset, testSearchOffset))
                 {
                     //Console.WriteLine($"No match for {originX},{originY}");
                     continue;
                 }
                 
                 #region check at current origin
-                Console.WriteLine($"Starting test at {originX},{originY}");
+                //Console.WriteLine($"Starting test at {originX},{originY}");
                 for (int checkY = 0; checkY < searchHeight; ++checkY)
                 {
                     for (int checkX = 0; checkX < searchWidth; ++checkX)
@@ -299,31 +289,22 @@ public class ImageLocatorTest
                         // check mask
                         if (searchPixels[searchOffset + indexALPHA] == 0x00)
                         {
-                            Console.WriteLine($"masked for {originX},{originY},{checkX},{checkY}");
+                            //Console.WriteLine($"masked for {originX},{originY},{checkX},{checkY}");
                             continue;
                         }
                         // check pixel
-                        if (
-                            (searchPixels[searchOffset + indexBLUE] 
-                               != pixels[imageOffset + indexBLUE])
-                            ||
-                            (searchPixels[searchOffset + indexGREEN]
-                               != pixels[imageOffset + indexGREEN])
-                            ||
-                            (searchPixels[searchOffset + indexRED]
-                               != pixels[imageOffset + indexRED])
-                           )
+                        if (! checkPixel(matchThreshold, pixels, searchPixels, imageOffset, searchOffset))
                         {
                             //Console.WriteLine($"Mismatch for {originX},{originY},{checkX},{checkY}");
                             matches = false;
-                            Console.WriteLine($"({checkX},{checkY}: " +
-                                $"{searchPixels[searchOffset + indexBLUE]}," +
-                                $"{searchPixels[searchOffset + indexGREEN]}," +
-                                $"{searchPixels[searchOffset + indexRED]}," +
-                                $" != " +
-                                $"{pixels[imageOffset + indexBLUE]}," +
-                                $"{pixels[imageOffset + indexGREEN]}," +
-                                $"{pixels[imageOffset + indexRED]}");
+                            //Console.WriteLine($"({checkX},{checkY}: " +
+                            //    $"{searchPixels[searchOffset + indexBLUE]}," +
+                            //    $"{searchPixels[searchOffset + indexGREEN]}," +
+                            //    $"{searchPixels[searchOffset + indexRED]}," +
+                            //    $" != " +
+                            //    $"{pixels[imageOffset + indexBLUE]}," +
+                            //    $"{pixels[imageOffset + indexGREEN]}," +
+                            //    $"{pixels[imageOffset + indexRED]}");
                             break;
                         }
                         //Console.WriteLine($"Found matching pixel at {originX},{originY},{checkX},{checkY}");
@@ -341,9 +322,33 @@ public class ImageLocatorTest
 
         #endregion
 
-        Thread.Sleep(5000);
+        //Thread.Sleep(5000);
 
         testWindow.Close();
         testWindow2.Close();
+    }
+
+    private bool checkPixel(double deltaThreshold, byte[] pixels, byte[] searchPixels, int imageOffset, int searchOffset)
+    {
+        const int indexRED = 2, indexGREEN = 1, indexBLUE = 0, indexALPHA = 3, pixelWIDTH = 4;
+
+        if (searchPixels[searchOffset + indexALPHA] == 0x00) return true;
+
+        byte r, g, b, r_, g_, b_;
+        r = pixels[imageOffset + indexRED];
+        g = pixels[imageOffset + indexGREEN];
+        b = pixels[imageOffset + indexBLUE];
+
+        r_ = searchPixels[searchOffset + indexRED];
+        g_ = searchPixels[searchOffset + indexGREEN];
+        b_ = searchPixels[searchOffset + indexBLUE];
+
+        if ((r == r_) && (g == g_) && (b == b_)) return true;
+
+        var delta = ColorCompare.delta(r, g, b, r_, g_, b_);
+
+        if (delta < deltaThreshold) return true;
+        
+        return false;
     }
 }

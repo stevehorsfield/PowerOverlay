@@ -20,4 +20,31 @@
     <ProjectReference Include="..\PowerOverlay\PowerOverlay.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="LocateImageTestBitmap-test-simple-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-test-simple-four-pixel-row.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-test-simple-one-pixel.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-test-simple-transparent-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-test-simple.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-transparent-background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-white-background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LocateImageTestBitmap-yellow-black-square.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

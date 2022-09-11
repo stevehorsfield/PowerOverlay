@@ -17,6 +17,7 @@
     <None Remove="Commands\AudioControl.png" />
     <None Remove="Commands\CloseCommand.png" />
     <None Remove="Commands\ExecuteCommand.png" />
+    <None Remove="Commands\MoveToImage.png" />
     <None Remove="Commands\PositionWindow.png" />
     <None Remove="Commands\SendAppCommand.png" />
     <None Remove="Commands\SendCharacters.png" />
@@ -33,6 +34,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="AppIcon.ico" />
+    <Resource Include="Commands\MoveToImage.png" />
     <Resource Include="Commands\CloseCommand.png" />
     <Resource Include="Commands\SendAppCommand.png" />
     <Resource Include="Commands\SendMouse.png" />

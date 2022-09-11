@@ -38,6 +38,7 @@ public class CommandFactory
         RegisterCommandType(SendAppCommandDefinition.Instance);
         RegisterCommandType(CloseCommandDefinition.Instance);
         RegisterCommandType(AudioControlDefinition.Instance);
+        RegisterCommandType(MoveToImageDefinition.Instance);
     }
 
     public static JsonNode ToJson(ActionCommand action)

@@ -291,10 +291,23 @@ public class PositionWindow : ActionCommand
         }
     }
 
+    private bool positionActiveApplication;
+    public bool PositionActiveApplication
+    {
+        get { return positionActiveApplication; }
+        set
+        {
+            positionActiveApplication = value;
+            RaisePropertyChanged(nameof(PositionActiveApplication));
+            RaiseCanExecuteChanged(new EventArgs());
+        }
+    }
+
     public PositionWindow()
     {
         ApplicationTargets = new();
         ApplicationTargets.CollectionChanged += (o, e) => { RaiseCanExecuteChanged(new EventArgs()); };
+        PositionActiveApplication = false;
         LayoutRowWeights = new ObservableCollection<LayoutWeight>();
         LayoutColumnWeights = new ObservableCollection<LayoutWeight>();
         // Force weight construction
@@ -308,7 +321,7 @@ public class PositionWindow : ActionCommand
     }
     public override bool CanExecute(object? parameter)
     {
-        if (ApplicationTargets.Count == 0) return false;
+        if ((ApplicationTargets.Count == 0) && (!PositionActiveApplication)) return false;
         switch (Mode)
         {
             case PositionMode.Positioned:
@@ -324,6 +337,7 @@ public class PositionWindow : ActionCommand
     {
         var clone = new PositionWindow()
         {
+            PositionActiveApplication = PositionActiveApplication,
             PositionAllMatches = PositionAllMatches,
             Mode = Mode,
             SetPosition = SetPosition,
@@ -559,6 +573,12 @@ public class PositionWindow : ActionCommand
 
     public override Task ExecuteWithContext(CommandExecutionContext context)
     {
+        if (PositionActiveApplication)
+        {
+            IntPtr activeApp = NativeUtils.GetActiveAppHwnd();
+            Resize(activeApp);
+        }
+
         foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {
             DebugLog.Log($"Repositioning window 0x{hwnd.ToString("X16")}");
@@ -570,6 +590,7 @@ public class PositionWindow : ActionCommand
 
     public override void WriteJson(JsonObject o)
     {
+        o.AddLowerCamelValue(nameof(PositionActiveApplication), PositionActiveApplication);
         if (ApplicationTargets.Count > 0)
         {
             o.AddLowerCamel(nameof(ApplicationTargets), ApplicationTargets.ToJson());
@@ -625,6 +646,7 @@ public class PositionWindow : ActionCommand
     public static PositionWindow CreateFromJson(JsonObject o)
     {
         var result = new PositionWindow();
+        o.TryGetValue<bool>(nameof(PositionActiveApplication), b => result.PositionActiveApplication = b);
         o.TryGet<JsonArray>(nameof(ApplicationTargets), xs => {
             foreach (var x in xs)
             {
@@ -789,9 +811,12 @@ public class PositionWindowDefinition : ActionCommandDefinition
             cb.SetBinding(CheckBox.IsCheckedProperty, new Binding(prop));
             return cb;
         };
+        var chkCurrentApp = createChk("Reposition active application window",
+            nameof(PositionWindow.PositionActiveApplication), HorizontalAlignment.Left);
         var chkAllMatches = createChk("Reposition all matches (otherwise first only)", 
             nameof(PositionWindow.PositionAllMatches), HorizontalAlignment.Left);
-        
+
+        sp.Children.Add(chkCurrentApp);
         sp.Children.Add(chkAllMatches);
 
         var sp2 = new StackPanel();

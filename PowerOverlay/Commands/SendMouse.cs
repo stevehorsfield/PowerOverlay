@@ -411,8 +411,8 @@ public class SendMouse : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return SendMouseDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SendMouseDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SendMouseDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private MoveCursorOrigin cursorOrigin;
     public MoveCursorOrigin CursorOrigin

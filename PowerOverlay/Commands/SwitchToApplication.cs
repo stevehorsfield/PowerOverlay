@@ -15,8 +15,8 @@ public class SwitchToApplication : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return SwitchToApplicationDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SwitchToApplicationDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SwitchToApplicationDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private bool switchToOriginalWindow;
 

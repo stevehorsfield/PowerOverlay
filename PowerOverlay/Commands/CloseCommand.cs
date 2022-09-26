@@ -23,8 +23,8 @@ public class CloseCommand : ActionCommand
 
     public override ActionCommandDefinition Definition { get { return CloseCommandDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = CloseCommandDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(CloseCommandDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private ObservableCollection<ApplicationMatcherViewModel> appTargets = new();
     public ObservableCollection<ApplicationMatcherViewModel> ApplicationTargets => appTargets;

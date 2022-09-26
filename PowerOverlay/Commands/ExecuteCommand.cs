@@ -41,8 +41,8 @@ public class ExecuteCommand : ActionCommand
 
     private const string NotSpecifiedVerb = "(not specified)";
 
-    private readonly FrameworkElement configElement = ExecuteCommandDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(ExecuteCommandDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private string executablePath = String.Empty;
     public string ExecutablePath

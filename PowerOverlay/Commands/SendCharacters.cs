@@ -20,8 +20,8 @@ public class SendCharacters : ActionCommand
 
     public override ActionCommandDefinition Definition { get { return SendCharactersDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SendCharactersDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SendCharactersDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private ObservableCollection<ApplicationMatcherViewModel> appTargets = new();
     public ObservableCollection<ApplicationMatcherViewModel> ApplicationTargets => appTargets;

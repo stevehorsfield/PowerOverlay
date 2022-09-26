@@ -431,8 +431,8 @@ public class SendKeys : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return SendKeysDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SendKeysDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SendKeysDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private ObservableCollection<SendKeyValue> keySequence = new();
     public ObservableCollection<SendKeyValue> KeySequence => keySequence;

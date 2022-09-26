@@ -174,8 +174,8 @@ public class AudioControl : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return AudioControlDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = AudioControlDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new (AudioControlDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private bool setMute, setVolume;
     bool useDefaultDevice = true;

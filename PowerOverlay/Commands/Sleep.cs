@@ -17,8 +17,8 @@ public class Sleep : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return SleepDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SleepDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SleepDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private int sleepMilliseconds;
     public int SleepMilliseconds

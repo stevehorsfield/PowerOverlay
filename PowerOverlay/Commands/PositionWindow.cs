@@ -47,8 +47,8 @@ public class PositionWindow : ActionCommand
 {
     public override PositionWindowDefinition Definition { get { return PositionWindowDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = PositionWindowDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(PositionWindowDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     public ObservableCollection<ApplicationMatcherViewModel> ApplicationTargets { get; private set; }
 

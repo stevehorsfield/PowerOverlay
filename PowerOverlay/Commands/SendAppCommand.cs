@@ -75,8 +75,8 @@ public class SendAppCommand : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return SendAppCommandDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SendAppCommandDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SendAppCommandDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private ObservableCollection<ApplicationMatcherViewModel> appTargets = new();
     public ObservableCollection<ApplicationMatcherViewModel> ApplicationTargets => appTargets;

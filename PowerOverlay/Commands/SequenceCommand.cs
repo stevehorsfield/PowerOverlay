@@ -19,8 +19,8 @@ public class SequenceCommand : ActionCommand
 {
     public override ActionCommandDefinition Definition { get { return SequenceCommandDefinition.Instance; } }
 
-    private readonly FrameworkElement configElement = SequenceCommandDefinition.Instance.CreateConfigElement();
-    public override FrameworkElement ConfigElement => configElement;
+    private readonly Lazy<FrameworkElement> configElement = new(SequenceCommandDefinition.Instance.CreateConfigElement);
+    public override FrameworkElement ConfigElement => configElement.Value;
 
     private readonly ObservableCollection<ActionCommand> actions = new();
 

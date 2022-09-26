@@ -106,6 +106,32 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
     public bool IsXaml { get { return contentSourceType == ContentSourceType.Xaml; } }
     public bool IsXamlFragment { get { return contentSourceType == ContentSourceType.XamlFragment; } }
 
+    public bool IsPlainTextCheckboxBehaviour
+    {
+        get { return contentSourceType == ContentSourceType.PlainText; }
+        set
+        {
+            if (value) ContentFormat = ContentSourceType.PlainText;
+        }
+    }
+    public bool IsXamlCheckboxBehaviour
+    {
+        get { return contentSourceType == ContentSourceType.Xaml; }
+        set
+        {
+            if (value) ContentFormat = ContentSourceType.Xaml;
+        }
+    }
+    public bool IsXamlFragmentCheckboxBehaviour
+    {
+        get { return contentSourceType == ContentSourceType.XamlFragment; }
+        set
+        {
+            if (value) ContentFormat = ContentSourceType.XamlFragment;
+        }
+    }
+
+
     private void Notify(params string[] names)
     {
         Array.ForEach(names, n => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n)));
@@ -158,6 +184,22 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
     public bool IsSelectMenu => actionMode == ActionMode.SelectMenu;
     public bool IsPerformTask => actionMode == ActionMode.PerformTask;
 
+    public bool IsNoActionCheckboxBehaviour
+    {
+        get { return IsNoAction; }
+        set { if (value) ActionMode = ActionMode.NoAction; }
+    }
+    public bool IsSelectMenuCheckboxBehaviour
+    {
+        get { return IsSelectMenu; }
+        set { if (value) ActionMode = ActionMode.SelectMenu; }
+    }
+    public bool IsPerformTaskCheckboxBehaviour
+    {
+        get { return IsPerformTask; }
+        set { if (value) ActionMode = ActionMode.PerformTask; }
+    }
+
     private ActionCommand? action;
     public string targetMenu = String.Empty;
 
@@ -204,7 +246,8 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         if (action == null && mode == ActionMode.PerformTask) action = SequenceCommandDefinition.Instance.Create();
 
         SetAndNotify(ref actionMode, mode, nameof(IsNoAction), nameof(IsSelectMenu), nameof(IsPerformTask), 
-            nameof(MenuListVisibility), nameof(ActionVisibility), nameof(Action), nameof(ActionMode));
+            nameof(MenuListVisibility), nameof(ActionVisibility), nameof(Action), nameof(ActionMode),
+            nameof(IsNoActionCheckboxBehaviour),nameof(IsSelectMenuCheckboxBehaviour), nameof(IsPerformTaskCheckboxBehaviour));
         RaiseCanExecuteChanged();
     }
 
@@ -342,7 +385,8 @@ public class ButtonViewModel : ICommand, INotifyPropertyChanged, IApplicationJso
         {
             Notify(nameof(Content), nameof(ContentFormat), nameof(RawText), 
                 nameof(IsXaml), nameof(IsPlainText), nameof(IsXamlFragment),
-                nameof(XamlErrorMessage), nameof(HasXamlError));
+                nameof(XamlErrorMessage), nameof(HasXamlError),
+                nameof(IsXamlCheckboxBehaviour), nameof(IsPlainTextCheckboxBehaviour), nameof(IsXamlFragmentCheckboxBehaviour));
         }
     }
 

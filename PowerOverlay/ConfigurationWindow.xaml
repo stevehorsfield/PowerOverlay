@@ -30,7 +30,7 @@
                 </ListView>
             </DockPanel>
             <TextBlock DockPanel.Dock="Top" Text="Menu name:"/>
-            <TextBox DockPanel.Dock="Top" Text="{Binding Path=Menus/Name}" IsReadOnly="{Binding Path=IsReadOnly}" />
+            <TextBox DockPanel.Dock="Top" Text="{Binding Path=Menus/Name}" IsReadOnly="{Binding Path=Menus/IsReadOnly}" />
             <TextBlock DockPanel.Dock="Top" Text="Auto show menu for:"/>
             <DockPanel DockPanel.Dock="Top">
 
@@ -61,7 +61,8 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </DockPanel>
-            <Border DockPanel.Dock="Top" Margin="5" BorderThickness="1" Padding="5" BorderBrush="Silver" Background="AliceBlue">
+            <Border DockPanel.Dock="Top" Margin="5" BorderThickness="1" Padding="5" BorderBrush="Silver" Background="AliceBlue"
+                    DataContext="{Binding Path=Menus/}">
                 <Grid DockPanel.Dock="Top" Grid.Row="2" Grid.Column="1">
                     <Grid.Style>
                         <Style>
@@ -130,116 +131,113 @@
                 <TabItem>
                     <TabItem.Header>General</TabItem.Header>
                     <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="220"/>
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
+                        <StackPanel Orientation="Vertical">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Label Grid.Row="0" Grid.Column="0" Content="Display:"/>
+                                <CheckBox Margin="5,2,5,2" Grid.Row="0" Grid.Column="1" Content="Visible" IsChecked="{Binding Path=IsVisible}" VerticalAlignment="Center"/>
 
-                            <Label Grid.Row="0" Grid.Column="0">Visible</Label>
-                            <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Path=IsVisible}"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="Content style:"/>
+                                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                                    <CheckBox IsChecked="{Binding Path=IsPlainTextCheckboxBehaviour}" Margin="5,2,5,2" Content="Text" VerticalAlignment="Center"/>
+                                    <CheckBox IsChecked="{Binding Path=IsXamlFragmentCheckboxBehaviour}" Margin="5,2,5,2" Content="XAML (Fragment)" VerticalAlignment="Center"/>
+                                    <CheckBox IsChecked="{Binding Path=IsXamlCheckboxBehaviour}" Margin="5,2,5,2" Content="XAML (Full)" VerticalAlignment="Center"/>
+                                </StackPanel>
 
-                            <Label Grid.Row="1" Grid.Column="0">Content type</Label>
+                                <Label Grid.Row="2" Grid.Column="0" Content="Content:"/>
+                                <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
+                                    <TextBox Height="150" Width="300" HorizontalAlignment="Left"
+                                         AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap"
+                                         HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                         Text="{Binding Path=RawText}"/>
 
-                            <ListBox Grid.Row="1" Grid.Column="1" Name="ContentFormatList" DataContextChanged="ContentFormatList_DataContextChanged"
-                                         SelectionChanged="ContentFormatList_SelectionChanged">
-                                <ListBoxItem Content="Text" Tag="PlainText" />
-                                <ListBoxItem Content="XAML (Fragment)" Tag="XamlFragment"/>
-                                <ListBoxItem Content="XAML (Full)" Tag="Xaml" />
-                            </ListBox>
+                                    <Border Width="150" Height="80" BorderThickness="2" BorderBrush="Silver"
+                                            Margin="10"
+                                            Background="{Binding DefaultStyle.BackgroundColourBrush}">
+                                        <ContentPresenter Content="{Binding Content}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <ContentPresenter.Style>
+                                                <Style>
+                                                    <Setter Property="TextBlock.Foreground" Value="{Binding DefaultStyle.ForegroundColourBrush}"/>
+                                                </Style>
+                                            </ContentPresenter.Style>
+                                        </ContentPresenter>
+                                    </Border>
 
-                            <StackPanel Grid.Row="2" Grid.Column="0">
-                                <Label>Button content</Label>
-                                <TextBlock Foreground="Red" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="100"
-                                   MaxWidth="200">
-                                    <TextBlock.Style>
-                                        <Style>
-                                            <Setter Property="UIElement.Visibility" Value="Hidden"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=HasXamlError, Mode=OneWay}" Value="true">
-                                                    <Setter Property="UIElement.Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                            <Bold>Error:</Bold> <Run Text="{Binding XamlErrorMessage, Mode=OneWay}"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <TextBox Grid.Row="2" Grid.Column="1" Height="150" Width="300" HorizontalAlignment="Left"
-                             AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap"
-                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                             Text="{Binding Path=RawText}"/>
+                                </StackPanel>
 
-                            <Label Grid.Row="3" Grid.Column="0">Preview</Label>
-                            <Border Grid.Row="3" Grid.Column="1" Width="150" Height="80" BorderThickness="2" BorderBrush="Silver"
-                            Margin="10"
-                            Background="{Binding DefaultStyle.BackgroundColourBrush}">
-                                <ContentPresenter Content="{Binding Content}" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <ContentPresenter.Style>
-                                        <Style>
-                                            <Setter Property="TextBlock.Foreground" Value="{Binding DefaultStyle.ForegroundColourBrush}"/>
-                                        </Style>
-                                    </ContentPresenter.Style>
-                                </ContentPresenter>
-                            </Border>
+                                <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left">
+                                    <TextBlock Foreground="Red" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="100"
+                                       MaxWidth="200">
+                                        <TextBlock.Style>
+                                            <Style>
+                                                <Setter Property="UIElement.Visibility" Value="Hidden"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=HasXamlError, Mode=OneWay}" Value="true">
+                                                        <Setter Property="UIElement.Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                <Bold>Error:</Bold> <Run Text="{Binding XamlErrorMessage, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
 
-                            <Label Grid.Row="4" Grid.Column="0">Action</Label>
-                            <StackPanel Grid.Row="4" Grid.Column="1">
-                                <ListBox Name="ActionModeList" DataContextChanged="ActionModeList_DataContextChanged"
-                                         SelectionChanged="ActionModeList_SelectionChanged">
-                                    <ListBoxItem Content="No action" Tag="NoAction" />
-                                    <ListBoxItem Content="Select menu" Tag="SelectMenu"/>
-                                    <ListBoxItem Content="Perform action" Tag="PerformTask" />
-                                </ListBox>
+                                <Label Grid.Row="4" Grid.Column="0" Content="Click behaviour:"/>
+                                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
+                                    <CheckBox IsChecked="{Binding Path=IsNoActionCheckboxBehaviour}" Content="No action" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                                    <CheckBox IsChecked="{Binding Path=IsSelectMenuCheckboxBehaviour}" Content="Select menu" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                                    <CheckBox IsChecked="{Binding Path=IsPerformTaskCheckboxBehaviour}" Content="Perform action" Margin="5,2,5,2" VerticalAlignment="Center"/>
+                                </StackPanel>
 
-                                <ListBox Name="TargetMenuList" Visibility="{Binding MenuListVisibility}"
-                                         DataContextChanged="TargetMenuList_DataContextChanged"
-                                         SelectionChanged="TargetMenuList_SelectionChanged"
-                                         IsSynchronizedWithCurrentItem="True"
-                                         >
-                                    <ListBox.Resources>
-                                        <CollectionViewSource x:Key="TargetMenuListView"
-                                                              Source="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Menus}"
-                                            />
-                                    </ListBox.Resources>
-                                    <ListBox.Style>
-                                        <Style>
-                                            <Setter Property="ListBox.ItemsSource" Value="{Binding Source={StaticResource TargetMenuListView}}"></Setter>
-                                        </Style>
-                                    </ListBox.Style>
+                                <Label Grid.Row="5" Grid.Column="0" Content="Target menu:" Visibility="{Binding MenuListVisibility}"/>
+                                <StackPanel Grid.Row="5" Grid.Column="1">
+                                    <ListBox Name="TargetMenuList" Visibility="{Binding MenuListVisibility}"
+                                             DataContextChanged="TargetMenuList_DataContextChanged"
+                                             SelectionChanged="TargetMenuList_SelectionChanged"
+                                             IsSynchronizedWithCurrentItem="True"
+                                             >
+                                        <ListBox.Resources>
+                                            <CollectionViewSource x:Key="TargetMenuListView"
+                                                                  Source="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.Menus}"
+                                                />
+                                        </ListBox.Resources>
+                                        <ListBox.Style>
+                                            <Style>
+                                                <Setter Property="ListBox.ItemsSource" Value="{Binding Source={StaticResource TargetMenuListView}}"></Setter>
+                                            </Style>
+                                        </ListBox.Style>
 
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Name}" />
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Name}" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
 
-                            </StackPanel>
-                            <Border Name="ActionPanel" BorderThickness="0" Grid.ColumnSpan="2" Grid.Row="5" Visibility="{Binding Path=ActionVisibility}">
-                                <Grid DataContext="{Binding Action}">
-                                    <ContentPresenter Content="{Binding Path=ConfigElement}"/>
-                                </Grid>
-                            </Border>
+                                </StackPanel>
 
-
-                        </Grid>
+                                <Label Grid.Row="6" Grid.Column="0" Content="Action(s):" Visibility="{Binding Path=ActionVisibility}"/>
+                                <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Name="ActionPanel" BorderThickness="0" Visibility="{Binding Path=ActionVisibility}">
+                                    <Border Margin="0" Padding="0" BorderThickness="0" DataContext="{Binding Action}">
+                                        <ContentPresenter Content="{Binding Path=ConfigElement}"/>
+                                    </Border>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem>

@@ -165,65 +165,34 @@ public partial class ConfigurationWindow : Window
         ((ConfigurationButtonMenuViewModel)SelectorsList.DataContext).MenuSelectors.Remove(selected);
     }
 
-    private void ActionModeList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        if (ActionModeList.DataContext == null)
-        {
-            ActionModeList.SelectedIndex = -1;
-            return;
-        }
+    //private void ActionModeList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    //{
+    //    if (ActionModeList.DataContext == null)
+    //    {
+    //        ActionModeList.SelectedIndex = -1;
+    //        return;
+    //    }
 
-        var actionMode = ((ButtonViewModel)ActionModeList.DataContext).ActionMode;
-        var actionModeName = actionMode.ToString();
-        foreach (var item in ActionModeList.Items.Cast<ListBoxItem>())
-        {
-            if (((string)item.Tag).Equals(actionModeName,StringComparison.InvariantCultureIgnoreCase))
-            {
-                item.IsSelected = true;
-                return;
-            }
-        }
-        ActionModeList.SelectedIndex = -1;
-    }
-    private void ActionModeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        e.Handled = true;
-        if (ActionModeList.SelectedIndex == -1) return;
-        if (ActionModeList.DataContext == null) return;
+    //    var actionMode = ((ButtonViewModel)ActionModeList.DataContext).ActionMode;
+    //    var actionModeName = actionMode.ToString();
+    //    foreach (var item in ActionModeList.Items.Cast<ListBoxItem>())
+    //    {
+    //        if (((string)item.Tag).Equals(actionModeName,StringComparison.InvariantCultureIgnoreCase))
+    //        {
+    //            item.IsSelected = true;
+    //            return;
+    //        }
+    //    }
+    //    ActionModeList.SelectedIndex = -1;
+    //}
+    //private void ActionModeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    //{
+    //    e.Handled = true;
+    //    if (ActionModeList.SelectedIndex == -1) return;
+    //    if (ActionModeList.DataContext == null) return;
 
-        var dc = (ButtonViewModel)ActionModeList.DataContext;
-        var mode = Enum.Parse<ActionMode>((string)((ListBoxItem)ActionModeList.SelectedItem).Tag);
-        dc.SetActionMode(mode);
-    }
-
-    private void ContentFormatList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        if (ContentFormatList.DataContext == null)
-        {
-            ContentFormatList.SelectedIndex = -1;
-            return;
-        }
-
-        var contentMode = ((ButtonViewModel)ContentFormatList.DataContext).ContentFormat;
-        var contentModeName = contentMode.ToString();
-        foreach (var item in ContentFormatList.Items.Cast<ListBoxItem>())
-        {
-            if (((string)item.Tag).Equals(contentModeName, StringComparison.InvariantCultureIgnoreCase))
-            {
-                item.IsSelected = true;
-                return;
-            }
-        }
-        ContentFormatList.SelectedIndex = -1;
-    }
-    private void ContentFormatList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        e.Handled = true;
-        if (ContentFormatList.SelectedIndex == -1) return;
-        if (ContentFormatList.DataContext == null) return;
-
-        var dc = (ButtonViewModel)ContentFormatList.DataContext;
-        var mode = Enum.Parse<ButtonViewModel.ContentSourceType>((string)((ListBoxItem)ContentFormatList.SelectedItem).Tag);
-        dc.ContentFormat = mode;
-    }
+    //    var dc = (ButtonViewModel)ActionModeList.DataContext;
+    //    var mode = Enum.Parse<ActionMode>((string)((ListBoxItem)ActionModeList.SelectedItem).Tag);
+    //    dc.SetActionMode(mode);
+    //}
 }

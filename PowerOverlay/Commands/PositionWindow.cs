@@ -917,8 +917,8 @@ public class PositionWindowDefinition : ActionCommandDefinition
             ntbRowCount.ValueChanged += (sender, e) =>
             {
                 var rowCount = ntbRowCount.Value;
-                ntb2.MaxValue = rowCount - 1;
-                ntb2b.MaxValue = rowCount - 1;
+                ntb2.MaxValue = rowCount - 1; // position is 0 <-> Count - 1
+                ntb2b.MaxValue = rowCount; // span is 1 <-> Count
                 while (positionDisplayGrid.RowDefinitions.Count > rowCount)
                 {
                     positionDisplayGrid.RowDefinitions.RemoveAt(positionDisplayGrid.RowDefinitions.Count - 1);
@@ -939,8 +939,8 @@ public class PositionWindowDefinition : ActionCommandDefinition
             ntbColumnCount.ValueChanged += (sender, e) =>
             {
                 var columnCount = ntbColumnCount.Value;
-                ntb3.MaxValue = columnCount - 1;
-                ntb3b.MaxValue = columnCount - 1;
+                ntb3.MaxValue = columnCount - 1; // position is 0 <-> Count - 1
+                ntb3b.MaxValue = columnCount; // span is 1 <-> Count
                 while (positionDisplayGrid.ColumnDefinitions.Count > columnCount)
                 {
                     positionDisplayGrid.ColumnDefinitions.RemoveAt(positionDisplayGrid.ColumnDefinitions.Count - 1);

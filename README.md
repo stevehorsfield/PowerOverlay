@@ -39,5 +39,13 @@ A named menu can be provided as an argument.
 * Support custom button layouts (more/fewer buttons, non-grid layout, etc.)
 * Support options dialog
 * Add per-menu global hot key support
-* Support volume/mute settings for audio input/output (see IMMDeviceEnumerator and IAudioEndpointVolume)
 * Support webcam enable/disable
+* Support launching Windows Store apps directly
+* Redesign sequence action UI
+* Support repositioning active app
+* Support diagnostic output of all top-level window details
+* Support rolling clear-up of debug log entries
+* Support capturing and showing top-level exceptions
+* Add action to manipulate clipboard (set text/image/file/previous clipboard capture?)
+* Add detailed diagnostic mode, particularly for diagnosing issues with low-level key SendInput behaviour
+

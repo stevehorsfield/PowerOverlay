@@ -103,6 +103,7 @@ public class SwitchToApplication : ActionCommand
                 NativeUtils.SetForegroundWindow(hwnd);
                 return Task.CompletedTask;
             }
+            DebugLog.Log("No matching window found to switch to");
         }
         return Task.CompletedTask;
     }

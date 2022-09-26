@@ -389,10 +389,22 @@ public class PositionWindow : ActionCommand
     private void LayoutWindow(IntPtr hwnd)
     {
         var screen = GetScreenSizeForLayout(hwnd);
-        if (! screen.HasValue) return;
+        if (!screen.HasValue)
+        {
+            DebugLog.Log("Window layout failed: no screen details available");
+            return;
+        }
         
         var windowLayout = CalculateWindowLayout(screen.Value);
-        if (!windowLayout.HasValue) return;
+        if (!windowLayout.HasValue)
+        {
+            DebugLog.Log("Window layout failed: failed to calculate layout");
+            return;
+        }
+
+        DebugLog.Log($"Repositioning window to " +
+            $"{(int)windowLayout.Value.Left},{(int)windowLayout.Value.Top} and size " +
+            $"{(int)windowLayout.Value.Width},{(int)windowLayout.Value.Height}");
 
         NativeUtils.RepositionWindow(hwnd, true, true,
             (int)windowLayout.Value.Left, (int)windowLayout.Value.Top,
@@ -419,7 +431,11 @@ public class PositionWindow : ActionCommand
                 targetScreenIndex = screens.FindIndex(x => x.isPrimary);
             }
         }
-        if (targetScreenIndex == -1) return null; // no match
+        if (targetScreenIndex == -1)
+        {
+            DebugLog.Log($"No monitor found for index {LayoutDetails.Monitor} (revert to primary: {LayoutTargetPrimaryMonitorIfNotMatched}), screen count: {screens.Count}");
+            return null; // no match
+        }
 
         return screens[targetScreenIndex].clientRect;
     }
@@ -545,6 +561,7 @@ public class PositionWindow : ActionCommand
     {
         foreach (var hwnd in ApplicationTargets.EnumerateMatchedWindows(false, true))
         {
+            DebugLog.Log($"Repositioning window 0x{hwnd.ToString("X16")}");
             Resize(hwnd);
             if (!PositionAllMatches) return Task.CompletedTask;
         }

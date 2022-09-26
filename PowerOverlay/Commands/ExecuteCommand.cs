@@ -531,7 +531,7 @@ public class ExecuteCommandControl : ContentControl, System.Windows.Forms.IWin32
         var result = ofd.ShowDialog(Window.GetWindow(this));
         if (result ?? false)
         {
-            FilenameTextBox.Text = ofd.FileName;
+            ((ExecuteCommand)FilenameTextBox.DataContext).ExecutablePath = ofd.FileName;
         }
     }
 
@@ -545,7 +545,7 @@ public class ExecuteCommandControl : ContentControl, System.Windows.Forms.IWin32
 
         if (dialogResult != System.Windows.Forms.DialogResult.OK) return;
 
-        WorkingDirectoryTextBox.Text = fbd.SelectedPath;
+        ((ExecuteCommand)WorkingDirectoryTextBox.DataContext).WorkingDirectory = fbd.SelectedPath;
     }
 
     private const string ArgumentsDataTemplateXaml = @"<DataTemplate 

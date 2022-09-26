@@ -7,74 +7,47 @@
         mc:Ignorable="d"
         Title="Configure" Height="800" Width="1200" WindowState="Maximized">
     <DockPanel Margin="5">
+        <DockPanel DockPanel.Dock="Left" Width="450">
+            <TextBlock DockPanel.Dock="Top" Text="Menus:"/>
+            <DockPanel DockPanel.Dock="Top" Height="150">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+                    <Button Click="MenusAdd_Click" Margin="0,2" Width="20" Height="20">
+                        <Bold>+</Bold>
+                    </Button>
+                    <Button Click="MenusRemove_Click" Margin="2,2" Width="20" Height="20">
+                        <Bold>-</Bold>
+                    </Button>
+                </StackPanel>
+                <ListView Name="MenuList" ItemsSource="{Binding Path=Menus}" IsSynchronizedWithCurrentItem="True" SelectionChanged="ListView_SelectionChanged">
+                    <ListView.ItemTemplate>
 
-        <DockPanel DockPanel.Dock="Left" Width="100">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
-                <Button Click="MenusAdd_Click" Margin="0,2" Width="20" Height="20"><Bold>+</Bold></Button>
-                <Button Click="MenusRemove_Click" Margin="2,2" Width="20" Height="20"><Bold>-</Bold></Button>
-            </StackPanel>
-            <ListView Name="MenuList" ItemsSource="{Binding Path=Menus}" IsSynchronizedWithCurrentItem="True" SelectionChanged="ListView_SelectionChanged">
-                <ListView.ItemTemplate>
-                    
-                    
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Path=Name}"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
 
-            </ListView>
-        </DockPanel>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=Name}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
 
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" FlowDirection="RightToLeft">
-            <Button Margin="2,0" Content="OK" IsDefault="True" Click="OK_Click" />
-            <Button Margin="2,0" Content="Cancel" IsCancel="True" />
-        </StackPanel>
+                </ListView>
+            </DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Menu name:"/>
+            <TextBox DockPanel.Dock="Top" Text="{Binding Path=Menus/Name}" IsReadOnly="{Binding Path=IsReadOnly}" />
+            <TextBlock DockPanel.Dock="Top" Text="Auto show menu for:"/>
+            <DockPanel DockPanel.Dock="Top">
 
-        <Grid Name="EditorGrid" Margin="2,0,0,0" DataContext="{Binding Path=Menus/}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Row="0" Grid.ColumnSpan="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-
-                <Label Grid.Row="0" Grid.Column="0">Name</Label>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"
-                         IsReadOnly="{Binding Path=IsReadOnly}"
-                         ></TextBox>
-
-                <Label Grid.Row="1" Grid.Column="0">Auto show menu for:</Label>
-
-                <DockPanel Grid.Row="2" Grid.Column="0" MaxHeight="100">
-                
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
-                        <Button Click="SelectorsAdd_Click" Margin="0,2" Width="20" Height="20">
-                            <Bold>+</Bold>
-                        </Button>
-                        <Button Click="SelectorsRemove_Click" Margin="2,2" Width="20" Height="20">
-                            <Bold>-</Bold>
-                        </Button>
-                    </StackPanel>
-                    <ListBox Name="SelectorsList" ItemsSource="{Binding MenuSelectors}"
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+                    <Button Click="SelectorsAdd_Click" Margin="0,2" Width="20" Height="20">
+                        <Bold>+</Bold>
+                    </Button>
+                    <Button Click="SelectorsRemove_Click" Margin="2,2" Width="20" Height="20">
+                        <Bold>-</Bold>
+                    </Button>
+                </StackPanel>
+                <ListBox Name="SelectorsList" DataContext="{Binding Menus/}" ItemsSource="{Binding MenuSelectors}"
                              IsSynchronizedWithCurrentItem="True"
-                             MaxHeight="100" MinHeight="20" Width="350">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock>
+                             MaxHeight="100" MinHeight="100" HorizontalAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
                                     <Run Text="Exe: (re: " />
                                     <Run Run.Text="{Binding Path=UseRegexForExecutable}"/>
                                     <Run Text=") "/>
@@ -83,18 +56,18 @@
                                     <Run Run.Text="{Binding Path=UseRegexForWindowTitle}"/>
                                     <Run Text=") "/>
                                     <Run Text="{Binding Path=WindowTitlePattern}"/>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
-
-                <Grid Grid.Row="2" Grid.Column="1">
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+            <Border DockPanel.Dock="Top" Margin="5" BorderThickness="1" Padding="5" BorderBrush="Silver" Background="AliceBlue">
+                <Grid DockPanel.Dock="Top" Grid.Row="2" Grid.Column="1">
                     <Grid.Style>
                         <Style>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=SelectorsList,Path=SelectedIndex}" Value="-1">
-                                    <Setter Property="Grid.Visibility" Value="Hidden" />
+                                    <Setter Property="Grid.IsEnabled" Value="False" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -126,7 +99,7 @@
                     <TextBlock Grid.Row="1" Grid.Column="0" >Window title:</TextBlock>
                     <CheckBox Grid.Row="1" Grid.Column="1" Margin="5,0"
                               IsChecked="{Binding Path=MenuSelectors/UseRegexForWindowTitle}">
-                            <TextBlock>Use regex</TextBlock>
+                        <TextBlock>Use regex</TextBlock>
                     </CheckBox>
                     <CheckBox Grid.Row="1" Grid.Column="2" Margin="5,0"
                               IsChecked="{Binding Path=MenuSelectors/MatchCaseForWindowTitle}"
@@ -136,18 +109,27 @@
                     <TextBox Grid.Row="1" Grid.Column="3"  HorizontalAlignment="Stretch"
                              Text="{Binding Path=MenuSelectors/WindowTitlePattern}"/>
                 </Grid>
-            
-                
-            </Grid>
+            </Border>
 
-            <UniformGrid DataContext="{Binding Path=Buttons}" Name="ButtonGrid" Columns="5" Rows="5" Grid.Row="1" Grid.Column="0" Width="250" Height="250">
+            <UniformGrid Margin="0,10,0,10" DockPanel.Dock="Top" 
+                         DataContext="{Binding Path=Menus/Buttons}" 
+                         Name="ButtonGrid" 
+                         Columns="5" Rows="5"
+                         Width="250" Height="250"/>
 
-            </UniformGrid>
 
-            <TabControl Grid.Row="1" Grid.Column="2">
+        </DockPanel>
+        <DockPanel Margin="5">
+
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" FlowDirection="RightToLeft">
+                <Button Margin="2,0" Content="OK" IsDefault="True" Click="OK_Click" />
+                <Button Margin="2,0" Content="Cancel" IsCancel="True" />
+            </StackPanel>
+
+            <TabControl DataContext="{Binding Path=Menus/}">
                 <TabItem>
                     <TabItem.Header>General</TabItem.Header>
-                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
+                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" DataContext="{Binding Path=Buttons/}" Margin="0,5,0,5">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="220"/>
@@ -241,7 +223,7 @@
                                             <Setter Property="ListBox.ItemsSource" Value="{Binding Source={StaticResource TargetMenuListView}}"></Setter>
                                         </Style>
                                     </ListBox.Style>
-                                    
+
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Path=Name}" />
@@ -256,7 +238,7 @@
                                 </Grid>
                             </Border>
 
-                            
+
                         </Grid>
                     </ScrollViewer>
                 </TabItem>
@@ -339,13 +321,13 @@
                                     <TextBlock DockPanel.Dock="Left" Text="{Binding Path=DefaultStyle.FontSize}" Margin="0,0,10,0" Width="20"/>
                                     <Slider Minimum="2" Maximum="50" Value="{Binding Path=DefaultStyle.FontSize}" />
                                 </DockPanel>
-                                
+
                                 <Label Grid.Row="7" Grid.Column="0">Hover font size:</Label>
                                 <DockPanel Grid.Row="7" Grid.Column="1">
                                     <TextBlock DockPanel.Dock="Left" Text="{Binding Path=HoverStyle.FontSize}" Margin="0,0,10,0" Width="20"/>
                                     <Slider Minimum="2" Maximum="50" Value="{Binding Path=HoverStyle.FontSize}" />
                                 </DockPanel>
-                                
+
                                 <Label Grid.Row="8" Grid.Column="0">Pressed font size:</Label>
                                 <DockPanel Grid.Row="8" Grid.Column="1">
                                     <TextBlock DockPanel.Dock="Left" Text="{Binding Path=PressedStyle.FontSize}" Margin="0,0,10,0" Width="20"/>
@@ -372,13 +354,13 @@
                                     Grid.Row="12" Grid.Column="1"
                                     SelectedItem="{Binding Path=DefaultStyle.FontWeightName}"
                                     ItemsSource="{Binding Path=DefaultStyle.FontWeights}"/>
-                                
+
                                 <Label Grid.Row="13" Grid.Column="0">Hover font weight:</Label>
                                 <ComboBox
                                     Grid.Row="13" Grid.Column="1"
                                     SelectedItem="{Binding Path=HoverStyle.FontWeightName}"
                                     ItemsSource="{Binding Path=HoverStyle.FontWeights}"/>
-                                
+
                                 <Label Grid.Row="14" Grid.Column="0">Pressed font weight:</Label>
                                 <ComboBox
                                     Grid.Row="14" Grid.Column="1"
@@ -406,14 +388,12 @@
                             </Grid>
                         </ScrollViewer>
                     </DockPanel>
-                    
 
-                    
+
+
                 </TabItem>
             </TabControl>
-            
 
-        </Grid>
-
+        </DockPanel>
     </DockPanel>
 </Window>

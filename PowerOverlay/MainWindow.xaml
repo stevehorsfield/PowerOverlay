@@ -148,10 +148,10 @@
                                 </Grid.ColumnDefinitions>
                                 <Button Content="New" Margin="5" Padding="5,2,5,2" Grid.Column="0"
                                 Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="New"/>
-                                <Button Content="Open" Margin="5" Padding="5,2,5,2" Grid.Column="1"
-                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Open..."/>
-                                <Button Content="Save" Margin="5" Padding="5,2,5,2" Grid.Column="2"
-                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Save..."/>
+                                <Button Content="Open..." Margin="5" Padding="5,2,5,2" Grid.Column="1"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Open"/>
+                                <Button Content="Save..." Margin="5" Padding="5,2,5,2" Grid.Column="2"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="Save"/>
                             </Grid>
 
                             <Line StrokeThickness="5" Stroke="Silver" Margin="5,2"

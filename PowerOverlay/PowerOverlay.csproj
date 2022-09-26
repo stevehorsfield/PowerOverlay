@@ -51,7 +51,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PowerOverlay.Interop\PowerOverlay.Interop.vcxproj" />
+	  <ProjectReference Include="..\PowerOverlay.Interop\PowerOverlay.Interop.vcxproj">
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	  </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
